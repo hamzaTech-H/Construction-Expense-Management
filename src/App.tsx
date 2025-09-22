@@ -1,4 +1,5 @@
 import './App.css';
+import { Button } from '@/components/base/buttons/button';
 
 const App: React.FC = () => {
   const handleAddUser = async () => {
@@ -18,8 +19,8 @@ const App: React.FC = () => {
   return (
     <div>
       <h1>Electron with better-sqlite3</h1>
-      <button onClick={handleAddUser}>Add User</button>
-      <button onClick={handleGetUser}>Get User</button>
+      <Button onClick={handleAddUser}>Add User</Button>
+      <Button onClick={handleGetUser}>Get User</Button>
     </div>
   );
 };
