@@ -1,7 +1,12 @@
 import { app, BrowserWindow, ipcMain} from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
-import { getUser, addUser } from './database';
+import { 
+  getAllProjects, getProjectById, addProject, updateProject, deleteProject,
+  getInvoicesByProject, getInvoiceById, addInvoice, updateInvoice, deleteInvoice, updateInvoiceAmounts,
+  getExpensesByInvoice, getExpenseById, addExpense, updateExpense, deleteExpense, updateExpenseAmounts,
+  getPaymentsByExpense, addPayment, deletePayment
+} from './database';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -68,10 +73,86 @@ app.on('activate', () => {
 
 app.whenReady().then(createWindow)
 
-ipcMain.handle('add-user', (_event, { name, email }) => {
-  return addUser(name, email);
+// ===== PROJECTS =====
+ipcMain.handle('get-all-projects', () => {
+  return getAllProjects();
 });
 
-ipcMain.handle('get-user', (_event, id) => {
-  return getUser(id);
+ipcMain.handle('get-project-by-id', (_event, id) => {
+  return getProjectById(id);
+});
+
+ipcMain.handle('add-project', (_event, { name, clientName, description }) => {
+  return addProject(name, clientName, description);
+});
+
+ipcMain.handle('update-project', (_event, { id, name, clientName, description }) => {
+  return updateProject(id, name, clientName, description);
+});
+
+ipcMain.handle('delete-project', (_event, id) => {
+  return deleteProject(id);
+});
+
+// ===== INVOICES =====
+ipcMain.handle('get-invoices-by-project', (_event, projectId) => {
+  return getInvoicesByProject(projectId);
+});
+
+ipcMain.handle('get-invoice-by-id', (_event, id) => {
+  return getInvoiceById(id);
+});
+
+ipcMain.handle('add-invoice', (_event, { projectId, name, date }) => {
+  return addInvoice(projectId, name, date);
+});
+
+ipcMain.handle('update-invoice', (_event, { id, name, date }) => {
+  return updateInvoice(id, name, date);
+});
+
+ipcMain.handle('delete-invoice', (_event, id) => {
+  return deleteInvoice(id);
+});
+
+ipcMain.handle('update-invoice-amounts', (_event, { invoiceId, projectAmount, amountPaid, remainingAmount }) => {
+  return updateInvoiceAmounts(invoiceId, projectAmount, amountPaid, remainingAmount);
+});
+
+// ===== EXPENSES =====
+ipcMain.handle('get-expenses-by-invoice', (_event, invoiceId) => {
+  return getExpensesByInvoice(invoiceId);
+});
+
+ipcMain.handle('get-expense-by-id', (_event, id) => {
+  return getExpenseById(id);
+});
+
+ipcMain.handle('add-expense', (_event, { invoiceId, description, unitPrice, quantity }) => {
+  return addExpense(invoiceId, description, unitPrice, quantity);
+});
+
+ipcMain.handle('update-expense', (_event, { id, description, unitPrice, quantity }) => {
+  return updateExpense(id, description, unitPrice, quantity);
+});
+
+ipcMain.handle('delete-expense', (_event, id) => {
+  return deleteExpense(id);
+});
+
+ipcMain.handle('update-expense-amounts', (_event, { expenseId, amountPaid, remainingAmount, status }) => {
+  return updateExpenseAmounts(expenseId, amountPaid, remainingAmount, status);
+});
+
+// ===== PAYMENTS =====
+ipcMain.handle('get-payments-by-expense', (_event, expenseId) => {
+  return getPaymentsByExpense(expenseId);
+});
+
+ipcMain.handle('add-payment', (_event, { expenseId, amount, date, note }) => {
+  return addPayment(expenseId, amount, date, note);
+});
+
+ipcMain.handle('delete-payment', (_event, id) => {
+  return deletePayment(id);
 });

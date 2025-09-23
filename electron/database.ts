@@ -7,26 +7,170 @@ const dbPath = path.join(process.cwd(), 'database.db');
 // Create connection
 const db = new Database(dbPath);
 
-// ✅ Create table if it doesn’t exist
+// Enable foreign keys
+db.pragma('foreign_keys = ON');
+
+// ✅ Create all necessary tables
 db.prepare(`
-  CREATE TABLE IF NOT EXISTS users (
+  CREATE TABLE IF NOT EXISTS projects (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    email TEXT NOT NULL UNIQUE
+    client_name TEXT NOT NULL,
+    description TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )
 `).run();
 
-// Function to get a user
-export function getUser(id: number) {
-  const stmt = db.prepare('SELECT * FROM users WHERE id = ?');
-  return stmt.get(id) || null; // return null if not found
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS invoices (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    date TEXT NOT NULL,
+    project_amount DECIMAL(10,2) DEFAULT 0,
+    amount_paid DECIMAL(10,2) DEFAULT 0,
+    remaining_amount DECIMAL(10,2) DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE
+  )
+`).run();
+
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS expenses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    invoice_id INTEGER NOT NULL,
+    description TEXT NOT NULL,
+    unit_price DECIMAL(10,2) NOT NULL,
+    quantity INTEGER NOT NULL,
+    total_price DECIMAL(10,2) NOT NULL,
+    amount_paid DECIMAL(10,2) DEFAULT 0,
+    remaining_amount DECIMAL(10,2) NOT NULL,
+    status TEXT DEFAULT 'Not Paid',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (invoice_id) REFERENCES invoices (id) ON DELETE CASCADE
+  )
+`).run();
+
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS payments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    expense_id INTEGER NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    date TEXT NOT NULL,
+    note TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (expense_id) REFERENCES expenses (id) ON DELETE CASCADE
+  )
+`).run();
+
+// ===== PROJECTS =====
+export function getAllProjects() {
+  const stmt = db.prepare('SELECT * FROM projects ORDER BY created_at DESC');
+  return stmt.all();
 }
 
-// Function to add a user
-export function addUser(name: string, email: string) {
-  const stmt = db.prepare('INSERT INTO users (name, email) VALUES (?, ?)');
-  const result = stmt.run(name, email);
-  return result.lastInsertRowid; // return the new user’s ID
+export function getProjectById(id: number) {
+  const stmt = db.prepare('SELECT * FROM projects WHERE id = ?');
+  return stmt.get(id);
+}
+
+export function addProject(name: string, clientName: string, description: string) {
+  const stmt = db.prepare('INSERT INTO projects (name, client_name, description) VALUES (?, ?, ?)');
+  const result = stmt.run(name, clientName, description);
+  return result.lastInsertRowid;
+}
+
+export function updateProject(id: number, name: string, clientName: string, description: string) {
+  const stmt = db.prepare('UPDATE projects SET name = ?, client_name = ?, description = ? WHERE id = ?');
+  return stmt.run(name, clientName, description, id);
+}
+
+export function deleteProject(id: number) {
+  const stmt = db.prepare('DELETE FROM projects WHERE id = ?');
+  return stmt.run(id);
+}
+
+// ===== INVOICES =====
+export function getInvoicesByProject(projectId: number) {
+  const stmt = db.prepare('SELECT * FROM invoices WHERE project_id = ? ORDER BY created_at DESC');
+  return stmt.all(projectId);
+}
+
+export function getInvoiceById(id: number) {
+  const stmt = db.prepare('SELECT * FROM invoices WHERE id = ?');
+  return stmt.get(id);
+}
+
+export function addInvoice(projectId: number, name: string, date: string) {
+  const stmt = db.prepare('INSERT INTO invoices (project_id, name, date) VALUES (?, ?, ?)');
+  const result = stmt.run(projectId, name, date);
+  return result.lastInsertRowid;
+}
+
+export function updateInvoice(id: number, name: string, date: string) {
+  const stmt = db.prepare('UPDATE invoices SET name = ?, date = ? WHERE id = ?');
+  return stmt.run(name, date, id);
+}
+
+export function deleteInvoice(id: number) {
+  const stmt = db.prepare('DELETE FROM invoices WHERE id = ?');
+  return stmt.run(id);
+}
+
+export function updateInvoiceAmounts(invoiceId: number, projectAmount: number, amountPaid: number, remainingAmount: number) {
+  const stmt = db.prepare('UPDATE invoices SET project_amount = ?, amount_paid = ?, remaining_amount = ? WHERE id = ?');
+  return stmt.run(projectAmount, amountPaid, remainingAmount, invoiceId);
+}
+
+// ===== EXPENSES =====
+export function getExpensesByInvoice(invoiceId: number) {
+  const stmt = db.prepare('SELECT * FROM expenses WHERE invoice_id = ? ORDER BY created_at DESC');
+  return stmt.all(invoiceId);
+}
+
+export function getExpenseById(id: number) {
+  const stmt = db.prepare('SELECT * FROM expenses WHERE id = ?');
+  return stmt.get(id);
+}
+
+export function addExpense(invoiceId: number, description: string, unitPrice: number, quantity: number) {
+  const totalPrice = unitPrice * quantity;
+  const stmt = db.prepare('INSERT INTO expenses (invoice_id, description, unit_price, quantity, total_price, remaining_amount) VALUES (?, ?, ?, ?, ?, ?)');
+  const result = stmt.run(invoiceId, description, unitPrice, quantity, totalPrice, totalPrice);
+  return result.lastInsertRowid;
+}
+
+export function updateExpense(id: number, description: string, unitPrice: number, quantity: number) {
+  const totalPrice = unitPrice * quantity;
+  const stmt = db.prepare('UPDATE expenses SET description = ?, unit_price = ?, quantity = ?, total_price = ? WHERE id = ?');
+  return stmt.run(description, unitPrice, quantity, totalPrice, id);
+}
+
+export function deleteExpense(id: number) {
+  const stmt = db.prepare('DELETE FROM expenses WHERE id = ?');
+  return stmt.run(id);
+}
+
+export function updateExpenseAmounts(expenseId: number, amountPaid: number, remainingAmount: number, status: string) {
+  const stmt = db.prepare('UPDATE expenses SET amount_paid = ?, remaining_amount = ?, status = ? WHERE id = ?');
+  return stmt.run(amountPaid, remainingAmount, status, expenseId);
+}
+
+// ===== PAYMENTS =====
+export function getPaymentsByExpense(expenseId: number) {
+  const stmt = db.prepare('SELECT * FROM payments WHERE expense_id = ? ORDER BY date DESC');
+  return stmt.all(expenseId);
+}
+
+export function addPayment(expenseId: number, amount: number, date: string, note: string) {
+  const stmt = db.prepare('INSERT INTO payments (expense_id, amount, date, note) VALUES (?, ?, ?, ?)');
+  const result = stmt.run(expenseId, amount, date, note);
+  return result.lastInsertRowid;
+}
+
+export function deletePayment(id: number) {
+  const stmt = db.prepare('DELETE FROM payments WHERE id = ?');
+  return stmt.run(id);
 }
 
 export default db;
