@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Trash2, Edit, FileText } from 'lucide-react';
 
 interface Invoice {
@@ -43,6 +43,8 @@ const ExpensesPage: React.FC<ExpensesPageProps> = ({ currentInvoice, onBack }) =
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteExpenseId, setDeleteExpenseId] = useState<number | null>(null);
   const [deleteExpenseDescription, setDeleteExpenseDescription] = useState<string>('');
+  const [showPaymentError, setShowPaymentError] = useState(false);
+  const [paymentErrorMessage, setPaymentErrorMessage] = useState<string>('');
   const [showPayments, setShowPayments] = useState(false);
   const [currentExpense, setCurrentExpense] = useState<Expense | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -50,10 +52,19 @@ const ExpensesPage: React.FC<ExpensesPageProps> = ({ currentInvoice, onBack }) =
   const [modifyExpenseForm, setModifyExpenseForm] = useState({ description: '', unitPrice: '', quantity: '' });
   const [modifyExpenseId, setModifyExpenseId] = useState<number | null>(null);
   const [paymentForm, setPaymentForm] = useState({ amount: '', date: '', note: '' });
+  const amountInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadExpenses();
   }, [currentInvoice.id]);
+
+  // Reset payment error when opening payments modal
+  useEffect(() => {
+    if (showPayments) {
+      setShowPaymentError(false);
+      setPaymentErrorMessage('');
+    }
+  }, [showPayments]);
 
   const loadExpenses = async () => {
     try {
@@ -112,7 +123,9 @@ const ExpensesPage: React.FC<ExpensesPageProps> = ({ currentInvoice, onBack }) =
     
     // Verify that total Amount Paid does not exceed Total Price
     if (totalPaidAfterPayment > currentExpense.total_price) {
-      alert(`Payment amount would exceed the total price. Maximum payment allowed: $${(currentExpense.total_price - currentExpense.amount_paid).toFixed(2)}`);
+      const maxAllowed = (currentExpense.total_price - currentExpense.amount_paid).toFixed(2);
+      setPaymentErrorMessage(`Payment amount would exceed the total price. Maximum payment allowed: $${maxAllowed}`);
+      setShowPaymentError(true);
       // Don't clear the form, keep inputs editable
       return;
     }
@@ -658,11 +671,12 @@ const ExpensesPage: React.FC<ExpensesPageProps> = ({ currentInvoice, onBack }) =
             {/* Add New Payment */}
             <div>
               <h3 className="text-lg font-semibold mb-3">Add New Payment</h3>
-              <form onSubmit={handleAddPayment}>
+              <form onSubmit={handleAddPayment} key={`payment-form-${currentExpense?.id || 'new'}`}>
                 <div className="grid grid-cols-3 gap-4 mb-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Payment Amount</label>
                     <input
+                      ref={amountInputRef}
                       type="number"
                       step="0.01"
                       value={paymentForm.amount}
@@ -743,6 +757,44 @@ const ExpensesPage: React.FC<ExpensesPageProps> = ({ currentInvoice, onBack }) =
                   className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                 >
                   Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Error Modal */}
+      {showPaymentError && (
+        <div className="fixed inset-0 bg-gray-200 bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-96 shadow-lg">
+            <div className="flex items-center mb-4">
+              <div className="flex-shrink-0 w-10 h-10 mx-auto bg-red-100 rounded-full flex items-center justify-center">
+                <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+            </div>
+            <div className="text-center">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Payment Error</h3>
+              <p className="text-sm text-gray-500 mb-4">
+                {paymentErrorMessage}
+              </p>
+              <div className="flex justify-center">
+                <button
+                  onClick={() => {
+                    setShowPaymentError(false);
+                    setPaymentErrorMessage('');
+                    // Focus the amount input after closing the error modal
+                    setTimeout(() => {
+                      if (amountInputRef.current) {
+                        amountInputRef.current.focus();
+                      }
+                    }, 100);
+                  }}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  OK
                 </button>
               </div>
             </div>
