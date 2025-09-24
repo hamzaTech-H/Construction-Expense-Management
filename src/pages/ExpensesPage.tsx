@@ -54,8 +54,21 @@ const ExpensesPage: React.FC<ExpensesPageProps> = ({ currentInvoice, onBack }) =
 
   const loadExpenses = async () => {
     try {
-      const data = await window.database.getExpensesByInvoice(currentInvoice.id);
+      const data = await (window.database as any).getExpensesByInvoice(currentInvoice.id);
       setExpenses(data);
+      
+      // Update invoice totals based on expenses
+      const totalProjectAmount = data.reduce((sum: number, expense: any) => sum + expense.total_price, 0);
+      const totalAmountPaid = data.reduce((sum: number, expense: any) => sum + expense.amount_paid, 0);
+      const totalRemainingAmount = totalProjectAmount - totalAmountPaid;
+      
+      // Update the invoice amounts in the database
+      await (window.database as any).updateInvoiceAmounts(
+        currentInvoice.id,
+        totalProjectAmount,
+        totalAmountPaid,
+        totalRemainingAmount
+      );
     } catch (error) {
       console.error('Error loading expenses:', error);
     }
@@ -63,7 +76,7 @@ const ExpensesPage: React.FC<ExpensesPageProps> = ({ currentInvoice, onBack }) =
 
   const loadPayments = async (expenseId: number) => {
     try {
-      const data = await window.database.getPaymentsByExpense(expenseId);
+      const data = await (window.database as any).getPaymentsByExpense(expenseId);
       setPayments(data);
     } catch (error) {
       console.error('Error loading payments:', error);
@@ -73,7 +86,7 @@ const ExpensesPage: React.FC<ExpensesPageProps> = ({ currentInvoice, onBack }) =
   const handleAddExpense = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await window.database.addExpense(
+      await (window.database as any).addExpense(
         currentInvoice.id,
         expenseForm.description,
         parseFloat(expenseForm.unitPrice),
@@ -126,6 +139,10 @@ const ExpensesPage: React.FC<ExpensesPageProps> = ({ currentInvoice, onBack }) =
       // Don't close the popup automatically - let user close it manually
       loadPayments(currentExpense.id);
       loadExpenses(); // Refresh expenses to update amounts
+      
+      // Also refresh the current expense data
+      const updatedExpense = await (window.database as any).getExpenseById(currentExpense.id);
+      setCurrentExpense(updatedExpense);
     } catch (error) {
       console.error('Error adding payment:', error);
       // Don't clear the form on error, keep inputs editable
@@ -134,7 +151,7 @@ const ExpensesPage: React.FC<ExpensesPageProps> = ({ currentInvoice, onBack }) =
 
   const handleDeleteExpense = async (id: number) => {
     try {
-      await window.database.deleteExpense(id);
+      await (window.database as any).deleteExpense(id);
       loadExpenses();
     } catch (error) {
       console.error('Error deleting expense:', error);
@@ -145,7 +162,7 @@ const ExpensesPage: React.FC<ExpensesPageProps> = ({ currentInvoice, onBack }) =
     e.preventDefault();
     if (!modifyExpenseId) return;
     try {
-      await window.database.updateExpense(
+      await (window.database as any).updateExpense(
         modifyExpenseId,
         modifyExpenseForm.description,
         parseFloat(modifyExpenseForm.unitPrice),

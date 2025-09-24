@@ -38,8 +38,36 @@ const InvoicesPage: React.FC<InvoicesPageProps> = ({ currentProject, onBack, onI
 
   const loadInvoices = async () => {
     try {
-      const data = await window.database.getInvoicesByProject(currentProject.id);
-      setInvoices(data);
+      const data = await (window.database as any).getInvoicesByProject(currentProject.id);
+      // Calculate and update invoice totals based on expenses
+      const updatedInvoices = await Promise.all(data.map(async (invoice: any) => {
+        const expenses = await (window.database as any).getExpensesByInvoice(invoice.id);
+        
+        const totalProjectAmount = expenses.reduce((sum: number, expense: any) => sum + expense.total_price, 0);
+        const totalAmountPaid = expenses.reduce((sum: number, expense: any) => sum + expense.amount_paid, 0);
+        const totalRemainingAmount = totalProjectAmount - totalAmountPaid;
+        
+        // Update the invoice amounts in the database if they're different
+        if (invoice.project_amount !== totalProjectAmount || 
+            invoice.amount_paid !== totalAmountPaid || 
+            invoice.remaining_amount !== totalRemainingAmount) {
+          await (window.database as any).updateInvoiceAmounts(
+            invoice.id,
+            totalProjectAmount,
+            totalAmountPaid,
+            totalRemainingAmount
+          );
+        }
+        
+        return {
+          ...invoice,
+          project_amount: totalProjectAmount,
+          amount_paid: totalAmountPaid,
+          remaining_amount: totalRemainingAmount
+        };
+      }));
+      
+      setInvoices(updatedInvoices);
     } catch (error) {
       console.error('Error loading invoices:', error);
     }
@@ -48,7 +76,7 @@ const InvoicesPage: React.FC<InvoicesPageProps> = ({ currentProject, onBack, onI
   const handleAddInvoice = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await window.database.addInvoice(currentProject.id, invoiceForm.name, invoiceForm.date);
+      await (window.database as any).addInvoice(currentProject.id, invoiceForm.name, invoiceForm.date);
       setInvoiceForm({ name: '', date: '' });
       setShowAddInvoice(false);
       loadInvoices();
@@ -59,7 +87,7 @@ const InvoicesPage: React.FC<InvoicesPageProps> = ({ currentProject, onBack, onI
 
   const handleDeleteInvoice = async (id: number) => {
     try {
-      await window.database.deleteInvoice(id);
+      await (window.database as any).deleteInvoice(id);
       loadInvoices();
     } catch (error) {
       console.error('Error deleting invoice:', error);
@@ -70,7 +98,7 @@ const InvoicesPage: React.FC<InvoicesPageProps> = ({ currentProject, onBack, onI
     e.preventDefault();
     if (!modifyInvoiceId) return;
     try {
-      await window.database.updateInvoice(
+      await (window.database as any).updateInvoice(
         modifyInvoiceId,
         modifyInvoiceForm.name,
         modifyInvoiceForm.date
@@ -183,7 +211,7 @@ const InvoicesPage: React.FC<InvoicesPageProps> = ({ currentProject, onBack, onI
               </div>
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Project Amount:</span>
+                  <span className="text-gray-600">Total Price:</span>
                   <span className="font-semibold">${invoice.project_amount.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
