@@ -27,7 +27,10 @@ interface InvoicesPageProps {
 const InvoicesPage: React.FC<InvoicesPageProps> = ({ currentProject, onBack, onInvoiceClick }) => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [showAddInvoice, setShowAddInvoice] = useState(false);
+  const [showModifyInvoice, setShowModifyInvoice] = useState(false);
   const [invoiceForm, setInvoiceForm] = useState({ name: '', date: '' });
+  const [modifyInvoiceForm, setModifyInvoiceForm] = useState({ name: '', date: '' });
+  const [modifyInvoiceId, setModifyInvoiceId] = useState<number | null>(null);
 
   useEffect(() => {
     loadInvoices();
@@ -63,6 +66,33 @@ const InvoicesPage: React.FC<InvoicesPageProps> = ({ currentProject, onBack, onI
     }
   };
 
+  const handleModifyInvoice = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!modifyInvoiceId) return;
+    try {
+      await window.database.updateInvoice(
+        modifyInvoiceId,
+        modifyInvoiceForm.name,
+        modifyInvoiceForm.date
+      );
+      setModifyInvoiceForm({ name: '', date: '' });
+      setShowModifyInvoice(false);
+      setModifyInvoiceId(null);
+      loadInvoices();
+    } catch (error) {
+      console.error('Error updating invoice:', error);
+    }
+  };
+
+  const openModifyInvoice = (invoice: Invoice) => {
+    setModifyInvoiceForm({
+      name: invoice.name,
+      date: invoice.date
+    });
+    setModifyInvoiceId(invoice.id);
+    setShowModifyInvoice(true);
+  };
+
   const getTotalProjectAmount = () => {
     return invoices.reduce((sum, invoice) => sum + invoice.project_amount, 0);
   };
@@ -94,12 +124,20 @@ const InvoicesPage: React.FC<InvoicesPageProps> = ({ currentProject, onBack, onI
           </div>
         </div>
 
-        {/* Title and Add Button */}
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Invoices of {currentProject.name}</h1>
-            <div className="w-full h-0.5 bg-gray-300 mt-2"></div>
-          </div>
+        {/* Back Button and Title */}
+        <div className="mb-6">
+          <button
+            onClick={onBack}
+            className="text-sky-600 hover:text-sky-800 mb-4 flex items-center gap-2"
+          >
+            ← Back to Projects
+          </button>
+          <h1 className="text-3xl font-bold text-gray-900">Invoices of {currentProject.name}</h1>
+          <div className="w-full h-0.5 bg-gray-300 mt-2"></div>
+        </div>
+
+        {/* Add Button */}
+        <div className="flex justify-end mb-6">
           <button
             onClick={() => setShowAddInvoice(true)}
             className="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700 flex items-center gap-2"
@@ -112,7 +150,11 @@ const InvoicesPage: React.FC<InvoicesPageProps> = ({ currentProject, onBack, onI
         {/* Invoice Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {invoices.map((invoice) => (
-            <div key={invoice.id} className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow">
+            <div 
+              key={invoice.id} 
+              className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer"
+              onClick={() => onInvoiceClick(invoice)}
+            >
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">{invoice.name}</h3>
@@ -120,12 +162,21 @@ const InvoicesPage: React.FC<InvoicesPageProps> = ({ currentProject, onBack, onI
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => handleDeleteInvoice(invoice.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteInvoice(invoice.id);
+                    }}
                     className="text-red-600 hover:text-red-800"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
-                  <button className="text-gray-600 hover:text-gray-800">
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openModifyInvoice(invoice);
+                    }}
+                    className="text-gray-600 hover:text-gray-800"
+                  >
                     <Edit className="h-4 w-4" />
                   </button>
                 </div>
@@ -144,27 +195,18 @@ const InvoicesPage: React.FC<InvoicesPageProps> = ({ currentProject, onBack, onI
                   <span className="font-semibold text-red-600">${invoice.remaining_amount.toFixed(2)}</span>
                 </div>
               </div>
-              <button
-                onClick={() => onInvoiceClick(invoice)}
-                className="w-full bg-sky-600 text-white py-2 rounded-lg hover:bg-sky-700"
-              >
+              <div className="w-full bg-sky-600 text-white py-2 rounded-lg hover:bg-sky-700 text-center">
                 Show Details
-              </button>
+              </div>
             </div>
           ))}
         </div>
 
-        <button
-          onClick={onBack}
-          className="mt-6 text-sky-600 hover:text-sky-800"
-        >
-          ← Back to Projects
-        </button>
       </div>
 
       {/* Add Invoice Modal */}
       {showAddInvoice && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-gray-200 bg-opacity-30 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg w-96">
             <h2 className="text-xl font-bold mb-4">Add New Invoice</h2>
             <form onSubmit={handleAddInvoice}>
@@ -201,6 +243,56 @@ const InvoicesPage: React.FC<InvoicesPageProps> = ({ currentProject, onBack, onI
                   className="flex-1 bg-sky-600 text-white py-2 rounded-lg hover:bg-sky-700"
                 >
                   Add
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modify Invoice Modal */}
+      {showModifyInvoice && (
+        <div className="fixed inset-0 bg-gray-200 bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-96">
+            <h2 className="text-xl font-bold mb-4">Modify Invoice</h2>
+            <form onSubmit={handleModifyInvoice}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Invoice Name</label>
+                <input
+                  type="text"
+                  value={modifyInvoiceForm.name}
+                  onChange={(e) => setModifyInvoiceForm({ ...modifyInvoiceForm, name: e.target.value })}
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                <input
+                  type="date"
+                  value={modifyInvoiceForm.date}
+                  onChange={(e) => setModifyInvoiceForm({ ...modifyInvoiceForm, date: e.target.value })}
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                  required
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowModifyInvoice(false);
+                    setModifyInvoiceId(null);
+                    setModifyInvoiceForm({ name: '', date: '' });
+                  }}
+                  className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-sky-600 text-white py-2 rounded-lg hover:bg-sky-700"
+                >
+                  Update
                 </button>
               </div>
             </form>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, MoreVertical } from 'lucide-react';
+import { Search, Plus, Trash2, Edit, FileText } from 'lucide-react';
 import InvoicesPage from './pages/InvoicesPage';
 import ExpensesPage from './pages/ExpensesPage';
 
@@ -27,9 +27,14 @@ const App: React.FC = () => {
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
   const [currentInvoice, setCurrentInvoice] = useState<Invoice | null>(null);
   const [currentPage, setCurrentPage] = useState('projects'); // 'projects', 'invoices', 'expenses'
+  const [showModifyProject, setShowModifyProject] = useState(false);
+  const [modifyProjectId, setModifyProjectId] = useState<number | null>(null);
+  const [currentPageNum, setCurrentPageNum] = useState(1);
+  const [itemsPerPage] = useState(6);
 
   // Form states
   const [projectForm, setProjectForm] = useState({ name: '', clientName: '', description: '' });
+  const [modifyProjectForm, setModifyProjectForm] = useState({ name: '', clientName: '', description: '' });
 
   useEffect(() => {
     loadProjects();
@@ -37,7 +42,7 @@ const App: React.FC = () => {
 
   const loadProjects = async () => {
     try {
-      const data = await window.database.getAllProjects();
+      const data = await (window.database as any).getAllProjects();
       setProjects(data);
     } catch (error) {
       console.error('Error loading projects:', error);
@@ -47,7 +52,7 @@ const App: React.FC = () => {
   const handleAddProject = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await window.database.addProject(projectForm.name, projectForm.clientName, projectForm.description);
+      await (window.database as any).addProject(projectForm.name, projectForm.clientName, projectForm.description);
       setProjectForm({ name: '', clientName: '', description: '' });
       setShowAddProject(false);
       loadProjects();
@@ -58,17 +63,61 @@ const App: React.FC = () => {
 
   const handleDeleteProject = async (id: number) => {
     try {
-      await window.database.deleteProject(id);
+      await (window.database as any).deleteProject(id);
       loadProjects();
     } catch (error) {
       console.error('Error deleting project:', error);
     }
   };
 
+  const handleModifyProject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!modifyProjectId) return;
+    try {
+      await (window.database as any).updateProject(
+        modifyProjectId,
+        modifyProjectForm.name,
+        modifyProjectForm.clientName,
+        modifyProjectForm.description
+      );
+      setModifyProjectForm({ name: '', clientName: '', description: '' });
+      setShowModifyProject(false);
+      setModifyProjectId(null);
+      loadProjects();
+    } catch (error) {
+      console.error('Error updating project:', error);
+    }
+  };
+
+  const openModifyProject = (project: Project) => {
+    setModifyProjectForm({
+      name: project.name,
+      clientName: project.client_name,
+      description: project.description
+    });
+    setModifyProjectId(project.id);
+    setShowModifyProject(true);
+  };
+
+  const handleViewInvoices = (project: Project) => {
+    setCurrentProject(project);
+    setCurrentPage('invoices');
+  };
+
   const filteredProjects = projects.filter(project =>
     project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     project.client_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
+  const startIndex = (currentPageNum - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentProjects = filteredProjects.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPageNum(page);
+  };
 
   // Render different pages based on current state
   if (currentPage === 'invoices' && currentProject) {
@@ -125,34 +174,45 @@ const App: React.FC = () => {
 
         {/* Projects Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProjects.map((project) => (
+          {currentProjects.map((project) => (
             <div
               key={project.id}
-              className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => {
-                setCurrentProject(project);
-                setCurrentPage('invoices');
-                loadInvoices(project.id);
-              }}
+              className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow"
             >
               <div className="flex justify-between items-start mb-4">
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-gray-900">{project.name}</h3>
                   <p className="text-gray-600">{project.client_name}</p>
                 </div>
-                <div className="relative">
+                <div className="flex gap-2">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      // Handle menu click
+                      handleDeleteProject(project.id);
                     }}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-red-600 hover:text-red-800"
                   >
-                    <MoreVertical className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openModifyProject(project);
+                    }}
+                    className="text-gray-600 hover:text-gray-800"
+                  >
+                    <Edit className="h-4 w-4" />
                   </button>
                 </div>
               </div>
-              <p className="text-gray-700 text-sm">{project.description}</p>
+              <p className="text-gray-700 text-sm mb-4">{project.description}</p>
+              <button
+                onClick={() => handleViewInvoices(project)}
+                className="w-full bg-sky-600 text-white py-2 rounded-lg hover:bg-sky-700 flex items-center justify-center gap-2"
+              >
+                <FileText className="h-4 w-4" />
+                Show Invoices
+              </button>
             </div>
           ))}
         </div>
@@ -162,11 +222,46 @@ const App: React.FC = () => {
             <p className="text-gray-500">No projects found. Try adjusting your search or add a new project.</p>
           </div>
         )}
+
+        {/* Pagination */}
+        {filteredProjects.length > itemsPerPage && (
+          <div className="flex justify-center items-center mt-8 gap-2">
+            <button
+              onClick={() => handlePageChange(currentPageNum - 1)}
+              disabled={currentPageNum === 1}
+              className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                className={`px-3 py-2 border rounded-lg ${
+                  currentPageNum === page
+                    ? 'bg-sky-600 text-white border-sky-600'
+                    : 'border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+            
+            <button
+              onClick={() => handlePageChange(currentPageNum + 1)}
+              disabled={currentPageNum === totalPages}
+              className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Add Project Modal */}
       {showAddProject && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-gray-200 bg-opacity-30 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg w-96">
             <h2 className="text-xl font-bold mb-4">Add New Project</h2>
             <form onSubmit={handleAddProject}>
@@ -212,6 +307,65 @@ const App: React.FC = () => {
                   className="flex-1 bg-sky-600 text-white py-2 rounded-lg hover:bg-sky-700"
                 >
                   Add
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modify Project Modal */}
+      {showModifyProject && (
+        <div className="fixed inset-0 bg-gray-200 bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-96">
+            <h2 className="text-xl font-bold mb-4">Modify Project</h2>
+            <form onSubmit={handleModifyProject}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Project Name</label>
+                <input
+                  type="text"
+                  value={modifyProjectForm.name}
+                  onChange={(e) => setModifyProjectForm({ ...modifyProjectForm, name: e.target.value })}
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Client Name</label>
+                <input
+                  type="text"
+                  value={modifyProjectForm.clientName}
+                  onChange={(e) => setModifyProjectForm({ ...modifyProjectForm, clientName: e.target.value })}
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Short Description</label>
+                <textarea
+                  value={modifyProjectForm.description}
+                  onChange={(e) => setModifyProjectForm({ ...modifyProjectForm, description: e.target.value })}
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                  rows={3}
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowModifyProject(false);
+                    setModifyProjectId(null);
+                    setModifyProjectForm({ name: '', clientName: '', description: '' });
+                  }}
+                  className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-sky-600 text-white py-2 rounded-lg hover:bg-sky-700"
+                >
+                  Update
                 </button>
               </div>
             </form>
