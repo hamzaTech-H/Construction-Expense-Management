@@ -29,6 +29,9 @@ const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState('projects'); // 'projects', 'invoices', 'expenses'
   const [showModifyProject, setShowModifyProject] = useState(false);
   const [modifyProjectId, setModifyProjectId] = useState<number | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteProjectId, setDeleteProjectId] = useState<number | null>(null);
+  const [deleteProjectName, setDeleteProjectName] = useState<string>('');
   const [currentPageNum, setCurrentPageNum] = useState(1);
   const [itemsPerPage] = useState(6);
 
@@ -65,9 +68,18 @@ const App: React.FC = () => {
     try {
       await (window.database as any).deleteProject(id);
       loadProjects();
+      setShowDeleteConfirm(false);
+      setDeleteProjectId(null);
+      setDeleteProjectName('');
     } catch (error) {
       console.error('Error deleting project:', error);
     }
+  };
+
+  const confirmDeleteProject = (project: Project) => {
+    setDeleteProjectId(project.id);
+    setDeleteProjectName(project.name);
+    setShowDeleteConfirm(true);
   };
 
   const handleModifyProject = async (e: React.FormEvent) => {
@@ -177,7 +189,8 @@ const App: React.FC = () => {
           {currentProjects.map((project) => (
             <div
               key={project.id}
-              className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow"
+              className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer"
+              onClick={() => handleViewInvoices(project)}
             >
               <div className="flex justify-between items-start mb-4">
                 <div className="flex-1">
@@ -188,7 +201,7 @@ const App: React.FC = () => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleDeleteProject(project.id);
+                      confirmDeleteProject(project);
                     }}
                     className="text-red-600 hover:text-red-800"
                   >
@@ -369,6 +382,44 @@ const App: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-gray-200 bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-96 shadow-lg">
+            <div className="flex items-center mb-4">
+              <div className="flex-shrink-0 w-10 h-10 mx-auto bg-red-100 rounded-full flex items-center justify-center">
+                <Trash2 className="h-6 w-6 text-red-600" />
+              </div>
+            </div>
+            <div className="text-center">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Delete Project</h3>
+              <p className="text-sm text-gray-500 mb-4">
+                Are you sure you want to delete <strong>"{deleteProjectName}"</strong>? 
+                This action cannot be undone and will also delete all associated invoices and expenses.
+              </p>
+              <div className="flex gap-3 justify-center">
+                <button
+                  onClick={() => {
+                    setShowDeleteConfirm(false);
+                    setDeleteProjectId(null);
+                    setDeleteProjectName('');
+                  }}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => deleteProjectId && handleDeleteProject(deleteProjectId)}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
