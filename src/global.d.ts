@@ -7,8 +7,8 @@ declare global {
       // Projects
       getAllProjects: () => Promise<any[]>;
       getProjectById: (id: number) => Promise<any>;
-      addProject: (name: string, clientName: string, description: string) => Promise<number>;
-      updateProject: (id: number, name: string, clientName: string, description: string) => Promise<any>;
+      addProject: (name: string, date:string, description: string) => Promise<number>;
+      updateProject: (id: number, name: string, date:string, description: string) => Promise<any>;
       deleteProject: (id: number) => Promise<any>;
 
       // Invoices

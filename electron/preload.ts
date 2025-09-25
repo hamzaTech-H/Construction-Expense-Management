@@ -28,10 +28,10 @@ contextBridge.exposeInMainWorld('database', {
   // Projects
   getAllProjects: () => ipcRenderer.invoke('get-all-projects'),
   getProjectById: (id: number) => ipcRenderer.invoke('get-project-by-id', id),
-  addProject: (name: string, clientName: string, description: string) => 
-    ipcRenderer.invoke('add-project', { name, clientName, description }),
-  updateProject: (id: number, name: string, clientName: string, description: string) => 
-    ipcRenderer.invoke('update-project', { id, name, clientName, description }),
+  addProject: (name: string, date: string, description: string) => 
+    ipcRenderer.invoke('add-project', { name, date, description }),
+  updateProject: (id: number, name: string, date: string, description: string) => 
+    ipcRenderer.invoke('update-project', { id, name, date, description }),
   deleteProject: (id: number) => ipcRenderer.invoke('delete-project', id),
 
   // Invoices

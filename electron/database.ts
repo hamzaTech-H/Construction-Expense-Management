@@ -15,7 +15,7 @@ db.prepare(`
   CREATE TABLE IF NOT EXISTS projects (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    client_name TEXT NOT NULL,
+    date DATE,
     description TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )
@@ -74,15 +74,15 @@ export function getProjectById(id: number) {
   return stmt.get(id);
 }
 
-export function addProject(name: string, clientName: string, description: string) {
-  const stmt = db.prepare('INSERT INTO projects (name, client_name, description) VALUES (?, ?, ?)');
-  const result = stmt.run(name, clientName, description);
+export function addProject(name: string, date: string, description: string) {
+  const stmt = db.prepare('INSERT INTO projects (name, date, description) VALUES (?, ?, ?)');
+  const result = stmt.run(name, date, description);
   return result.lastInsertRowid;
 }
 
-export function updateProject(id: number, name: string, clientName: string, description: string) {
-  const stmt = db.prepare('UPDATE projects SET name = ?, client_name = ?, description = ? WHERE id = ?');
-  return stmt.run(name, clientName, description, id);
+export function updateProject(id: number, name: string, date: string, description: string) {
+  const stmt = db.prepare('UPDATE projects SET name = ?, date = ? ,description = ? WHERE id = ?');
+  return stmt.run(name, date, description, id);
 }
 
 export function deleteProject(id: number) {

@@ -80,12 +80,12 @@ ipcMain.handle('get-project-by-id', (_event, id) => {
   return getProjectById(id);
 });
 
-ipcMain.handle('add-project', (_event, { name, clientName, description }) => {
-  return addProject(name, clientName, description);
+ipcMain.handle('add-project', (_event, { name, date, description }) => {
+  return addProject(name, date, description);
 });
 
-ipcMain.handle('update-project', (_event, { id, name, clientName, description }) => {
-  return updateProject(id, name, clientName, description);
+ipcMain.handle('update-project', (_event, { id, name, date, description }) => {
+  return updateProject(id, name, date, description);
 });
 
 ipcMain.handle('delete-project', (_event, id) => {
