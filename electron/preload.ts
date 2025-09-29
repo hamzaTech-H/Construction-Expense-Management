@@ -1,64 +1,46 @@
 import { ipcRenderer, contextBridge } from 'electron'
 
-// --------- Expose some API to the Renderer process ---------
-contextBridge.exposeInMainWorld('ipcRenderer', {
-  on(...args: Parameters<typeof ipcRenderer.on>) {
-    const [channel, listener] = args
-    return ipcRenderer.on(channel, (event, ...args) => listener(event, ...args))
-  },
-  off(...args: Parameters<typeof ipcRenderer.off>) {
-    const [channel, ...omit] = args
-    return ipcRenderer.off(channel, ...omit)
-  },
-  send(...args: Parameters<typeof ipcRenderer.send>) {
-    const [channel, ...omit] = args
-    return ipcRenderer.send(channel, ...omit)
-  },
-  invoke(...args: Parameters<typeof ipcRenderer.invoke>) {
-    const [channel, ...omit] = args
-    return ipcRenderer.invoke(channel, ...omit)
-  },
+type DatabaseAPI = Window['database'];
 
-
-  // You can expose other APTs you need here.
-  // ...
-})
-
-contextBridge.exposeInMainWorld('database', {
+const database: DatabaseAPI = {
   // Projects
   getAllProjects: () => ipcRenderer.invoke('get-all-projects'),
-  getProjectById: (id: number) => ipcRenderer.invoke('get-project-by-id', id),
-  addProject: (name: string, clientName: string, description: string) => 
-    ipcRenderer.invoke('add-project', { name, clientName, description }),
-  updateProject: (id: number, name: string, clientName: string, description: string) => 
-    ipcRenderer.invoke('update-project', { id, name, clientName, description }),
-  deleteProject: (id: number) => ipcRenderer.invoke('delete-project', id),
+  getProjectById: (id) => ipcRenderer.invoke('get-project-by-id', id),
+  addProject: (name, date, description) => 
+    ipcRenderer.invoke('add-project', { name, date, description }),
+  updateProject: (id, name, date, description) => 
+    ipcRenderer.invoke('update-project', { id, name, date, description }),
+  deleteProject: (id) => ipcRenderer.invoke('delete-project', id),
+  getProjectStats: (id) => ipcRenderer.invoke('get-project-stats', id),
 
   // Invoices
-  getInvoicesByProject: (projectId: number) => ipcRenderer.invoke('get-invoices-by-project', projectId),
-  getInvoiceById: (id: number) => ipcRenderer.invoke('get-invoice-by-id', id),
-  addInvoice: (projectId: number, name: string, date: string) => 
-    ipcRenderer.invoke('add-invoice', { projectId, name, date }),
-  updateInvoice: (id: number, name: string, date: string) => 
-    ipcRenderer.invoke('update-invoice', { id, name, date }),
-  deleteInvoice: (id: number) => ipcRenderer.invoke('delete-invoice', id),
-  updateInvoiceAmounts: (invoiceId: number, projectAmount: number, amountPaid: number, remainingAmount: number) => 
-    ipcRenderer.invoke('update-invoice-amounts', { invoiceId, projectAmount, amountPaid, remainingAmount }),
+  // getInvoicesByProject: (projectId) => ipcRenderer.invoke('get-invoices-by-project', projectId),
+  // getInvoiceById: (id) => ipcRenderer.invoke('get-invoice-by-id', id),
+  // addInvoice: (projectId, name, date) => 
+  //   ipcRenderer.invoke('add-invoice', { projectId, name, date }),
+  // updateInvoice: (id, name, date) => 
+  //   ipcRenderer.invoke('update-invoice', { id, name, date }),
+  // deleteInvoice: (id) => ipcRenderer.invoke('delete-invoice', id),
+  // updateInvoiceAmounts: (invoiceId, projectAmount, amountPaid, remainingAmount) => 
+  //   ipcRenderer.invoke('update-invoice-amounts', { invoiceId, projectAmount, amountPaid, remainingAmount }),
 
   // Expenses
-  getExpensesByInvoice: (invoiceId: number) => ipcRenderer.invoke('get-expenses-by-invoice', invoiceId),
-  getExpenseById: (id: number) => ipcRenderer.invoke('get-expense-by-id', id),
-  addExpense: (invoiceId: number, description: string, unitPrice: number, quantity: number) => 
-    ipcRenderer.invoke('add-expense', { invoiceId, description, unitPrice, quantity }),
-  updateExpense: (id: number, description: string, unitPrice: number, quantity: number) => 
+  getExpensesByInvoice: (invoiceId) => ipcRenderer.invoke('get-expenses-by-invoice', invoiceId),
+  getExpenseById: (id) => ipcRenderer.invoke('get-expense-by-id', id),
+  addExpense: (projectId, description, date, amountTotal, isPaid) => 
+    ipcRenderer.invoke('add-expense', { projectId, description, date, amountTotal, isPaid }),
+  updateExpense: (id, description, unitPrice, quantity) => 
     ipcRenderer.invoke('update-expense', { id, description, unitPrice, quantity }),
-  deleteExpense: (id: number) => ipcRenderer.invoke('delete-expense', id),
-  updateExpenseAmounts: (expenseId: number, amountPaid: number, remainingAmount: number, status: string) => 
+  deleteExpense: (id) => ipcRenderer.invoke('delete-expense', id),
+  updateExpenseAmounts: (expenseId, amountPaid, remainingAmount, status) => 
     ipcRenderer.invoke('update-expense-amounts', { expenseId, amountPaid, remainingAmount, status }),
 
   // Payments
-  getPaymentsByExpense: (expenseId: number) => ipcRenderer.invoke('get-payments-by-expense', expenseId),
-  addPayment: (expenseId: number, amount: number, date: string, note: string) => 
+  getPaymentsByExpense: (expenseId) => ipcRenderer.invoke('get-payments-by-expense', expenseId),
+  addPayment: (expenseId, amount, date, note) => 
     ipcRenderer.invoke('add-payment', { expenseId, amount, date, note }),
-  deletePayment: (id: number) => ipcRenderer.invoke('delete-payment', id),
-})
+  deletePayment: (id) => ipcRenderer.invoke('delete-payment', id),
+}
+
+
+contextBridge.exposeInMainWorld("database", database);

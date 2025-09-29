@@ -1,5 +1,3 @@
-"use client";
-
 import { useCallback, useState } from "react";
 
 const DEFAULT_TIMEOUT = 2000;
@@ -67,7 +65,7 @@ export const useClipboard = (): UseClipboardReturnType => {
                 setTimeout(() => setCopied(false), DEFAULT_TIMEOUT);
 
                 return { success: true };
-            } catch {
+            } catch (err) {
                 // If modern method fails, try fallback
                 return fallback(text, id);
             }
