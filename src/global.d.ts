@@ -10,19 +10,21 @@ declare global {
       addProject: (name: string, date:string, description: string) => Promise<number>;
       updateProject: (id: number, name: string, date:string, description: string) => Promise<any>;
       deleteProject: (id: number) => Promise<any>;
+      getProjectStats: (id: number) => Promise<any>;
+
 
       // Invoices
-      getInvoicesByProject: (projectId: number) => Promise<any[]>;
-      getInvoiceById: (id: number) => Promise<any>;
-      addInvoice: (projectId: number, name: string, date: string) => Promise<number>;
-      updateInvoice: (id: number, name: string, date: string) => Promise<any>;
-      deleteInvoice: (id: number) => Promise<any>;
-      updateInvoiceAmounts: (invoiceId: number, projectAmount: number, amountPaid: number, remainingAmount: number) => Promise<any>;
+      // getInvoicesByProject: (projectId: number) => Promise<any[]>;
+      // getInvoiceById: (id: number) => Promise<any>;
+      // addInvoice: (projectId: number, name: string, date: string) => Promise<number>;
+      // updateInvoice: (id: number, name: string, date: string) => Promise<any>;
+      // deleteInvoice: (id: number) => Promise<any>;
+      // updateInvoiceAmounts: (invoiceId: number, projectAmount: number, amountPaid: number, remainingAmount: number) => Promise<any>;
 
       // Expenses
       getExpensesByInvoice: (invoiceId: number) => Promise<any[]>;
       getExpenseById: (id: number) => Promise<any>;
-      addExpense: (invoiceId: number, description: string, unitPrice: number, quantity: number) => Promise<number>;
+      addExpense: (projectId: number, description: string, date: string, amountTotal: number, isPaid: boolean) => Promise<number>;
       updateExpense: (id: number, description: string, unitPrice: number, quantity: number) => Promise<any>;
       deleteExpense: (id: number) => Promise<any>;
       updateExpenseAmounts: (expenseId: number, amountPaid: number, remainingAmount: number, status: string) => Promise<any>;

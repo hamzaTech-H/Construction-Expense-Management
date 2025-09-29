@@ -32,11 +32,6 @@ export default function ProjectModal({ setIsModalOpen, project }: ProjectModalPr
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         
-        const formData = new FormData(e.currentTarget);
-        const name = formData.get("name") as string;
-        const date = formData.get("date") as string;
-        const description = formData.get("description") as string;
-        
         if(project) {
             const id = project.id
             await window.database.updateProject(id, name, date, description);
