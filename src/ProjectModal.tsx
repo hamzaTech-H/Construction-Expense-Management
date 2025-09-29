@@ -3,7 +3,7 @@ import { Input } from "@/components/base/input/input";
 import { TextArea } from "@/components/base/textarea/textarea";
 import { XClose } from '@untitledui/icons';
 import { useState, useEffect, useContext } from "react";
-import { fetchProjectsContext } from "./App";
+import { fetchProjectsContext } from "./ProjectsList";
 
 interface ProjectModalProps {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;

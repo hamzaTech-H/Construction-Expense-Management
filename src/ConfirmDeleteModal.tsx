@@ -1,7 +1,7 @@
 import { Button } from "@/components/base/buttons/button";
 import { X } from '@untitledui/icons';
 import { useContext } from "react";
-import { fetchProjectsContext } from "./App";
+import { fetchProjectsContext } from "./ProjectsList";
 
 type ConfirmDeleteModalProps = {
   setIsConfirmOpen: React.Dispatch<React.SetStateAction<boolean>>;
