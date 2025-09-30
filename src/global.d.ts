@@ -22,7 +22,7 @@ declare global {
       // updateInvoiceAmounts: (invoiceId: number, projectAmount: number, amountPaid: number, remainingAmount: number) => Promise<any>;
 
       // Expenses
-      getExpensesByInvoice: (invoiceId: number) => Promise<any[]>;
+      getExpensesByProject: (projectId: number) => Promise<any[]>;
       getExpenseById: (id: number) => Promise<any>;
       addExpense: (projectId: number, description: string, date: string, amountTotal: number, isPaid: boolean) => Promise<number>;
       updateExpense: (id: number, description: string, unitPrice: number, quantity: number) => Promise<any>;

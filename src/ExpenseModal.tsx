@@ -7,26 +7,31 @@ import { useParams } from "react-router-dom";
 
 interface ProjectModalProps {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onChange: () => void;
+  fetchStats: () => void;
 }
 
-export default function ExpenseModal({ setIsModalOpen }: ProjectModalProps) {    
+export default function ExpenseModal({ setIsModalOpen, onChange, fetchStats }: ProjectModalProps) {    
+    
     const projectId = Number(useParams<{ projectId: string }>().projectId);
     const [description, setDescription] = useState("");
-    const [date, setDate] = useState("");
+    const [date, setDate] = useState(() => {
+        return new Date().toISOString().split("T")[0];
+    });
     const [total, setTotal] = useState(0);
     const [isPaid, setIsPaid] = useState(false);
-
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         await window.database.addExpense(projectId, description, date, total, isPaid);
-       setIsModalOpen(false);
+        onChange();
+        fetchStats();
+        setIsModalOpen(false);
     };
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
             <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-lg relative">
-
                 <h2 className="mb-4 text-lg font-semibold">Ajouter la dépense</h2>
                 <Button color="tertiary" size="md" iconLeading={<XClose data-icon />} onClick={() => setIsModalOpen(false)} aria-label="Button CTA" className="absolute top-3 right-3"/>
 

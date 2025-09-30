@@ -136,9 +136,9 @@ export function getProjectStats(projectId: number) {
 // }
 
 // ===== EXPENSES =====
-export function getExpensesByInvoice(invoiceId: number) {
-  const stmt = db.prepare('SELECT * FROM expenses WHERE invoice_id = ? ORDER BY created_at DESC');
-  return stmt.all(invoiceId);
+export function getExpensesByProject(projectId: number) {
+  const stmt = db.prepare('SELECT * FROM expenses WHERE project_id = ? ORDER BY created_at DESC');
+  return stmt.all(projectId);
 }
 
 export function getExpenseById(id: number) {

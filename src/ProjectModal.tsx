@@ -24,7 +24,9 @@ export default function ProjectModal({ setIsModalOpen, project }: ProjectModalPr
             setDescription(project.description ?? "");
         } else {
             setName("");
-            setDate("");
+            setDate(() => {
+                return new Date().toISOString().split("T")[0];
+            });
             setDescription("");
         }
     }, [project]);

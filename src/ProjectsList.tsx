@@ -44,7 +44,7 @@ export default function ProjectsList() {
 
   return (
     <>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 mt-4">
         <Input name="name" type="search" icon={SearchMd} placeholder="Rechercher par nom ou description..." onChange={(value: string) => setSearch(value)}/>
         <Button 
           onClick={() => {

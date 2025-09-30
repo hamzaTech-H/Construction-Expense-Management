@@ -25,7 +25,7 @@ const database: DatabaseAPI = {
   //   ipcRenderer.invoke('update-invoice-amounts', { invoiceId, projectAmount, amountPaid, remainingAmount }),
 
   // Expenses
-  getExpensesByInvoice: (invoiceId) => ipcRenderer.invoke('get-expenses-by-invoice', invoiceId),
+  getExpensesByProject: (projectId) => ipcRenderer.invoke('get-expenses-by-project', projectId),
   getExpenseById: (id) => ipcRenderer.invoke('get-expense-by-id', id),
   addExpense: (projectId, description, date, amountTotal, isPaid) => 
     ipcRenderer.invoke('add-expense', { projectId, description, date, amountTotal, isPaid }),

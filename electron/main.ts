@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { 
   getAllProjects, getProjectById, addProject, updateProject, deleteProject, getProjectStats,
-  getExpensesByInvoice, getExpenseById, addExpense, updateExpense, deleteExpense, updateExpenseAmounts,
+  getExpensesByProject, getExpenseById, addExpense, updateExpense, deleteExpense, updateExpenseAmounts,
   getPaymentsByExpense, addPayment, deletePayment
 } from './database';
 
@@ -121,8 +121,8 @@ ipcMain.handle('get-project-stats', (_event, id) => {
 // });
 
 // ===== EXPENSES =====
-ipcMain.handle('get-expenses-by-invoice', (_event, invoiceId) => {
-  return getExpensesByInvoice(invoiceId);
+ipcMain.handle('get-expenses-by-project', (_event, projectId) => {
+  return getExpensesByProject(projectId);
 });
 
 ipcMain.handle('get-expense-by-id', (_event, id) => {
