@@ -5,8 +5,7 @@ import ProjectsList from './ProjectsList';
 
 function App() {
   return (
-    <main className="h-screen flex flex-col px-4 py-0 mx-auto">
-
+    <main className="flex flex-col px-8 py-0 mx-auto">
       <Routes>
         <Route 
           path="/" 

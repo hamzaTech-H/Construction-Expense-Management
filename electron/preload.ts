@@ -29,8 +29,8 @@ const database: DatabaseAPI = {
   getExpenseById: (id) => ipcRenderer.invoke('get-expense-by-id', id),
   addExpense: (projectId, description, date, amountTotal, isPaid) => 
     ipcRenderer.invoke('add-expense', { projectId, description, date, amountTotal, isPaid }),
-  updateExpense: (id, description, unitPrice, quantity) => 
-    ipcRenderer.invoke('update-expense', { id, description, unitPrice, quantity }),
+  updateExpense: (id, description, date, amountTotal, isPaid) => 
+    ipcRenderer.invoke('update-expense', { id, description, date, amountTotal, isPaid }),
   deleteExpense: (id) => ipcRenderer.invoke('delete-expense', id),
   updateExpenseAmounts: (expenseId, amountPaid, remainingAmount, status) => 
     ipcRenderer.invoke('update-expense-amounts', { expenseId, amountPaid, remainingAmount, status }),

@@ -95,31 +95,6 @@ ipcMain.handle('get-project-stats', (_event, id) => {
   return getProjectStats(id);
 });
 
-// ===== INVOICES =====
-// ipcMain.handle('get-invoices-by-project', (_event, projectId) => {
-//   return getInvoicesByProject(projectId);
-// });
-
-// ipcMain.handle('get-invoice-by-id', (_event, id) => {
-//   return getInvoiceById(id);
-// });
-
-// ipcMain.handle('add-invoice', (_event, { projectId, name, date }) => {
-//   return addInvoice(projectId, name, date);
-// });
-
-// ipcMain.handle('update-invoice', (_event, { id, name, date }) => {
-//   return updateInvoice(id, name, date);
-// });
-
-// ipcMain.handle('delete-invoice', (_event, id) => {
-//   return deleteInvoice(id);
-// });
-
-// ipcMain.handle('update-invoice-amounts', (_event, { invoiceId, projectAmount, amountPaid, remainingAmount }) => {
-//   return updateInvoiceAmounts(invoiceId, projectAmount, amountPaid, remainingAmount);
-// });
-
 // ===== EXPENSES =====
 ipcMain.handle('get-expenses-by-project', (_event, projectId) => {
   return getExpensesByProject(projectId);
@@ -133,8 +108,8 @@ ipcMain.handle('add-expense', (_event, { projectId, description, date, amountTot
   return addExpense(projectId, description, date, amountTotal, isPaid);
 });
 
-ipcMain.handle('update-expense', (_event, { id, description, date, amountTotal}) => {
-  return updateExpense(id, description, date, amountTotal);
+ipcMain.handle('update-expense', (_event, { id, description, date, amountTotal, isPaid}) => {
+  return updateExpense(id, description, date, amountTotal, isPaid);
 });
 
 ipcMain.handle('delete-expense', (_event, id) => {

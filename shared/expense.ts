@@ -1,5 +1,5 @@
 export enum ExpenseStatus {
-  NOT_PAID = "not_paid",
-  PAID = "paid",
-  PARTIALLY_PAID = "partially_paid",
+  NOT_PAID = "Impayé",
+  PAID = "Payé",
+  PARTIALLY_PAID = "Partiel",
 }

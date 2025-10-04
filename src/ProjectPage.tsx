@@ -1,50 +1,61 @@
 import { useParams } from "react-router-dom";
 import { Link } from "react-aria-components";
 import { Button } from "@/components/base/buttons/button";
-import { Plus, Printer } from '@untitledui/icons';
+import { Plus, Printer, ArrowNarrowLeft} from '@untitledui/icons';
 import { ProjectStatsCard } from './ProjectStatsCard';
 import ExpenseModal from "./ExpenseModal";
 import { useEffect, useState } from "react";
 import { ExpensesTable } from "./ExpensesTable";
-
-
-type ProjectStats = {
-  total: number | null;
-  paid: number | null;
-  remaining: number | null;
-};
+import { Expense, ProjectStats } from "./types";
 
 
 export default function ProjectPage() {
   const {projectId} = useParams<{ projectId: string }>();
   const id = Number(projectId); 
-  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false); 
-  const [stats, setStats] = useState<ProjectStats | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
+  
+  const [stats, setStats] = useState<ProjectStats>({
+    total: 0,
+    paid: 0,
+    remaining: 0,
+  });
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null); 
+  const [isLoading, setIsLoading] = useState(true);
 
-  const refreshExpenses = () => {
-    setRefreshKey((prev) => prev + 1); // change forces table to re-fetch
+  const loadData = async () => {
+    setIsLoading(true);
+    const [statsResult, expensesResult] = await Promise.all([
+      window.database.getProjectStats(id),
+      window.database.getExpensesByProject(id),
+    ]);
+    setStats(statsResult);
+    setExpenses(expensesResult);
+    setIsLoading(false);
   };
-
-  const refreshStats = async () => {
-    const result: ProjectStats = await window.database.getProjectStats(id);
-    setStats(result);
-  };
-
 
   useEffect(() => {
-    refreshStats();
+    loadData();
   }, [id]);
 
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="text-gray-500 animate-pulse text-lg">
+          Chargement du projet...
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="h-screen flex flex-col px-4">
-      {/* Top row: Back link (left) and Buttons (right) */}
-      <div className="flex items-center justify-between mb-8 mt-4">
+    <div className="h-screen flex flex-col py-4 px-2">
+      <div className="flex items-center justify-between mb-4">
         <Link
           href="/"
           className="text-blue-600 hover:underline text-sm font-medium"
         >
-          ← Retour aux projets
+          <Button color="link-gray" size="md" iconLeading={<ArrowNarrowLeft data-icon />} aria-label="Button CTA" />
         </Link>
 
         <div className="flex gap-3">
@@ -58,7 +69,10 @@ export default function ProjectPage() {
           <Button
             size="md"
             iconLeading={<Plus data-icon />}
-            onClick={() => setIsExpenseModalOpen(true)}
+            onClick={() => {
+              setSelectedExpense(null)
+              setIsExpenseModalOpen(true)
+            }}
           >
             Ajouter dépense
           </Button>
@@ -66,30 +80,35 @@ export default function ProjectPage() {
       </div>
 
       {/* Project stats row */}
-      <div className="flex flex-wrap gap-6 mb-8">
-        <ProjectStatsCard
-          title="Total Budget"
-          value={stats?.total ?? 0}
-          colorClasses="bg-blue-100 text-blue-900 border-l-4 border-blue-500"
-        />
-        <ProjectStatsCard
-          title="Total Paid"
-          value={stats?.paid ?? 0}
-          colorClasses="bg-green-100 text-green-900 border-l-4 border-green-500"
-        />
-        <ProjectStatsCard
-          title="Remaining"
-          value={stats?.remaining ?? 0}
-          colorClasses="bg-red-100 text-red-900 border-l-4 border-red-500"
-        />
-      </div>
+    <div className="flex flex-wrap gap-6 mb-4">
+      {stats ? (
+        <>
+          <ProjectStatsCard
+            title="Total général"
+            value={stats.total}
+            colorClasses="bg-blue-100 text-blue-900 border-l-4 border-blue-500"
+          />
+          <ProjectStatsCard
+            title="Total payé"
+            value={stats.paid}
+            colorClasses="bg-green-100 text-green-900 border-l-4 border-green-500"
+          />
+          <ProjectStatsCard
+            title="Total restant"
+            value={stats.remaining}
+            colorClasses="bg-red-100 text-red-900 border-l-4 border-red-500"
+          />
+        </>
+      ) : (
+        <div className="text-gray-400 animate-pulse">Chargement des stats...</div>
+      )}
+    </div>
 
-      <ExpensesTable projectId={id} refreshKey={refreshKey} />
-
+      <ExpensesTable expenses={expenses} setIsExpenseModalOpen={setIsExpenseModalOpen} setSelectedExpense={setSelectedExpense} setExpenses={setExpenses} setStats={setStats}/>
 
       {/* Modal */}
       {isExpenseModalOpen && (
-        <ExpenseModal setIsModalOpen={setIsExpenseModalOpen} onChange={refreshExpenses} fetchStats={refreshStats}/>
+        <ExpenseModal setIsModalOpen={setIsExpenseModalOpen} expense={selectedExpense} setExpenses={setExpenses} setStats={setStats}/>
       )}
     </div>
   );

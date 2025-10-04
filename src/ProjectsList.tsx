@@ -3,50 +3,39 @@ import { Input } from "@/components/base/input/input";
 import { Plus, SearchMd } from '@untitledui/icons';
 import ProjectModal from "./ProjectModal"
 import ProjectCard from "./ProjectCard";
-import { useEffect, useState, createContext } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
+import { Project } from "./types";
 
-interface Project {
-  id: number;
-  name: string;
-  date: string;
-  description?: string;
-}
-
-type FetchProjectsType = () => Promise<void>;
-
-export const fetchProjectsContext = createContext<FetchProjectsType>(
-  async () => {} // dummy default function
-);
 
 export default function ProjectsList() {
+  console.log("project list rendered");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [search, setSearch] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
 
-  const filteredProjects = projects.filter((project) =>
-    [project.name, project.description ?? ""]
-      .join(" ")
-      .toLowerCase()
-      .includes(search.toLowerCase())
-  );
-
-  // Fetch projects from database
-  const fetchProjects = async () => {
-    const allProjects: Project[] = await window.database.getAllProjects();
+  const fetchProjects = useCallback(async () => {
+    const allProjects = await window.database.getAllProjects();
     setProjects(allProjects);
-  };
+  }, []);
 
-  // Fetch projects on mount
   useEffect(() => {
     fetchProjects();
-  }, []);
+  }, [fetchProjects]);
+
+  const filteredProjects = useMemo(() => {
+    const normalizedSearch = search.toLowerCase();
+    return projects.filter(({ name, description }) =>
+      `${name} ${description ?? ""}`.toLowerCase().includes(normalizedSearch)
+    );
+  }, [projects, search]);
 
   return (
     <>
-      <div className="flex items-center gap-4 mt-4">
+      <div className="sticky top-0 z-50 bg-white py-4 px-2 shadow-md flex items-center gap-4">
         <Input name="name" type="search" icon={SearchMd} placeholder="Rechercher par nom ou description..." onChange={(value: string) => setSearch(value)}/>
         <Button 
+          size="md"
           onClick={() => {
             setIsModalOpen(true) 
             setSelectedProject(null)
@@ -56,29 +45,24 @@ export default function ProjectsList() {
         </Button>
       </div>
 
-      <fetchProjectsContext.Provider value={fetchProjects}>
-        <div className="flex flex-wrap justify-center gap-4 mt-8">
-          {filteredProjects.map((project) => (
-            <ProjectCard
-              id={project.id}
-              name={project.name}
-              date={project.date}
-              description={project.description}
-              key={project.id}
-              setIsModalOpen={setIsModalOpen} 
-              setSelectedProject={setSelectedProject}
-            />
-          ))}
-        </div>
-      </fetchProjectsContext.Provider>
+      <div className="flex flex-wrap justify-center gap-4 mt-8">
+        {filteredProjects.map((project) => (
+          <ProjectCard
+            project={project}
+            key={project.id}
+            setIsModalOpen={setIsModalOpen} 
+            setSelectedProject={setSelectedProject}
+            fetchProjects= {fetchProjects}
+          />
+        ))}
+      </div>
       
       {isModalOpen && (
-        <fetchProjectsContext.Provider value={fetchProjects}>
           <ProjectModal 
             setIsModalOpen={setIsModalOpen}
             project={selectedProject}
+            setProjects={setProjects}
         />
-        </fetchProjectsContext.Provider>
       )}
     </>
     

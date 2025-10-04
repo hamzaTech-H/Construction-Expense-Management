@@ -12,20 +12,11 @@ declare global {
       deleteProject: (id: number) => Promise<any>;
       getProjectStats: (id: number) => Promise<any>;
 
-
-      // Invoices
-      // getInvoicesByProject: (projectId: number) => Promise<any[]>;
-      // getInvoiceById: (id: number) => Promise<any>;
-      // addInvoice: (projectId: number, name: string, date: string) => Promise<number>;
-      // updateInvoice: (id: number, name: string, date: string) => Promise<any>;
-      // deleteInvoice: (id: number) => Promise<any>;
-      // updateInvoiceAmounts: (invoiceId: number, projectAmount: number, amountPaid: number, remainingAmount: number) => Promise<any>;
-
       // Expenses
       getExpensesByProject: (projectId: number) => Promise<any[]>;
       getExpenseById: (id: number) => Promise<any>;
-      addExpense: (projectId: number, description: string, date: string, amountTotal: number, isPaid: boolean) => Promise<number>;
-      updateExpense: (id: number, description: string, unitPrice: number, quantity: number) => Promise<any>;
+      addExpense: (projectId: number, description: string, date: string, amountTotal: number, isPaid: boolean) => Promise<Expense>;
+      updateExpense: (id:number, description:string, date: string, amountTotal: number, isPaid: boolean) => Promise<any>;
       deleteExpense: (id: number) => Promise<any>;
       updateExpenseAmounts: (expenseId: number, amountPaid: number, remainingAmount: number, status: string) => Promise<any>;
 

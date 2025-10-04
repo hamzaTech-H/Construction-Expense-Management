@@ -2,49 +2,54 @@ import { Button } from "@/components/base/buttons/button";
 import { Input } from "@/components/base/input/input";
 import { TextArea } from "@/components/base/textarea/textarea";
 import { XClose } from '@untitledui/icons';
-import { useState, useEffect, useContext } from "react";
-import { fetchProjectsContext } from "./ProjectsList";
+import { useState } from "react";
+import { Project } from "./types";
 
 interface ProjectModalProps {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  project: { id: number; name: string; date: string; description?: string } | null;
+  project: Project | null;
+  setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
 }
 
-export default function ProjectModal({ setIsModalOpen, project }: ProjectModalProps) {    
+export default function ProjectModal({ setIsModalOpen, project, setProjects }: ProjectModalProps) {    
     
-    const fetchProjects = useContext(fetchProjectsContext)
-    const [name, setName] = useState("");
-    const [date, setDate] = useState("");
-    const [description, setDescription] = useState("");
+    const [form, setForm] = useState({
+        name: project?.name ?? "",
+        date: project?.date ?? new Date().toISOString().split("T")[0],
+        description: project?.description ?? "",
+    });
 
-    useEffect(() => {
-        if (project) {
-            setName(project.name);
-            setDate(project.date);
-            setDescription(project.description ?? "");
-        } else {
-            setName("");
-            setDate(() => {
-                return new Date().toISOString().split("T")[0];
-            });
-            setDescription("");
-        }
-    }, [project]);
+    const handleChange = (field: keyof typeof form, value: string) =>
+        setForm(prev => ({ ...prev, [field]: value }));
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         
         if(project) {
-            const id = project.id
-            await window.database.updateProject(id, name, date, description);
-            await fetchProjects();
-            setIsModalOpen(false);
+            await window.database.updateProject(project.id, form.name, form.date, form.description);
+            const updatedProject: Project = {
+                id: project.id,
+                name: form.name,
+                date: form.date,
+                description: form.description,
+            };
+            setProjects((prev) =>
+                prev.map((p) => (p.id === project.id ? updatedProject : p))
+            );
+           
         } else {
-            await window.database.addProject(name, date, description);
-            await fetchProjects();
-            setIsModalOpen(false);
+            const projectId = await window.database.addProject(form.name, form.date, form.description);
+            const newProject: Project = {
+                id: projectId as number,
+                name: form.name,
+                date: form.date,
+                description: form.description,
+            };
+
+            setProjects(prev => [newProject, ...prev]);
         }
-       
+
+        setIsModalOpen(false);    
     };
 
     return (
@@ -55,9 +60,9 @@ export default function ProjectModal({ setIsModalOpen, project }: ProjectModalPr
                 <Button color="tertiary" size="md" iconLeading={<XClose data-icon />} onClick={() => setIsModalOpen(false)} aria-label="Button CTA" className="absolute top-3 right-3"/>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <Input isRequired name="name" label="Nom" placeholder="Nom de Projet" value={name} onChange={(value: string) => setName(value)}/>
-                    <Input isRequired name="date" label="Date" type="date" value={date} onChange={(value: string) => setDate(value)}/>                           
-                    <TextArea name='description' placeholder="Ajouter un description" label="Description" rows={4} value={description} onChange={(value: string) => setDescription(value)}/>
+                    <Input isRequired name="name" label="Nom" placeholder="Nom de Projet" value={form.name} onChange={(value: string) => handleChange("name", value)}/>
+                    <Input isRequired name="date" label="Date" type="date" value={form.date} onChange={(value: string) => handleChange("date", value)}/>                           
+                    <TextArea name='description' placeholder="Ajouter un description" label="Description" rows={4} value={form.description} onChange={(value: string) => handleChange("description", value)}/>
                     
                     <div className="flex justify-end gap-2">
                         <Button type="submit" size="md" className="mt-2">Sauvegarder</Button> 
