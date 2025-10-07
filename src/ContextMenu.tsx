@@ -51,20 +51,22 @@ export const ContextMenu = ({
         className="justify-start"
         color="tertiary"
         size="sm"
+        iconLeading={<CreditCard01 data-icon />}
+        onClick={() => onAddPayment(expense)}
+      >
+        Afficher les paiements
+      </Button>
+      
+      <Button
+        className="justify-start"
+        color="tertiary"
+        size="sm"
         iconLeading={<Edit05 data-icon />}
         onClick={() => onModify(expense)}
       >
         Modifier
       </Button>
-      <Button
-        className="justify-start"
-        color="tertiary"
-        size="sm"
-        iconLeading={<CreditCard01 data-icon />}
-        onClick={() => onAddPayment(expense)}
-      >
-        Ajouter paiement
-      </Button>
+      
       <Button
         className="justify-start"
         color="tertiary-destructive"

@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import { ExpenseStatus } from "../shared/expense";
+import { log } from 'console';
 
 // Ensure database file is stored properly
 const dbPath = path.join(process.cwd(), 'database.db');
@@ -116,7 +117,6 @@ export function addExpense(projectId: number, description: string, date: string,
   const result = stmt.run(projectId, description, date, amountTotal, amountPaid ,amountRemainig, status);
   const createdExpense = {
     id: result.lastInsertRowid as number,
-    project_id: projectId,
     description,
     date,
     amount_total: amountTotal,
@@ -125,25 +125,39 @@ export function addExpense(projectId: number, description: string, date: string,
     status
   };
 
+  if (isPaid) {
+    const today = new Date().toISOString().split('T')[0];
+    const stmt = db.prepare('INSERT INTO payments (expense_id, amount, date, note) VALUES (?, ?, ?, ?)');
+    stmt.run(createdExpense.id, amountTotal, today, '');
+  }
+
   return createdExpense;
 }
 
-export function updateExpense(id: number, description: string, date: string, amountTotal: number, isPaid: boolean) {
+export function updateExpense(id: number, description: string, date: string, amountTotal: number) {
   let amountPaid = 0;
   let amountRemainig = 0;
   let status = ExpenseStatus.NOT_PAID
 
-  if (isPaid) {
-    amountPaid = amountTotal;
-    status = ExpenseStatus.PAID;
+  const expense:any = getExpenseById(id);
+
+  if (amountTotal < expense.amount_paid) {
+    throw new Error("Le total ne peut pas être réduit. Supprimez d’abord un paiement");
+  }
+
+  if (expense.status === ExpenseStatus.NOT_PAID) {
+    amountPaid = 0;
+    amountRemainig = 0;
   } else {
-    amountRemainig = amountTotal;
+    amountPaid = expense.amount_paid;
+    amountRemainig = expense.amount_remaining + amountTotal - expense.amount_total;
+    status = ExpenseStatus.PARTIALLY_PAID
   }
 
   const stmt = db.prepare('UPDATE expenses SET description = ?, date = ?, amount_total = ?, amount_paid = ?, amount_remaining = ?, status = ? WHERE id = ?');
-  const result = stmt.run(description, date, amountTotal, amountPaid, amountRemainig, status, id);
+  stmt.run(description, date, amountTotal, amountPaid, amountRemainig, status, id);
   const createdExpense = {
-    id: result.lastInsertRowid as number,
+    id: id,
     description,
     date,
     amount_total: amountTotal,
@@ -161,7 +175,7 @@ export function deleteExpense(id: number) {
 }
 
 export function updateExpenseAmounts(expenseId: number, amountPaid: number, remainingAmount: number, status: string) {
-  const stmt = db.prepare('UPDATE expenses SET amount_paid = ?, remaining_amount = ?, status = ? WHERE id = ?');
+  const stmt = db.prepare('UPDATE expenses SET amount_paid = ?, amount_remaining = ?, status = ? WHERE id = ?');
   return stmt.run(amountPaid, remainingAmount, status, expenseId);
 }
 
@@ -172,9 +186,25 @@ export function getPaymentsByExpense(expenseId: number) {
 }
 
 export function addPayment(expenseId: number, amount: number, date: string, note: string) {
+  const expense:any = getExpenseById(expenseId);
+
+  if (!expense) throw new Error("Expense not found");
+  if (amount <= 0) throw new Error("Le montant doit être supérieur à 0");
+  
+  const newAmountPaid = expense.amount_paid + amount;
+  if (newAmountPaid > expense.amount_total)
+    throw new Error("Le montant payé dépasse le total de la dépense !");
+  
+  const status =
+    newAmountPaid === expense.amount_total
+      ? ExpenseStatus.PAID
+      : ExpenseStatus.PARTIALLY_PAID;
+
   const stmt = db.prepare('INSERT INTO payments (expense_id, amount, date, note) VALUES (?, ?, ?, ?)');
   const result = stmt.run(expenseId, amount, date, note);
-  return result.lastInsertRowid;
+  const paymentId = result.lastInsertRowid;
+  updateExpenseAmounts(expense.id, newAmountPaid, expense.amount_total - newAmountPaid, status)
+  return { paymentId, newAmountPaid, remaining: expense.amount_total - newAmountPaid, status };
 }
 
 export function deletePayment(id: number) {

@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { Link } from "react-aria-components";
 import { Button } from "@/components/base/buttons/button";
 import { Plus, Printer, ArrowNarrowLeft} from '@untitledui/icons';
@@ -12,6 +12,9 @@ import { Expense, ProjectStats } from "./types";
 export default function ProjectPage() {
   const {projectId} = useParams<{ projectId: string }>();
   const id = Number(projectId); 
+  const [searchParams] = useSearchParams();
+  
+  const projectName = searchParams.get('name'); 
   
   const [stats, setStats] = useState<ProjectStats>({
     total: 0,
@@ -57,6 +60,10 @@ export default function ProjectPage() {
         >
           <Button color="link-gray" size="md" iconLeading={<ArrowNarrowLeft data-icon />} aria-label="Button CTA" />
         </Link>
+
+        <h1 className="text-3xl font-bold text-gray-800 text-center tracking-tight truncate">
+          Projet: {projectName}
+        </h1>
 
         <div className="flex gap-3">
           <Button

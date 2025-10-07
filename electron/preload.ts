@@ -13,24 +13,13 @@ const database: DatabaseAPI = {
   deleteProject: (id) => ipcRenderer.invoke('delete-project', id),
   getProjectStats: (id) => ipcRenderer.invoke('get-project-stats', id),
 
-  // Invoices
-  // getInvoicesByProject: (projectId) => ipcRenderer.invoke('get-invoices-by-project', projectId),
-  // getInvoiceById: (id) => ipcRenderer.invoke('get-invoice-by-id', id),
-  // addInvoice: (projectId, name, date) => 
-  //   ipcRenderer.invoke('add-invoice', { projectId, name, date }),
-  // updateInvoice: (id, name, date) => 
-  //   ipcRenderer.invoke('update-invoice', { id, name, date }),
-  // deleteInvoice: (id) => ipcRenderer.invoke('delete-invoice', id),
-  // updateInvoiceAmounts: (invoiceId, projectAmount, amountPaid, remainingAmount) => 
-  //   ipcRenderer.invoke('update-invoice-amounts', { invoiceId, projectAmount, amountPaid, remainingAmount }),
-
   // Expenses
   getExpensesByProject: (projectId) => ipcRenderer.invoke('get-expenses-by-project', projectId),
   getExpenseById: (id) => ipcRenderer.invoke('get-expense-by-id', id),
   addExpense: (projectId, description, date, amountTotal, isPaid) => 
     ipcRenderer.invoke('add-expense', { projectId, description, date, amountTotal, isPaid }),
-  updateExpense: (id, description, date, amountTotal, isPaid) => 
-    ipcRenderer.invoke('update-expense', { id, description, date, amountTotal, isPaid }),
+  updateExpense: (id, description, date, amountTotal) => 
+    ipcRenderer.invoke('update-expense', { id, description, date, amountTotal }),
   deleteExpense: (id) => ipcRenderer.invoke('delete-expense', id),
   updateExpenseAmounts: (expenseId, amountPaid, remainingAmount, status) => 
     ipcRenderer.invoke('update-expense-amounts', { expenseId, amountPaid, remainingAmount, status }),

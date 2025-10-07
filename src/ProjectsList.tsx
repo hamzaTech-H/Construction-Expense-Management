@@ -8,7 +8,6 @@ import { Project } from "./types";
 
 
 export default function ProjectsList() {
-  console.log("project list rendered");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [search, setSearch] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);

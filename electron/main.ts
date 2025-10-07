@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain} from 'electron'
+import { app, BrowserWindow, ipcMain, Menu } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { 
@@ -37,6 +37,8 @@ function createWindow() {
     },
   })
 
+  // Menu.setApplicationMenu(null)
+  
   // Test active push message to Renderer-process.
   win.webContents.on('did-finish-load', () => {
     win?.webContents.send('main-process-message', (new Date).toLocaleString())
@@ -108,8 +110,8 @@ ipcMain.handle('add-expense', (_event, { projectId, description, date, amountTot
   return addExpense(projectId, description, date, amountTotal, isPaid);
 });
 
-ipcMain.handle('update-expense', (_event, { id, description, date, amountTotal, isPaid}) => {
-  return updateExpense(id, description, date, amountTotal, isPaid);
+ipcMain.handle('update-expense', (_event, { id, description, date, amountTotal}) => {
+  return updateExpense(id, description, date, amountTotal);
 });
 
 ipcMain.handle('delete-expense', (_event, id) => {

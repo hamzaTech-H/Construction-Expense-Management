@@ -7,13 +7,14 @@ import { ExpenseStatus } from "../shared/expense";
 import { Expense, ProjectStats } from "./types";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
 import { ContextMenu } from "./ContextMenu";
+import ExpensePaymentsModal from "./ExpensePaymentsModal";
 
 type ExpensesTableProps = {
   expenses: Expense[];
   setIsExpenseModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectedExpense: React.Dispatch<React.SetStateAction<Expense | null>>
   setExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
-setStats: React.Dispatch<React.SetStateAction<ProjectStats>>;
+  setStats: React.Dispatch<React.SetStateAction<ProjectStats>>;
 };
 
 export const ExpensesTable = ({ expenses, setIsExpenseModalOpen, setSelectedExpense, setExpenses, setStats}: ExpensesTableProps) => {
@@ -23,6 +24,7 @@ export const ExpensesTable = ({ expenses, setIsExpenseModalOpen, setSelectedExpe
     });
 
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [isExpensePaymentsModalOpen, setIsExpensePaymentsModalOpen] = useState(false);
 
     const closeContextMenu = () =>
         setContextMenu((prev) => ({
@@ -131,7 +133,7 @@ export const ExpensesTable = ({ expenses, setIsExpenseModalOpen, setSelectedExpe
                         setSelectedExpense(contextMenu.expense)
                     }}
                     onAddPayment={() => {
-                        setIsExpenseModalOpen(true);
+                        setIsExpensePaymentsModalOpen(true);
                         closeContextMenu();
                     }}
                     onDelete={() => {
@@ -160,6 +162,10 @@ export const ExpensesTable = ({ expenses, setIsExpenseModalOpen, setSelectedExpe
                         });
                     }}
                 />
+            )}
+
+            {isExpensePaymentsModalOpen && (
+                <ExpensePaymentsModal setIsPaymentsModalOpen={setIsExpensePaymentsModalOpen} expense={contextMenu.expense} setExpenses={setExpenses} setStats={setStats}/>
             )}
         </>
     );

@@ -20,7 +20,7 @@ const ProjectCardComponent = ({project, setIsModalOpen, setSelectedProject, fetc
   return (
     <>
       <Link
-        href={`/projects/${project.id}`}  
+        href={`/projects/${project.id}?name=${project.name}`}  
         className="max-w-sm w-full bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 p-6"
       >
         <div className="flex items-center justify-between">

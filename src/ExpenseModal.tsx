@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/base/checkbox/checkbox";
 import { useParams } from "react-router-dom";
 import { Expense, ProjectStats} from "./types";
 import { ExpenseStatus } from "../shared/expense";
+import toast from "react-hot-toast";
 
 interface ExpenseModalProps {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -30,7 +31,13 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (expense) {
-            const updatedExpense = await window.database.updateExpense(expense.id, form.description, form.date, form.total, form.isPaid);
+
+            if (form.total < expense.amount_paid) {
+                toast.error("Le total ne peut pas être réduit. Supprimez d’abord un paiement");
+                return; 
+            } 
+
+            const updatedExpense = await window.database.updateExpense(expense.id, form.description, form.date, form.total);
             
             setExpenses(prev =>
                 prev.map(exp => exp.id === updatedExpense.id ? updatedExpense : exp)
@@ -67,12 +74,14 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
                     <Input isRequired name="description" label="Description" placeholder="une description sur la dépense" value={form.description} onChange={(value: string) => handleChange("description", value)}/>
                     <Input isRequired name="date" label="Date" type="date" value={form.date} onChange={(value: string) => handleChange("date", value)}/> 
                     <Input isRequired name="total" label="Total" type="number" value={form.total.toString()} onChange={(value: String) => handleChange("total", Number(value))}/>                          
-                    <Checkbox 
-                        label="marquer comme payé" 
-                        size="sm" 
-                        isSelected={form.isPaid}      
-                        onChange={(checked: boolean) => handleChange("isPaid", checked)}
-                    ></Checkbox>
+                    {!expense && (
+                        <Checkbox
+                            label="marquer comme payé"
+                            size="sm"
+                            isSelected={form.isPaid}
+                            onChange={(checked: boolean) => handleChange("isPaid", checked)}
+                        />
+                    )}
                     <div className="flex justify-end gap-2">
                         <Button type="submit" size="md" className="mt-2">Sauvegarder</Button> 
                     </div>

@@ -7,14 +7,12 @@ export interface Project {
 
 export type Expense = {
   id: number;
-  project_id: number;
   description: string;
   date: string;
   amount_total: number;
   amount_paid: number;
   amount_remaining: number;
   status: string;
-  created_at: string;
 };
 
 export type ProjectStats = {
@@ -22,3 +20,10 @@ export type ProjectStats = {
   paid: number;
   remaining: number;
 };
+
+export type Payment = {
+  id: number;
+  amount: number;
+  date: string;
+  note: string;
+}
