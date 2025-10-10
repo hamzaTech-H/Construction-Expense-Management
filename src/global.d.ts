@@ -1,4 +1,5 @@
 import { electron } from "node:process";
+import { Payment } from "./types";
 
 // Updated interface for database methods
 export {};
@@ -23,7 +24,7 @@ declare global {
       updateExpenseAmounts: (expenseId: number, amountPaid: number, remainingAmount: number, status: string) => Promise<any>;
 
       // Payments
-      getPaymentsByExpense: (expenseId: number) => Promise<any[]>;
+      getPaymentsByExpense: (expenseId: number) => Promise<Payment[]>;
       addPayment: (expenseId: number, amount: number, date: string, note: string) => Promise<any>;
       deletePayment: (id: number) => Promise<any>;
     };

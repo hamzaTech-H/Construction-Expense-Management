@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import { ExpenseStatus } from "../shared/expense";
+import { Payment } from '@/types';
 
 // Ensure database file is stored properly
 const dbPath = path.join(process.cwd(), 'database.db');
@@ -181,7 +182,7 @@ export function updateExpenseAmounts(expenseId: number, amountPaid: number, rema
 // ===== PAYMENTS =====
 export function getPaymentsByExpense(expenseId: number) {
   const stmt = db.prepare('SELECT * FROM payments WHERE expense_id = ? ORDER BY date DESC');
-  return stmt.all(expenseId);
+  return stmt.all(expenseId)  as Payment[];;
 }
 
 export function addPayment(expenseId: number, amount: number, date: string, note: string) {

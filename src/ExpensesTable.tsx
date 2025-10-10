@@ -165,7 +165,7 @@ export const ExpensesTable = ({ expenses, setIsExpenseModalOpen, setSelectedExpe
             )}
 
             {isExpensePaymentsModalOpen && (
-                <ExpensePaymentsModal setIsPaymentsModalOpen={setIsExpensePaymentsModalOpen} expense={contextMenu.expense} setExpenses={setExpenses} setStats={setStats}/>
+                <ExpensePaymentsModal setIsPaymentsModalOpen={setIsExpensePaymentsModalOpen} expense={contextMenu.expense!} setExpenses={setExpenses} setStats={setStats}/>
             )}
         </>
     );

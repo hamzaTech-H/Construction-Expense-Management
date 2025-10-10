@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { getProjectById, getExpensesByProject, getProjectStats } from './database'; // adjust path
 import { getExpenseById, getPaymentsByExpense } from './database'; // adjust path
+import { Expense } from '@/types';
 
 export async function printProjectReport(projectId: number) {
   const project: any = await getProjectById(projectId);
@@ -165,7 +166,7 @@ export async function printProjectReport(projectId: number) {
             <tbody>
               ${expenses
                 .map(
-                  expense => `
+                  (expense: Expense) => `
                     <tr>
                       <td>${expense.description}</td>
                       <td style="text-align:center">${expense.amount_total.toLocaleString('fr-DZ')}</td>
@@ -209,7 +210,7 @@ export async function printExpensePayments(expenseId: number) {
 
   const formattedPayments = payments
     .map(
-      (payment, i) => `
+       (payment, i) => `
       <tr>
         <td>${i + 1}</td>
         <td>${Number(payment.amount).toLocaleString('fr-DZ', { style: 'currency', currency: 'DZD' })}</td>
