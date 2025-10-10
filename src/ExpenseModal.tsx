@@ -71,8 +71,16 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
                 <Button color="tertiary" size="md" iconLeading={<XClose data-icon />} onClick={() => setIsModalOpen(false)} aria-label="Button CTA" className="absolute top-3 right-3"/>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <Input isRequired name="description" label="Description" placeholder="une description sur la dépense" value={form.description} onChange={(value: string) => handleChange("description", value)}/>
-                    <Input isRequired name="date" label="Date" type="date" value={form.date} onChange={(value: string) => handleChange("date", value)}/> 
+                    <Input isRequired name="description" label="Description" placeholder="une description sur la dépense" value={form.description} onChange={(value: string) => handleChange("description", value)} maxLength={100}/>
+                    <div
+                        onClick={(e) => {
+                            const input = e.currentTarget.querySelector('input[type="date"]') as HTMLInputElement | null;
+                            input?.showPicker?.();
+                        }}
+                    >
+                        <Input isRequired name="date" label="Date" type="date" value={form.date} onChange={(value: string) => handleChange("date", value)}/> 
+                    </div>
+                    
                     <Input isRequired name="total" label="Total" type="number" value={form.total.toString()} onChange={(value: String) => handleChange("total", Number(value))}/>                          
                     {!expense && (
                         <Checkbox

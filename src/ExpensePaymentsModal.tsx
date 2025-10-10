@@ -1,9 +1,8 @@
 import { Button } from "@/components/base/buttons/button";
 import { Input } from "@/components/base/input/input";
-import { XClose } from '@untitledui/icons';
+import { XClose, Printer } from '@untitledui/icons';
 import { Expense, Payment, ProjectStats } from "./types";
 import { useEffect, useState } from "react";
-import { ExpenseStatus } from "../shared/expense";
 import toast from "react-hot-toast";
 
 interface ExpensePaymentsModalProps {
@@ -21,6 +20,10 @@ export default function ExpensePaymentsModal({ setIsPaymentsModalOpen, expense, 
         date: new Date().toISOString().split("T")[0],
         note: "",
     });
+
+    function handlePrint() {
+        window.pdf.printPayments(expense.id);
+    }
 
     useEffect(() => {
         const fetchPayments = async () => {
@@ -69,8 +72,20 @@ export default function ExpensePaymentsModal({ setIsPaymentsModalOpen, expense, 
                 className="absolute top-3 right-3"
             />
 
+        
+
             {/* Payments list */}
-            <div className="flex-1 overflow-y-auto mb-4 space-y-2">
+            <div className="flex justify-end mb-2">
+                <Button
+                    color="secondary"
+                    size="sm"
+                    iconLeading={<Printer data-icon />}
+                    onClick={handlePrint}
+                >
+                    Imprimer
+                </Button>
+            </div>
+            <div className="flex-1 overflow-y-auto mb-0 space-y-2">
                 {payments.length > 0 ? (
                     payments.map((payment) => (
                     <div
@@ -79,10 +94,7 @@ export default function ExpensePaymentsModal({ setIsPaymentsModalOpen, expense, 
                     >
                         <div className="flex flex-col">
                         <span className="font-mono text-primary">
-                            {new Intl.NumberFormat("fr-FR", {
-                            style: "currency",
-                            currency: "DZD",
-                            }).format(payment.amount)}
+                            {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(payment.amount)}
                         </span>
                         <span className="text-xs text-gray-500">{payment.date}</span>
                         </div>
@@ -94,19 +106,25 @@ export default function ExpensePaymentsModal({ setIsPaymentsModalOpen, expense, 
                 )}
                 </div>
 
-            {/* Add payment form */}
             <form
                 onSubmit={handleAddPayment}
-                className="border-t pt-3 flex flex-col gap-4"
+                className="border-t pt-3 flex flex-col gap-4 mt-1"
             >
                 <h3 className="text-md font-semibold">Ajouter Paiement</h3>
+                
 
                 <div className="flex gap-3">
                     <Input isRequired name="amount" label="Montant" type="number"  value={form.amount} onChange={(value: string) => setForm(prev => ({ ...prev, amount: value }))}/>
-                    <Input isRequired name="date" label="Date" type="date" value={form.date} onChange={(value: string) => setForm(prev => ({ ...prev, date: value }))}/>
+                    <div
+                        onClick={(e) => {
+                            const input = e.currentTarget.querySelector('input[type="date"]') as HTMLInputElement | null;
+                            input?.showPicker?.();
+                        }}
+                    >
+                        <Input isRequired name="date" label="Date" type="date" value={form.date} onChange={(value: string) => setForm((prev) => ({ ...prev, date: value }))}/>
+                    </div>
                     <Input name="note" label="Notes" placeholder="note" value={form.note} onChange={(value: string) => setForm(prev => ({ ...prev, note: value }))} />
                 </div>
-
                 <div className="flex justify-end">
                     <Button type="submit" size="md">
                         Ajouter Paiement

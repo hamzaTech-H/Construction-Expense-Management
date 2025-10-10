@@ -1,5 +1,6 @@
-import { app, BrowserWindow, ipcMain, Menu } from 'electron'
+import { app, BrowserWindow, ipcMain, Menu} from 'electron'
 import { fileURLToPath } from 'node:url'
+import { printProjectReport, printExpensePayments } from './printReports';
 import path from 'node:path'
 import { 
   getAllProjects, getProjectById, addProject, updateProject, deleteProject, getProjectStats,
@@ -133,4 +134,12 @@ ipcMain.handle('add-payment', (_event, { expenseId, amount, date, note }) => {
 
 ipcMain.handle('delete-payment', (_event, id) => {
   return deletePayment(id);
+});
+
+ipcMain.on('print-rapport', async (_event, projectId) => {
+  await printProjectReport(projectId);
+});
+
+ipcMain.on('print-payments', async (_event, expenseId) => {
+  await printExpensePayments(expenseId);
 });

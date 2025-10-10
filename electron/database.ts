@@ -1,7 +1,6 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import { ExpenseStatus } from "../shared/expense";
-import { log } from 'console';
 
 // Ensure database file is stored properly
 const dbPath = path.join(process.cwd(), 'database.db');

@@ -61,7 +61,15 @@ export default function ProjectModal({ setIsModalOpen, project, setProjects }: P
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <Input isRequired name="name" label="Nom" placeholder="Nom de Projet" value={form.name} onChange={(value: string) => handleChange("name", value)}/>
-                    <Input isRequired name="date" label="Date" type="date" value={form.date} onChange={(value: string) => handleChange("date", value)}/>                           
+                     <div
+                        onClick={(e) => {
+                            const input = e.currentTarget.querySelector('input[type="date"]') as HTMLInputElement | null;
+                            input?.showPicker?.();
+                        }}
+                    >
+                        <Input isRequired name="date" label="Date" type="date" value={form.date} onChange={(value: string) => handleChange("date", value)}/>
+                    </div>
+                                               
                     <TextArea name='description' placeholder="Ajouter un description" label="Description" rows={4} value={form.description} onChange={(value: string) => handleChange("description", value)}/>
                     
                     <div className="flex justify-end gap-2">

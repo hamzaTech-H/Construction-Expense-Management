@@ -1,3 +1,5 @@
+import { electron } from "node:process";
+
 // Updated interface for database methods
 export {};
 
@@ -25,5 +27,11 @@ declare global {
       addPayment: (expenseId: number, amount: number, date: string, note: string) => Promise<any>;
       deletePayment: (id: number) => Promise<any>;
     };
+
+    pdf: {
+      print: (projectId: number) =>void;
+      printPayments: (expenseId: number) =>void;
+    };
   }
+
 }

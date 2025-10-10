@@ -41,6 +41,11 @@ export default function ProjectPage() {
     loadData();
   }, [id]);
 
+  function handlePrint() {
+    window.pdf.print(id);
+  }
+
+
   if (isLoading) {
     return (
       <div className="h-screen flex items-center justify-center">
@@ -52,7 +57,7 @@ export default function ProjectPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col py-4 px-2">
+    <div className="h-screen flex flex-col py-4 px-2" id='rapport'>
       <div className="flex items-center justify-between mb-4">
         <Link
           href="/"
@@ -70,6 +75,7 @@ export default function ProjectPage() {
             color="secondary"
             size="md"
             iconLeading={<Printer data-icon />}
+            onClick={handlePrint}
           >
             Imprimer
           </Button>
@@ -91,17 +97,17 @@ export default function ProjectPage() {
       {stats ? (
         <>
           <ProjectStatsCard
-            title="Total général"
+            title="Montant total du projet"
             value={stats.total}
             colorClasses="bg-blue-100 text-blue-900 border-l-4 border-blue-500"
           />
           <ProjectStatsCard
-            title="Total payé"
+            title="Montant total payé"
             value={stats.paid}
             colorClasses="bg-green-100 text-green-900 border-l-4 border-green-500"
           />
           <ProjectStatsCard
-            title="Total restant"
+            title="Montant restant à payer"
             value={stats.remaining}
             colorClasses="bg-red-100 text-red-900 border-l-4 border-red-500"
           />

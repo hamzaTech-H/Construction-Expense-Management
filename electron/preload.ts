@@ -1,6 +1,7 @@
 import { ipcRenderer, contextBridge } from 'electron'
 
 type DatabaseAPI = Window['database'];
+type pdfAPI = Window['pdf'];
 
 const database: DatabaseAPI = {
   // Projects
@@ -33,3 +34,11 @@ const database: DatabaseAPI = {
 
 
 contextBridge.exposeInMainWorld("database", database);
+
+
+const pdf: pdfAPI = {
+  print: (projectId) => ipcRenderer.send('print-rapport', projectId),
+  printPayments: (expenseId) => ipcRenderer.send('print-payments', expenseId),
+}
+
+contextBridge.exposeInMainWorld("pdf", pdf);
