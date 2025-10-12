@@ -8,6 +8,7 @@ import { Expense, ProjectStats } from "./types";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
 import { ContextMenu } from "./ContextMenu";
 import ExpensePaymentsModal from "./ExpensePaymentsModal";
+import EditableCell from "./EditableCell";
 
 type ExpensesTableProps = {
   expenses: Expense[];
@@ -111,7 +112,7 @@ export const ExpensesTable = ({ expenses, setIsExpenseModalOpen, setSelectedExpe
                                         </BadgeWithIcon>
                                     )}
                                 </Table.Cell>
-                                <Table.Cell className="font-medium text-primary font-mono"> {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(item.amount_total)}</Table.Cell>
+                                <EditableCell expense={item} setExpenses={setExpenses} setStats={setStats}/>
                                 <Table.Cell className="font-medium text-primary font-mono"> {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(item.amount_paid)} </Table.Cell>
                                 <Table.Cell className="font-medium text-primary font-mono"> {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(item.amount_remaining)} </Table.Cell>
                             </Table.Row>

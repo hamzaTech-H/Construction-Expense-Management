@@ -147,7 +147,11 @@ export function updateExpense(id: number, description: string, date: string, amo
 
   if (expense.status === ExpenseStatus.NOT_PAID) {
     amountPaid = 0;
-    amountRemainig = 0;
+    amountRemainig = amountTotal;
+  } else if (amountTotal === expense.amount_paid) {
+    amountPaid = expense.amount_paid;
+    amountRemainig = expense.amount_remaining + amountTotal - expense.amount_total;
+    status = ExpenseStatus.PAID
   } else {
     amountPaid = expense.amount_paid;
     amountRemainig = expense.amount_remaining + amountTotal - expense.amount_total;
