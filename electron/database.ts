@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import { ExpenseStatus } from "../shared/expense";
-import { Payment } from '@/types';
+import { Expense, Payment } from '@/types';
 
 // Ensure database file is stored properly
 const dbPath = path.join(process.cwd(), 'database.db');
@@ -49,6 +49,57 @@ db.prepare(`
     FOREIGN KEY (expense_id) REFERENCES expenses (id) ON DELETE CASCADE
   )
 `).run();
+
+db.prepare(
+  `CREATE TRIGGER IF NOT EXISTS update_expense_after_payment_delete
+  AFTER DELETE ON payments
+  BEGIN
+    UPDATE expenses
+    SET 
+      amount_paid = (
+        SELECT COALESCE(SUM(amount), 0)
+        FROM payments
+        WHERE expense_id = OLD.expense_id
+      ),
+       amount_remaining = amount_total - (
+        SELECT COALESCE(SUM(amount), 0)
+        FROM payments
+        WHERE expense_id = OLD.expense_id
+      ),
+      status = CASE
+        WHEN (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE expense_id = OLD.expense_id) = 0 THEN '${ExpenseStatus.NOT_PAID}'
+        ELSE '${ExpenseStatus.PARTIALLY_PAID}'
+      END
+    WHERE id = OLD.expense_id;
+  END;`
+).run();
+
+db.prepare(`
+  CREATE TRIGGER IF NOT EXISTS update_expense_after_payment_update
+  AFTER UPDATE ON payments
+  BEGIN
+    UPDATE expenses
+    SET 
+      amount_paid = (
+        SELECT COALESCE(SUM(amount), 0)
+        FROM payments
+        WHERE expense_id = NEW.expense_id
+      ),
+       amount_remaining = amount_total - (
+        SELECT COALESCE(SUM(amount), 0)
+        FROM payments
+        WHERE expense_id = OLD.expense_id
+      ),
+      status = CASE
+        WHEN (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE expense_id = NEW.expense_id) = 0 THEN '${ExpenseStatus.NOT_PAID}'
+        WHEN (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE expense_id = NEW.expense_id) < amount_total THEN '${ExpenseStatus.PARTIALLY_PAID}'
+        ELSE '${ExpenseStatus.PAID}'
+      END
+    WHERE id = NEW.expense_id;
+  END;
+
+`).run();
+
 
 // ===== PROJECTS =====
 export function getAllProjects() {
@@ -192,7 +243,6 @@ export function getPaymentsByExpense(expenseId: number) {
 export function addPayment(expenseId: number, amount: number, date: string, note: string) {
   const expense:any = getExpenseById(expenseId);
 
-  if (!expense) throw new Error("Expense not found");
   if (amount <= 0) throw new Error("Le montant doit être supérieur à 0");
   
   const newAmountPaid = expense.amount_paid + amount;
@@ -211,9 +261,36 @@ export function addPayment(expenseId: number, amount: number, date: string, note
   return { paymentId, newAmountPaid, remaining: expense.amount_total - newAmountPaid, status };
 }
 
+export function updatePayment(id: number, amount: number, date: string, note: string) {
+  if (amount <= 0) throw new Error("Le montant doit être supérieur à 0");
+
+  const payment: any = db.prepare('SELECT * FROM payments WHERE id = ?').get(id);
+
+  const expense:any = getExpenseById(payment.expense_id);
+
+  const difference = amount - payment.amount;
+
+  if (difference > 0 && expense.amount_paid + difference > expense.amount_total) {
+    throw new Error("Le montant payé dépasse le total de la dépense !");
+  }
+
+  const stmt = db.prepare(`UPDATE payments SET amount = ?, date = ?, note = ? WHERE id = ?`);
+  stmt.run(amount, date, note, id);
+
+  const updatedExpense = getExpenseById(payment.expense_id);
+  return updatedExpense;
+}
+
+
 export function deletePayment(id: number) {
-  const stmt = db.prepare('DELETE FROM payments WHERE id = ?');
-  return stmt.run(id);
+  const payment:any = db.prepare('SELECT expense_id FROM payments WHERE id = ?').get(id);
+
+  const deleteStmt = db.prepare('DELETE FROM payments WHERE id = ?');
+  deleteStmt.run(id);
+
+  const updatedExpense = getExpenseById(payment.expense_id)
+
+  return updatedExpense;
 }
 
 export default db;

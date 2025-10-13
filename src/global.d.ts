@@ -26,6 +26,7 @@ declare global {
       // Payments
       getPaymentsByExpense: (expenseId: number) => Promise<Payment[]>;
       addPayment: (expenseId: number, amount: number, date: string, note: string) => Promise<any>;
+      updatePayment: (id: number, amount: number, date: string, note: string) => Promise<any>;
       deletePayment: (id: number) => Promise<any>;
     };
 

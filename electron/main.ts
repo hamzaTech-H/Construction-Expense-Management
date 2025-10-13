@@ -5,7 +5,8 @@ import path from 'node:path'
 import { 
   getAllProjects, getProjectById, addProject, updateProject, deleteProject, getProjectStats,
   getExpensesByProject, getExpenseById, addExpense, updateExpense, deleteExpense, updateExpenseAmounts,
-  getPaymentsByExpense, addPayment, deletePayment
+  getPaymentsByExpense, addPayment, deletePayment,
+  updatePayment
 } from './database';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -124,6 +125,10 @@ ipcMain.handle('get-payments-by-expense', (_event, expenseId) => {
 
 ipcMain.handle('add-payment', (_event, { expenseId, amount, date, note }) => {
   return addPayment(expenseId, amount, date, note);
+});
+
+ipcMain.handle('update-payment', (_event, { id, amount, date, note }) => {
+  return updatePayment(id, amount, date, note);
 });
 
 ipcMain.handle('delete-payment', (_event, id) => {

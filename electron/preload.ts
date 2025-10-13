@@ -29,6 +29,8 @@ const database: DatabaseAPI = {
   getPaymentsByExpense: (expenseId) => ipcRenderer.invoke('get-payments-by-expense', expenseId),
   addPayment: (expenseId, amount, date, note) => 
     ipcRenderer.invoke('add-payment', { expenseId, amount, date, note }),
+  updatePayment: (id, amount, date, note) => 
+    ipcRenderer.invoke('update-payment', { id, amount, date, note }),
   deletePayment: (id) => ipcRenderer.invoke('delete-payment', id),
 }
 
