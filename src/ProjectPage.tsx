@@ -41,11 +41,6 @@ export default function ProjectPage() {
     loadData();
   }, [id]);
 
-  function handlePrint() {
-    window.pdf.print(id);
-  }
-
-
   if (isLoading) {
     return (
       <div className="h-screen flex items-center justify-center">
@@ -66,30 +61,6 @@ export default function ProjectPage() {
           <Button color="link-gray" size="md" iconLeading={<ArrowNarrowLeft data-icon />} aria-label="Button CTA" />
         </Link>
 
-        <h1 className="text-3xl font-bold text-gray-800 text-center tracking-tight truncate">
-          Projet: {projectName}
-        </h1>
-
-        <div className="flex gap-3">
-          <Button
-            color="secondary"
-            size="md"
-            iconLeading={<Printer data-icon />}
-            onClick={handlePrint}
-          >
-            Imprimer
-          </Button>
-          <Button
-            size="md"
-            iconLeading={<Plus data-icon />}
-            onClick={() => {
-              setSelectedExpense(null)
-              setIsExpenseModalOpen(true)
-            }}
-          >
-            Ajouter dépense
-          </Button>
-        </div>
       </div>
 
       {/* Project stats row */}
@@ -117,7 +88,7 @@ export default function ProjectPage() {
       )}
     </div>
 
-      <ExpensesTable expenses={expenses} setIsExpenseModalOpen={setIsExpenseModalOpen} setSelectedExpense={setSelectedExpense} setExpenses={setExpenses} setStats={setStats}/>
+      <ExpensesTable projectData={{ id, name:projectName! }} expenses={expenses} setIsExpenseModalOpen={setIsExpenseModalOpen} setSelectedExpense={setSelectedExpense} setExpenses={setExpenses} setStats={setStats}/>
 
       {/* Modal */}
       {isExpenseModalOpen && (
