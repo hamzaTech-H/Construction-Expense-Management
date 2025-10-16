@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
-import { CalendarDate, Check, ChevronRight, EqualNot, FilterLines, Plus, Printer, SearchLg, User01, X, } from "@untitledui/icons";
-import type { SortDescriptor } from "react-aria-components";
-import { Table, TableCard, TableRowActionsDropdown } from "@/components/application/table/table";
+import { Check, EqualNot, FilterLines, Plus, Printer, SearchLg, X, } from "@untitledui/icons";
+import { type SortDescriptor } from "react-aria-components";
+import { Table, TableCard } from "@/components/application/table/table";
 import { BadgeWithIcon } from "@/components/base/badges/badges";
 import { ExpenseStatus } from "../shared/expense";
 import { Expense, ProjectStats } from "./types";
@@ -10,8 +10,6 @@ import { ContextMenu } from "./ContextMenu";
 import ExpensePaymentsModal from "./ExpensePaymentsModal";
 import EditableCell from "./EditableCell";
 import { Input } from "./components/base/input/input";
-import { MultiSelect } from "./components/base/select/multi-select";
-import { useListData } from "react-stately";
 import { Button } from "./components/base/buttons/button";
 import { Dropdown } from "./components/base/dropdown/dropdown";
 import { Checkbox } from "./components/base/checkbox/checkbox";
@@ -27,13 +25,6 @@ type ExpensesTableProps = {
   setExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
   setStats: React.Dispatch<React.SetStateAction<ProjectStats>>;
 };
-
-type StatusItem = {
-  id: string;
-  label: string;
-  icon?: React.ReactNode;
-};
-
 
 export const ExpensesTable = ({ expenses, projectData, setIsExpenseModalOpen, setSelectedExpense, setExpenses, setStats}: ExpensesTableProps) => {
     const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
@@ -63,23 +54,29 @@ export const ExpensesTable = ({ expenses, projectData, setIsExpenseModalOpen, se
     });
     
     const [search, setSearch] = useState<string>("");
-    const selectedItems = useListData<StatusItem>({
-        initialItems: [],
-    });
+    const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+
+    const handleCheckboxChange = (id: string, checked: boolean) => {
+        setSelectedStatuses((prev) => {
+        if (checked) {
+            return [...new Set([...prev, id])];
+        } else {
+            return prev.filter((status) => status !== id);
+        }
+        });
+    };
+
+    const isFiltered = selectedStatuses.length > 0;
 
     const sortedItems = useMemo(() => {
         const normalizedSearch = search.toLowerCase();
 
-        const selectedStatusIds = selectedItems.items.map((item) => item.id);
-
         const filtered = expenses.filter(({ description, status }) => {
             const matchesSearch = description.toLowerCase().includes(normalizedSearch);
-
-        // If no status filter selected, show all
             const matchesStatus =
-                selectedStatusIds.length === 0 || selectedStatusIds.includes(status);
+                selectedStatuses.length === 0 || selectedStatuses.includes(status);
 
-        return matchesSearch && matchesStatus;
+            return matchesSearch && matchesStatus;
         });
 
         return filtered.sort((a, b) => {
@@ -100,7 +97,7 @@ export const ExpensesTable = ({ expenses, projectData, setIsExpenseModalOpen, se
 
             return 0;
         });
-    }, [expenses, sortDescriptor, search,selectedItems.items]);
+    }, [expenses, sortDescriptor, search,selectedStatuses]);
 
     const handleContextMenu = (e: React.MouseEvent, expense: Expense) => {
         e.preventDefault();
@@ -112,48 +109,12 @@ export const ExpensesTable = ({ expenses, projectData, setIsExpenseModalOpen, se
         });
     };
 
-    const items = [
-        { label: ExpenseStatus.PAID, id: ExpenseStatus.PAID, icon: Check },
-        { label: ExpenseStatus.PARTIALLY_PAID, id: ExpenseStatus.PARTIALLY_PAID, icon: EqualNot },
-        { label: ExpenseStatus.NOT_PAID, id: ExpenseStatus.NOT_PAID, icon: X },
-    ];
-
     function handlePrint() {
        window.pdf.print(projectData.id);
     }
 
-
-    const [openMultiSelect, setOpenMultiSelect] = useState(false);
-
-    const handleSelectionChange = (selection) => {
-        console.log(selection);
-        if (selection?.currentKey === "status") {
-        setOpenMultiSelect(true); // open multiselect
-        } else {
-        setOpenMultiSelect(false);
-        }
-    };
-
     return (
         <>
-            {/* <div className="relative flex items-end gap-3 mb-10">
-                <MultiSelect
-                    label="status"
-                    placeholderIcon={null}
-                    isRequired
-                    selectedItems={selectedItems}
-                    placeholder="Status"
-                    items={items}
-                >
-                    {(item) => (
-                        <MultiSelect.Item id={item.id} icon={item.icon}>
-                            {item.label}
-                        </MultiSelect.Item>
-                    )}
-                </MultiSelect>
-                
-            </div> */}
-        
             <TableCard.Root size="sm" className="flex flex-col">
                 <TableCard.Header  className="flex items-center justify-between"
                     title={`Projet: ${projectData.name}`}
@@ -187,54 +148,29 @@ export const ExpensesTable = ({ expenses, projectData, setIsExpenseModalOpen, se
                     <Input icon={SearchLg} aria-label="Search" placeholder="Recherche par description" className="w-70" onChange={(value: string) => setSearch(value)} />
 
                     <Dropdown.Root>
-                        <Button size="md" color="secondary" iconLeading={FilterLines}>
-                            Filters
+                        <Button size="md" color={isFiltered ? "primary" : "secondary"} iconLeading={FilterLines}>
+                            Status
                         </Button>
- 
-                        <Dropdown.Popover placement="bottom left">
-                            <Dropdown.Menu onSelectionChange={handleSelectionChange}>
-                                <Dropdown.Section>
-                                    <Dropdown.Item id="status" icon={User01}>
-                                        <div className="flex items-center justify-between w-full">
-                                            Status
-                                            <ChevronRight size={16} className="text-fg-quaternary" />
-                                            
-                                        </div>
-                                    </Dropdown.Item>
-                                    <Dropdown.Item id="date" icon={CalendarDate}>
-                                        <div className="flex items-center justify-between w-full">
-                                            Date
-                                            <ChevronRight size={16} className="text-fg-quaternary" />
-                                        </div>
-                                    </Dropdown.Item>
-                                    
-                                </Dropdown.Section>
-                            </Dropdown.Menu>
-                        </Dropdown.Popover>
-                    </Dropdown.Root>
 
-                    <Dropdown.Root>
-                        <Button size="md" color="secondary" iconLeading={FilterLines}>
-                            status
-                        </Button>
- 
                         <Dropdown.Popover placement="bottom left">
-                            <Dropdown.Menu selectionMode="multiple" onSelectionChange={handleSelectionChange}>
+                            <Dropdown.Menu selectionMode="multiple">
                                 <Dropdown.Section>
-                                    <Dropdown.Item id="status">
-                                        <Checkbox label={`${ExpenseStatus.PAID}`} size="sm" />
+                                    <Dropdown.Item>
+                                        <Checkbox label={`${ExpenseStatus.PAID}`} size="sm" isSelected={selectedStatuses.includes(ExpenseStatus.PAID)}
+                                            onChange={(checked) => handleCheckboxChange(ExpenseStatus.PAID, checked)}/>
                                     </Dropdown.Item>
-                                    <Dropdown.Item id="date">
-                                        <Checkbox label={`${ExpenseStatus.PARTIALLY_PAID}`} size="sm" />
+                                    <Dropdown.Item>
+                                        <Checkbox label={`${ExpenseStatus.PARTIALLY_PAID}`} size="sm"  isSelected={selectedStatuses.includes(ExpenseStatus.PARTIALLY_PAID)}
+                                            onChange={(checked) => handleCheckboxChange(ExpenseStatus.PARTIALLY_PAID, checked)}/>
                                     </Dropdown.Item>
-                                    <Dropdown.Item id="stas">
-                                        <Checkbox label={`${ExpenseStatus.NOT_PAID}`} size="sm" />
+                                    <Dropdown.Item>
+                                        <Checkbox label={`${ExpenseStatus.NOT_PAID}`} size="sm" isSelected={selectedStatuses.includes(ExpenseStatus.NOT_PAID)}
+                                            onChange={(checked) => handleCheckboxChange(ExpenseStatus.NOT_PAID, checked)}/>
                                     </Dropdown.Item>
                                 </Dropdown.Section>
                             </Dropdown.Menu>
                         </Dropdown.Popover>
                     </Dropdown.Root>
-                    
                 </div>
 
                 <Table aria-label="Team members" selectionMode="none" sortDescriptor={sortDescriptor} onSortChange={setSortDescriptor}>
@@ -279,8 +215,6 @@ export const ExpensesTable = ({ expenses, projectData, setIsExpenseModalOpen, se
                 </Table>
             </TableCard.Root>
 
-
-            
             {/* Context Menu */}
             {contextMenu.visible && contextMenu.expense && (
                 <ContextMenu
