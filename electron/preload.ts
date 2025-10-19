@@ -7,10 +7,10 @@ const database: DatabaseAPI = {
   // Projects
   getAllProjects: () => ipcRenderer.invoke('get-all-projects'),
   getProjectById: (id) => ipcRenderer.invoke('get-project-by-id', id),
-  addProject: (name, date, description) => 
-    ipcRenderer.invoke('add-project', { name, date, description }),
-  updateProject: (id, name, date, description) => 
-    ipcRenderer.invoke('update-project', { id, name, date, description }),
+  addProject: (name, date, client, budget, description) => 
+    ipcRenderer.invoke('add-project', { name, date, client, budget, description }),
+  updateProject: (id, name, date, client, budget, description) => 
+    ipcRenderer.invoke('update-project', { id, name, date, client, budget, description }),
   deleteProject: (id) => ipcRenderer.invoke('delete-project', id),
   getProjectStats: (id) => ipcRenderer.invoke('get-project-stats', id),
 

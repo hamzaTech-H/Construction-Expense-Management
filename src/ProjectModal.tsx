@@ -16,21 +16,26 @@ export default function ProjectModal({ setIsModalOpen, project, setProjects }: P
     const [form, setForm] = useState({
         name: project?.name ?? "",
         date: project?.date ?? new Date().toISOString().split("T")[0],
+        client: project?.client,
+        budget: project?.budget,
         description: project?.description ?? "",
     });
 
-    const handleChange = (field: keyof typeof form, value: string) =>
+    const handleChange = (field: keyof typeof form, value: string|number|undefined) =>
         setForm(prev => ({ ...prev, [field]: value }));
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         
         if(project) {
-            await window.database.updateProject(project.id, form.name, form.date, form.description);
+            await window.database.updateProject(project.id, form.name, form.date, form.client, form.budget, form.description);
+             console.log(typeof form.budget, form.budget);
             const updatedProject: Project = {
                 id: project.id,
                 name: form.name,
                 date: form.date,
+                client: form.client,
+                budget: form.budget,
                 description: form.description,
             };
             setProjects((prev) =>
@@ -38,11 +43,14 @@ export default function ProjectModal({ setIsModalOpen, project, setProjects }: P
             );
            
         } else {
-            const projectId = await window.database.addProject(form.name, form.date, form.description);
+            const projectId = await window.database.addProject(form.name, form.date, form.client, form.budget, form.description);
+           
             const newProject: Project = {
                 id: projectId as number,
                 name: form.name,
                 date: form.date,
+                client: form.client,
+                budget: form.budget,
                 description: form.description,
             };
 
@@ -69,6 +77,9 @@ export default function ProjectModal({ setIsModalOpen, project, setProjects }: P
                     >
                         <Input isRequired name="date" label="Date" type="date" value={form.date} onChange={(value: string) => handleChange("date", value)}/>
                     </div>
+
+                    <Input name="client" label="Client"  value={form.client} onChange={(value: string) => handleChange("client", value)}/>
+                    <Input name="budget" label="Budget" type="number" value={form.budget?.toString() ?? ""} onChange={(value: string) => handleChange("budget", value === "" ? undefined : Number(value)) }/>
                                                
                     <TextArea name='description' placeholder="Ajouter un description" label="Description" rows={4} value={form.description} onChange={(value: string) => handleChange("description", value)}/>
                     

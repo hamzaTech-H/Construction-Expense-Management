@@ -10,8 +10,8 @@ declare global {
       // Projects
       getAllProjects: () => Promise<any[]>;
       getProjectById: (id: number) => Promise<any>;
-      addProject: (name: string, date:string, description: string) => Promise<number>;
-      updateProject: (id: number, name: string, date:string, description: string) => Promise<any>;
+      addProject: (name: string, date:string, client:string|undefined, budget:number|undefined, description: string) => Promise<number>;
+      updateProject: (id: number, name: string, date:string, client:string|undefined, budget:number|undefined, description: string) => Promise<any>;
       deleteProject: (id: number) => Promise<any>;
       getProjectStats: (id: number) => Promise<any>;
 

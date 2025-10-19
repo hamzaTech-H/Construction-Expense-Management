@@ -2,6 +2,8 @@ export interface Project {
   id: number;
   name: string;
   date: string;
+  client: string | undefined;
+  budget: number | undefined;
   description?: string;
 }
 

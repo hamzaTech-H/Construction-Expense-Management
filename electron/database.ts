@@ -18,6 +18,8 @@ db.prepare(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     date DATE,
+    client TEXT NULL,
+    budget INTEGER NULL,
     description TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )
@@ -112,15 +114,15 @@ export function getProjectById(id: number) {
   return stmt.get(id);
 }
 
-export function addProject(name: string, date: string, description: string) {
-  const stmt = db.prepare('INSERT INTO projects (name, date, description) VALUES (?, ?, ?)');
-  const result = stmt.run(name, date, description);
+export function addProject(name: string, date: string, client:string, budget:number, description: string) {
+  const stmt = db.prepare('INSERT INTO projects (name, date, client, budget, description) VALUES (?, ?, ?, ?, ?)');
+  const result = stmt.run(name, date, client, budget, description);
   return result.lastInsertRowid;
 }
 
-export function updateProject(id: number, name: string, date: string, description: string) {
-  const stmt = db.prepare('UPDATE projects SET name = ?, date = ? ,description = ? WHERE id = ?');
-  return stmt.run(name, date, description, id);
+export function updateProject(id: number, name: string, date: string, client:string, budget:number, description: string) {
+  const stmt = db.prepare('UPDATE projects SET name = ?, date = ? , client = ?, budget = ?, description = ? WHERE id = ?');
+  return stmt.run(name, date, client, budget, description, id);
 }
 
 export function deleteProject(id: number) {
