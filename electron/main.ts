@@ -6,7 +6,8 @@ import {
   getAllProjects, getProjectById, addProject, updateProject, deleteProject, getProjectStats,
   getExpensesByProject, getExpenseById, addExpense, updateExpense, deleteExpense, updateExpenseAmounts,
   getPaymentsByExpense, addPayment, deletePayment,
-  updatePayment
+  updatePayment,
+  getAllExpenseCategories
 } from './database';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -93,6 +94,13 @@ ipcMain.handle('get-project-stats', (_event, id) => {
   return getProjectStats(id);
 });
 
+// ===== Expense Categories ======
+
+ipcMain.handle('get-all-expense-categories', () => {
+  return getAllExpenseCategories();
+});
+
+
 // ===== EXPENSES =====
 ipcMain.handle('get-expenses-by-project', (_event, projectId) => {
   return getExpensesByProject(projectId);
@@ -102,12 +110,12 @@ ipcMain.handle('get-expense-by-id', (_event, id) => {
   return getExpenseById(id);
 });
 
-ipcMain.handle('add-expense', (_event, { projectId, description, date, amountTotal, isPaid }) => {
-  return addExpense(projectId, description, date, amountTotal, isPaid);
+ipcMain.handle('add-expense', (_event, { projectId, categoryId, description, date, amountTotal, isPaid }) => {
+  return addExpense(projectId, categoryId, description, date, amountTotal, isPaid);
 });
 
-ipcMain.handle('update-expense', (_event, { id, description, date, amountTotal}) => {
-  return updateExpense(id, description, date, amountTotal);
+ipcMain.handle('update-expense', (_event, { id, categoryId, description, date, amountTotal}) => {
+  return updateExpense(id, categoryId, description, date, amountTotal);
 });
 
 ipcMain.handle('delete-expense', (_event, id) => {

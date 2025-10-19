@@ -26,9 +26,18 @@ db.prepare(`
 `).run();
 
 db.prepare(`
+  CREATE TABLE IF NOT EXISTS expense_categories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`).run();
+
+db.prepare(`
   CREATE TABLE IF NOT EXISTS expenses (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     project_id INTEGER NOT NULL,
+    category_id INTEGER NOT NULL,
     description TEXT NOT NULL,
     date TEXT NOT NULL,
     amount_total DECIMAL(10,2) NOT NULL,
@@ -36,7 +45,8 @@ db.prepare(`
     amount_remaining DECIMAL(10,2) NOT NULL,
     status TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE
+    FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES expense_categories (id)
   )
 `).run();
 
@@ -103,6 +113,7 @@ db.prepare(`
 `).run();
 
 
+
 // ===== PROJECTS =====
 export function getAllProjects() {
   const stmt = db.prepare('SELECT * FROM projects ORDER BY created_at DESC');
@@ -143,6 +154,14 @@ export function getProjectStats(projectId: number) {
     return result;
 }
 
+// ===== EXPENSE CATEGORIES =====
+
+export function getAllExpenseCategories() {
+  const stmt = db.prepare('SELECT * FROM expense_categories');
+  return stmt.all();
+}
+
+
 // ===== EXPENSES =====
 export function getExpensesByProject(projectId: number) {
   const stmt = db.prepare('SELECT * FROM expenses WHERE project_id = ? ORDER BY created_at DESC');
@@ -154,7 +173,7 @@ export function getExpenseById(id: number) {
   return stmt.get(id);
 }
 
-export function addExpense(projectId: number, description: string, date: string, amountTotal: number, isPaid: boolean) {
+export function addExpense(projectId: number, categoryId: number, description: string, date: string, amountTotal: number, isPaid: boolean) {
   let amountPaid = 0;
   let amountRemainig = 0;
   let status = ExpenseStatus.NOT_PAID
@@ -166,10 +185,11 @@ export function addExpense(projectId: number, description: string, date: string,
     amountRemainig = amountTotal;
   }
   
-  const stmt = db.prepare('INSERT INTO expenses (project_id, description, date, amount_total, amount_paid, amount_remaining, status) VALUES (?, ?, ?, ?, ?, ?, ?)');
-  const result = stmt.run(projectId, description, date, amountTotal, amountPaid ,amountRemainig, status);
+  const stmt = db.prepare('INSERT INTO expenses (project_id, category_id, description, date, amount_total, amount_paid, amount_remaining, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+  const result = stmt.run(projectId, categoryId, description, date, amountTotal, amountPaid ,amountRemainig, status);
   const createdExpense = {
     id: result.lastInsertRowid as number,
+    category_id: categoryId,
     description,
     date,
     amount_total: amountTotal,
@@ -187,7 +207,7 @@ export function addExpense(projectId: number, description: string, date: string,
   return createdExpense;
 }
 
-export function updateExpense(id: number, description: string, date: string, amountTotal: number) {
+export function updateExpense(id: number, categoryId:number ,description: string, date: string, amountTotal: number) {
   let amountPaid = 0;
   let amountRemainig = 0;
   let status = ExpenseStatus.NOT_PAID
@@ -211,10 +231,11 @@ export function updateExpense(id: number, description: string, date: string, amo
     status = ExpenseStatus.PARTIALLY_PAID
   }
 
-  const stmt = db.prepare('UPDATE expenses SET description = ?, date = ?, amount_total = ?, amount_paid = ?, amount_remaining = ?, status = ? WHERE id = ?');
-  stmt.run(description, date, amountTotal, amountPaid, amountRemainig, status, id);
-  const createdExpense = {
+  const stmt = db.prepare('UPDATE expenses SET category_id = ?, description = ?, date = ?, amount_total = ?, amount_paid = ?, amount_remaining = ?, status = ? WHERE id = ?');
+  stmt.run(categoryId, description, date, amountTotal, amountPaid, amountRemainig, status, id);
+  const updatedExpense = {
     id: id,
+    category_id: categoryId,
     description,
     date,
     amount_total: amountTotal,
@@ -223,7 +244,7 @@ export function updateExpense(id: number, description: string, date: string, amo
     status
   };
 
-  return createdExpense;
+  return updatedExpense;
 }
 
 export function deleteExpense(id: number) {

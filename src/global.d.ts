@@ -15,11 +15,14 @@ declare global {
       deleteProject: (id: number) => Promise<any>;
       getProjectStats: (id: number) => Promise<any>;
 
+      // Expense Categories
+      getAllExpenseCategories: () => Promise<any[]>;
+
       // Expenses
       getExpensesByProject: (projectId: number) => Promise<any[]>;
       getExpenseById: (id: number) => Promise<any>;
-      addExpense: (projectId: number, description: string, date: string, amountTotal: number, isPaid: boolean) => Promise<Expense>;
-      updateExpense: (id:number, description:string, date: string, amountTotal: number) => Promise<any>;
+      addExpense: (projectId: number, categoryId: number, description: string, date: string, amountTotal: number, isPaid: boolean) => Promise<Expense>;
+      updateExpense: (id:number, categoryId: number, description:string, date: string, amountTotal: number) => Promise<any>;
       deleteExpense: (id: number) => Promise<any>;
       updateExpenseAmounts: (expenseId: number, amountPaid: number, remainingAmount: number, status: string) => Promise<any>;
 

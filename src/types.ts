@@ -9,6 +9,7 @@ export interface Project {
 
 export type Expense = {
   id: number;
+  category_id: number;
   description: string;
   date: string;
   amount_total: number;

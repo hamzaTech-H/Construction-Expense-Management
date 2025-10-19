@@ -5,9 +5,11 @@ import ProjectModal from "./ProjectModal"
 import ProjectCard from "./ProjectCard";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { Project } from "./types";
+import { useTranslation } from "react-i18next";
 
 
 export default function ProjectsList() {
+  const { t } = useTranslation();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [search, setSearch] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -32,7 +34,7 @@ export default function ProjectsList() {
   return (
     <>
       <div className="sticky top-0 z-50 bg-white py-4 px-2 shadow-md flex items-center gap-4">
-        <Input name="name" type="search" icon={SearchMd} placeholder="Rechercher par nom ou description..." onChange={(value: string) => setSearch(value)}/>
+        <Input name="name" type="search" icon={SearchMd} placeholder={t("Search by name or description...")} onChange={(value: string) => setSearch(value)}/>
         <Button 
           size="md"
           onClick={() => {
@@ -40,7 +42,7 @@ export default function ProjectsList() {
             setSelectedProject(null)
           }} 
           iconLeading={<Plus data-icon />}
-          >Ajouter Nouveau Projet
+          >{t("Add new project")}
         </Button>
       </div>
 

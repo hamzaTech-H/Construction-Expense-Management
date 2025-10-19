@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { HashRouter } from 'react-router-dom';
 import { RouteProvider } from '@/providers/route-provider';
 import { ThemeProvider } from '@/providers/theme-provider';
+import "./i18n";
 import App from '@/App';
 import '@/styles/globals.css';
  

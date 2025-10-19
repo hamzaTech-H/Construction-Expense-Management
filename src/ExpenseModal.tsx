@@ -1,12 +1,14 @@
 import { Button } from "@/components/base/buttons/button";
 import { Input } from "@/components/base/input/input";
 import { XClose } from '@untitledui/icons';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Checkbox } from "@/components/base/checkbox/checkbox";
 import { useParams } from "react-router-dom";
 import { Expense, ProjectStats} from "./types";
 import { ExpenseStatus } from "../shared/expense";
 import toast from "react-hot-toast";
+import { Select, SelectItemType } from "./components/base/select/select";
+import { useTranslation } from "react-i18next";
 
 interface ExpenseModalProps {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -16,9 +18,27 @@ interface ExpenseModalProps {
 }
 
 export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, setStats}: ExpenseModalProps) {    
+    const { t } = useTranslation();
+    const [categories, setCategories] = useState<SelectItemType[]>([]);
+
+    useEffect(() => {
+    (async () => {
+        const data = await window.database.getAllExpenseCategories(); 
+
+        const formatted: SelectItemType[] = data.map((c) => ({
+            id: c.id,
+            label: c.name,          
+        }));
+
+        setCategories(formatted);
+    })();
+    }, []);
+
+    console.log(expense?.date);
     
     const projectId = Number(useParams<{ projectId: string }>().projectId);
     const [form, setForm] = useState({
+        categoryId: expense?.category_id,
         description: expense?.description ?? "",
         date: expense?.date ?? new Date().toISOString().split("T")[0],
         total: expense?.amount_total ?? 0,
@@ -37,7 +57,7 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
                 return; 
             } 
 
-            const updatedExpense = await window.database.updateExpense(expense.id, form.description, form.date, form.total);
+            const updatedExpense = await window.database.updateExpense(expense.id, Number(form.categoryId), form.description, form.date, form.total);
             
             setExpenses(prev =>
                 prev.map(exp => exp.id === updatedExpense.id ? updatedExpense : exp)
@@ -50,7 +70,7 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
                 };
             });
         } else {
-            const newExpense = await window.database.addExpense(projectId, form.description, form.date, form.total, form.isPaid);
+            const newExpense = await window.database.addExpense(projectId, Number(form.categoryId), form.description, form.date, form.total, form.isPaid);
             
             setExpenses(prev => [newExpense, ...prev]);
             setStats(prev => {
@@ -71,6 +91,23 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
                 <Button color="tertiary" size="md" iconLeading={<XClose data-icon />} onClick={() => setIsModalOpen(false)} aria-label="Button CTA" className="absolute top-3 right-3"/>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    <Select
+                        selectedKey={form.categoryId}
+                        onSelectionChange={(key) =>
+                            setForm((prev) => ({ ...prev, categoryId: Number(key)}))
+                        }
+                        isRequired
+                        label={t("Category")}
+                        placeholder={t("Select category")}
+                        items={categories}
+                    >
+                        {(item) => (
+                            <Select.Item id={item.id}  >
+                                {item.label}
+                            </Select.Item>
+                        )}
+                    </Select>
+
                     <Input isRequired name="description" label="Description" placeholder="une description sur la dépense" value={form.description} onChange={(value: string) => handleChange("description", value)} maxLength={100}/>
                     <div
                         onClick={(e) => {

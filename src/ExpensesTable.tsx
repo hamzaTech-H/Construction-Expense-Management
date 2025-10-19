@@ -223,9 +223,9 @@ export const ExpensesTable = ({ expenses, projectData, setIsExpenseModalOpen, se
                     visible={contextMenu.visible}
                     expense={contextMenu.expense}
                     onModify={() => {
-                        setIsExpenseModalOpen(true);
-                        closeContextMenu();
                         setSelectedExpense(contextMenu.expense)
+                        setIsExpenseModalOpen(true);
+                        closeContextMenu(); 
                     }}
                     onAddPayment={() => {
                         setIsExpensePaymentsModalOpen(true);
