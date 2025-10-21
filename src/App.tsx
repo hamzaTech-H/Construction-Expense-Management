@@ -16,10 +16,10 @@ function App() {
 
   return (
     <main className="flex flex-col px-8 py-0 mx-auto">
-      <header className="flex justify-end gap-2 py-4">
+      {/* <header className="flex justify-end gap-2 py-4">
         <button onClick={() => i18n.changeLanguage("fr")}>🇫🇷 FR</button>
         <button onClick={() => i18n.changeLanguage("ar")}>🇸🇦 AR</button>
-      </header>
+      </header> */}
       
       <Toaster position="top-center" reverseOrder={false} />
       <Routes>

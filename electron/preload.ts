@@ -16,12 +16,13 @@ const database: DatabaseAPI = {
 
   // Expense Categories
   getAllExpenseCategories: () => ipcRenderer.invoke('get-all-expense-categories'),
+  getExpenseCategoriesByProject: (projectId) => ipcRenderer.invoke('get-expense-categories-by-project', projectId),
 
   // Expenses
   getExpensesByProject: (projectId) => ipcRenderer.invoke('get-expenses-by-project', projectId),
   getExpenseById: (id) => ipcRenderer.invoke('get-expense-by-id', id),
-  addExpense: (projectId, categoryId, description, date, amountTotal, isPaid) => 
-    ipcRenderer.invoke('add-expense', { projectId, categoryId, description, date, amountTotal, isPaid }),
+  addExpense: (projectId, categoryId, description, date, amountTotal, isNotPaid) => 
+    ipcRenderer.invoke('add-expense', { projectId, categoryId, description, date, amountTotal, isNotPaid }),
   updateExpense: (id, categoryId, description, date, amountTotal) => 
     ipcRenderer.invoke('update-expense', { id, categoryId, description, date, amountTotal }),
   deleteExpense: (id) => ipcRenderer.invoke('delete-expense', id),

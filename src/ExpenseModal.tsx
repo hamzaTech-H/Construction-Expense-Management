@@ -42,7 +42,7 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
         description: expense?.description ?? "",
         date: expense?.date ?? new Date().toISOString().split("T")[0],
         total: expense?.amount_total ?? 0,
-        isPaid: expense?.status === ExpenseStatus.PAID
+        isNotPaid: expense?.status === ExpenseStatus.PAID
     });
 
     const handleChange = (field: keyof typeof form, value: string | number | boolean) =>
@@ -70,7 +70,7 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
                 };
             });
         } else {
-            const newExpense = await window.database.addExpense(projectId, Number(form.categoryId), form.description, form.date, form.total, form.isPaid);
+            const newExpense = await window.database.addExpense(projectId, Number(form.categoryId), form.description, form.date, form.total, form.isNotPaid);
             
             setExpenses(prev => [newExpense, ...prev]);
             setStats(prev => {
@@ -121,10 +121,10 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
                     <Input isRequired name="total" label="Total" type="number" value={form.total.toString()} onChange={(value: String) => handleChange("total", Number(value))}/>                          
                     {!expense && (
                         <Checkbox
-                            label="marquer comme payé"
+                            label="marquer comme non payé"
                             size="sm"
-                            isSelected={form.isPaid}
-                            onChange={(checked: boolean) => handleChange("isPaid", checked)}
+                            isSelected={form.isNotPaid}
+                            onChange={(checked: boolean) => handleChange("isNotPaid", checked)}
                         />
                     )}
                     <div className="flex justify-end gap-2">

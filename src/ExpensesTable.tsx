@@ -24,9 +24,10 @@ type ExpensesTableProps = {
   setSelectedExpense: React.Dispatch<React.SetStateAction<Expense | null>>
   setExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
   setStats: React.Dispatch<React.SetStateAction<ProjectStats>>;
+  selectedTabIndex: string | number;
 };
 
-export const ExpensesTable = ({ expenses, projectData, setIsExpenseModalOpen, setSelectedExpense, setExpenses, setStats}: ExpensesTableProps) => {
+export const ExpensesTable = ({ expenses, projectData, setIsExpenseModalOpen, setSelectedExpense, setExpenses, setStats, selectedTabIndex}: ExpensesTableProps) => {
     const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
         column: "",
         direction: "ascending",
@@ -71,12 +72,15 @@ export const ExpensesTable = ({ expenses, projectData, setIsExpenseModalOpen, se
     const sortedItems = useMemo(() => {
         const normalizedSearch = search.toLowerCase();
 
-        const filtered = expenses.filter(({ description, status }) => {
+        const filtered = expenses.filter(({ description, status, category_id }) => {
             const matchesSearch = description.toLowerCase().includes(normalizedSearch);
             const matchesStatus =
                 selectedStatuses.length === 0 || selectedStatuses.includes(status);
+            
+            const matchesCategory =
+                selectedTabIndex === "all" || category_id === selectedTabIndex;
 
-            return matchesSearch && matchesStatus;
+            return matchesSearch && matchesStatus && matchesCategory;
         });
 
         return filtered.sort((a, b) => {
@@ -97,7 +101,7 @@ export const ExpensesTable = ({ expenses, projectData, setIsExpenseModalOpen, se
 
             return 0;
         });
-    }, [expenses, sortDescriptor, search,selectedStatuses]);
+    }, [expenses, sortDescriptor, search,selectedStatuses, selectedTabIndex]);
 
     const handleContextMenu = (e: React.MouseEvent, expense: Expense) => {
         e.preventDefault();

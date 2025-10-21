@@ -1,12 +1,13 @@
 import { useParams, useSearchParams } from "react-router-dom";
-import { Link } from "react-aria-components";
+import { Key, Link } from "react-aria-components";
 import { Button } from "@/components/base/buttons/button";
-import { Plus, Printer, ArrowNarrowLeft} from '@untitledui/icons';
+import { ArrowNarrowLeft} from '@untitledui/icons';
 import { ProjectStatsCard } from './ProjectStatsCard';
 import ExpenseModal from "./ExpenseModal";
 import { useEffect, useState } from "react";
 import { ExpensesTable } from "./ExpensesTable";
 import { Expense, ProjectStats } from "./types";
+import { ExpensesTabs } from "./ExpensesTabs"
 
 
 export default function ProjectPage() {
@@ -16,6 +17,19 @@ export default function ProjectPage() {
   
   const projectName = searchParams.get('name'); 
   
+  const [expenseCategories, setExpenseCategories] = useState<any[]>([]);
+  useEffect(() => {
+    async function fetchCategories() {
+      const categories = await window.database.getExpenseCategoriesByProject(Number(projectId));
+      // Ensure it's an array
+      setExpenseCategories(Array.isArray(categories) ? categories : []);
+    }
+
+    fetchCategories();
+  }, [projectId]);
+
+  const [selectedTabIndex, setSelectedTabIndex] = useState<Key>("all");
+
   const [stats, setStats] = useState<ProjectStats>({
     total: 0,
     paid: 0,
@@ -88,7 +102,9 @@ export default function ProjectPage() {
       )}
     </div>
 
-      <ExpensesTable projectData={{ id, name:projectName! }} expenses={expenses} setIsExpenseModalOpen={setIsExpenseModalOpen} setSelectedExpense={setSelectedExpense} setExpenses={setExpenses} setStats={setStats}/>
+      <ExpensesTabs tabs={[{ id: "all", label: "All" }, ...expenseCategories.map(c => ({ id: c.id, label: c.name }))]} selectedTabIndex={selectedTabIndex} setSelectedTabIndex={setSelectedTabIndex}/>
+
+      <ExpensesTable projectData={{ id, name:projectName! }} expenses={expenses} setIsExpenseModalOpen={setIsExpenseModalOpen} setSelectedExpense={setSelectedExpense} setExpenses={setExpenses} setStats={setStats} selectedTabIndex={selectedTabIndex} />
 
       {/* Modal */}
       {isExpenseModalOpen && (

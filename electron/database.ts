@@ -162,6 +162,18 @@ export function getAllExpenseCategories() {
 }
 
 
+export function getExpenseCategoriesByProject(projectId: number) {
+  const stmt = db.prepare(`
+    SELECT expense_categories.id, expense_categories.name
+    FROM expenses
+    JOIN expense_categories ON expenses.category_id = expense_categories.id
+    WHERE expenses.project_id = ?
+    GROUP BY expense_categories.id, expense_categories.name`);
+  return stmt.all(projectId);
+}
+
+
+
 // ===== EXPENSES =====
 export function getExpensesByProject(projectId: number) {
   const stmt = db.prepare('SELECT * FROM expenses WHERE project_id = ? ORDER BY created_at DESC');
@@ -173,12 +185,12 @@ export function getExpenseById(id: number) {
   return stmt.get(id);
 }
 
-export function addExpense(projectId: number, categoryId: number, description: string, date: string, amountTotal: number, isPaid: boolean) {
+export function addExpense(projectId: number, categoryId: number, description: string, date: string, amountTotal: number, isNotPaid: boolean) {
   let amountPaid = 0;
   let amountRemainig = 0;
   let status = ExpenseStatus.NOT_PAID
 
-  if (isPaid) {
+  if (!isNotPaid) {
     amountPaid = amountTotal;
     status = ExpenseStatus.PAID;
   } else {
@@ -198,7 +210,7 @@ export function addExpense(projectId: number, categoryId: number, description: s
     status
   };
 
-  if (isPaid) {
+  if (!isNotPaid) {
     const today = new Date().toISOString().split('T')[0];
     const stmt = db.prepare('INSERT INTO payments (expense_id, amount, date, note) VALUES (?, ?, ?, ?)');
     stmt.run(createdExpense.id, amountTotal, today, '');
