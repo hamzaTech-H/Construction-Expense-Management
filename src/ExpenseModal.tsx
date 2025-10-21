@@ -33,8 +33,6 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
         setCategories(formatted);
     })();
     }, []);
-
-    console.log(expense?.date);
     
     const projectId = Number(useParams<{ projectId: string }>().projectId);
     const [form, setForm] = useState({

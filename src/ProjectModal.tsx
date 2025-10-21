@@ -30,7 +30,6 @@ export default function ProjectModal({ setIsModalOpen, project, setProjects }: P
         
         if(project) {
             await window.database.updateProject(project.id, form.name, form.date, form.client, form.budget, form.description);
-             console.log(typeof form.budget, form.budget);
             const updatedProject: Project = {
                 id: project.id,
                 name: form.name,
