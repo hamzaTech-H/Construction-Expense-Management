@@ -19,11 +19,12 @@ export const ExpensesTabs = ({ tabs, selectedTabIndex, setSelectedTabIndex }: Ex
                 options={tabs.map((tab) => ({ label: tab.label, value: String(tab.id), }))}
                 className="w-80 md:hidden"
             />
-            <Tabs selectedKey={selectedTabIndex} onSelectionChange={setSelectedTabIndex} className="w-max max-md:hidden">
-                <Tabs.List type="underline" items={tabs}>
+            <Tabs selectedKey={selectedTabIndex} onSelectionChange={setSelectedTabIndex} className="w-full max-md:hidden">
+                <Tabs.List  type="underline" items={tabs}>
                     {(tab) => <Tabs.Item {...tab} />}
                 </Tabs.List>
             </Tabs>
+            
         </>
     );
 };

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Check, EqualNot, FilterLines, Plus, Printer, SearchLg, X, } from "@untitledui/icons";
+import { Check, EqualNot, FilterLines, SearchLg, X, } from "@untitledui/icons";
 import { type SortDescriptor } from "react-aria-components";
 import { Table, TableCard } from "@/components/application/table/table";
 import { BadgeWithIcon } from "@/components/base/badges/badges";
@@ -113,42 +113,9 @@ export const ExpensesTable = ({ expenses, projectData, setIsExpenseModalOpen, se
         });
     };
 
-    function handlePrint() {
-       window.pdf.print(projectData.id);
-    }
-
     return (
         <>
-            <TableCard.Root size="sm" className="flex flex-col">
-                <TableCard.Header  className="flex items-center justify-between"
-                    title={`Projet: ${projectData.name}`}
-                    badge={`${expenses.length} dépenses`}
-                    contentTrailing={
-                        <div className="flex items-center justify-end gap-3">
-                            <Button
-                                color="secondary"
-                                size="md"
-                                iconLeading={<Printer data-icon />}
-                                onClick={handlePrint}
-                            >
-                                Imprimer
-                            </Button>
-                            <Button
-                                size="md"
-                                iconLeading={<Plus data-icon />}
-                                onClick={() => {
-                                setSelectedExpense(null)
-                                setIsExpenseModalOpen(true)
-                                }}
-                            >
-                                Ajouter dépense
-                            </Button>
-
-                        </div>
-                    }
-                />
-
-                <div className="flex justify-start items-center gap-4 border-b border-secondary px-4 py-3">
+        <div className="flex justify-start items-center gap-4 py-5">
                     <Input icon={SearchLg} aria-label="Search" placeholder="Recherche par description" className="w-70" onChange={(value: string) => setSearch(value)} />
 
                     <Dropdown.Root>
@@ -176,6 +143,11 @@ export const ExpensesTable = ({ expenses, projectData, setIsExpenseModalOpen, se
                         </Dropdown.Popover>
                     </Dropdown.Root>
                 </div>
+            <TableCard.Root size="sm" className="flex flex-col">
+                <TableCard.Header  className="flex items-center justify-between"
+                    title={`Projet: ${projectData.name}`}
+                    badge={`${expenses.length} dépenses`}
+                />
 
                 <Table aria-label="Team members" selectionMode="none" sortDescriptor={sortDescriptor} onSortChange={setSortDescriptor}>
                     <Table.Header className="sticky top-0 z-40">

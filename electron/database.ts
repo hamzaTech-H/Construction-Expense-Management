@@ -1,7 +1,8 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import { ExpenseStatus } from "../shared/expense";
-import { Expense, Payment } from '@/types';
+import { Payment } from '@/types';
+import Decimal from 'decimal.js';
 
 // Ensure database file is stored properly
 const dbPath = path.join(process.cwd(), 'database.db');
@@ -144,9 +145,9 @@ export function deleteProject(id: number) {
 export function getProjectStats(projectId: number) {
   const stmt = db.prepare(`
     SELECT 
-      SUM(amount_total) AS total,
-      SUM(amount_paid) AS paid,
-      SUM(amount_remaining) AS remaining
+      ROUND(SUM(amount_total), 2) AS total,
+      ROUND(SUM(amount_paid), 2) AS paid,
+      ROUND(SUM(amount_remaining), 2) AS remaining
     FROM expenses
     WHERE project_id = ?
   `);
@@ -232,17 +233,20 @@ export function updateExpense(id: number, categoryId:number ,description: string
 
   if (expense.status === ExpenseStatus.NOT_PAID) {
     amountPaid = 0;
-    amountRemainig = amountTotal;
-  } else if (amountTotal === expense.amount_paid) {
-    amountPaid = expense.amount_paid;
-    amountRemainig = expense.amount_remaining + amountTotal - expense.amount_total;
-    status = ExpenseStatus.PAID
-  } else {
-    amountPaid = expense.amount_paid;
-    amountRemainig = expense.amount_remaining + amountTotal - expense.amount_total;
-    status = ExpenseStatus.PARTIALLY_PAID
-  }
+    amountRemainig = new Decimal(amountTotal).toNumber();
+    status = ExpenseStatus.NOT_PAID;
+} else {
+    const amountRemainingDecimal = new Decimal(expense.amount_remaining)
+        .plus(new Decimal(amountTotal))
+        .minus(new Decimal(expense.amount_total));
 
+    amountPaid = expense.amount_paid;
+    amountRemainig = amountRemainingDecimal.toNumber();
+
+    status = new Decimal(amountTotal).equals(expense.amount_paid)
+        ? ExpenseStatus.PAID
+        : ExpenseStatus.PARTIALLY_PAID;
+}
   const stmt = db.prepare('UPDATE expenses SET category_id = ?, description = ?, date = ?, amount_total = ?, amount_paid = ?, amount_remaining = ?, status = ? WHERE id = ?');
   stmt.run(categoryId, description, date, amountTotal, amountPaid, amountRemainig, status, id);
   const updatedExpense = {

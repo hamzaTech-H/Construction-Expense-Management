@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Menu} from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
 import { fileURLToPath } from 'node:url'
 import { printProjectReport, printExpensePayments } from './printReports';
 import path from 'node:path'
@@ -27,14 +27,14 @@ let win: BrowserWindow | null
 function createWindow() {
   win = new BrowserWindow({
     minWidth: 900,
-    minHeight: 700,
+    minHeight: 750,
+    frame: false,
+    autoHideMenuBar:true,
     icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
     },
   })
-
-  Menu.setApplicationMenu(null)
   
   // Test active push message to Renderer-process.
   win.webContents.on('did-finish-load', () => {
@@ -154,4 +154,27 @@ ipcMain.on('print-rapport', async (_event, projectId) => {
 
 ipcMain.on('print-payments', async (_event, expenseId) => {
   await printExpensePayments(expenseId);
+});
+
+// ===== WINDOW CONTROLS =====
+ipcMain.on('window-minimize', () => {
+  if (win) {
+    win.minimize();
+  }
+});
+
+ipcMain.on('window-maximize', () => {
+  if (win) {
+    if (win.isMaximized()) {
+      win.unmaximize();
+    } else {
+      win.maximize();
+    }
+  }
+});
+
+ipcMain.on('window-close', () => {
+  if (win) {
+    win.close();
+  }
 });

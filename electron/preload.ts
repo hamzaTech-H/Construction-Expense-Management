@@ -48,3 +48,12 @@ const pdf: pdfAPI = {
 }
 
 contextBridge.exposeInMainWorld("pdf", pdf);
+
+// Window controls API
+const electronAPI = {
+  minimizeWindow: () => ipcRenderer.send('window-minimize'),
+  maximizeWindow: () => ipcRenderer.send('window-maximize'),
+  closeWindow: () => ipcRenderer.send('window-close'),
+}
+
+contextBridge.exposeInMainWorld("electronAPI", electronAPI);

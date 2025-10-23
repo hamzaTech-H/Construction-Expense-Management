@@ -1,13 +1,13 @@
 import { useParams, useSearchParams } from "react-router-dom";
-import { Key, Link } from "react-aria-components";
+import { Key } from "react-aria-components";
 import { Button } from "@/components/base/buttons/button";
-import { ArrowNarrowLeft} from '@untitledui/icons';
 import { ProjectStatsCard } from './ProjectStatsCard';
 import ExpenseModal from "./ExpenseModal";
 import { useEffect, useState } from "react";
 import { ExpensesTable } from "./ExpensesTable";
 import { Expense, ProjectStats } from "./types";
 import { ExpensesTabs } from "./ExpensesTabs"
+import { Plus, Printer } from "lucide-react";
 
 
 export default function ProjectPage() {
@@ -65,18 +65,13 @@ export default function ProjectPage() {
     );
   }
 
+  function handlePrint() {
+       window.pdf.print(id);
+  }
+
   return (
     <div className="h-screen flex flex-col py-4 px-2" id='rapport'>
-      <div className="flex items-center justify-between mb-4">
-        <Link
-          href="/"
-          className="text-blue-600 hover:underline text-sm font-medium"
-        >
-          <Button color="link-gray" size="md" iconLeading={<ArrowNarrowLeft data-icon />} aria-label="Button CTA" />
-        </Link>
-
-      </div>
-
+      
       {/* Project stats row */}
     <div className="flex flex-wrap gap-6 mb-4">
       {stats ? (
@@ -101,6 +96,28 @@ export default function ProjectPage() {
         <div className="text-gray-400 animate-pulse">Chargement des stats...</div>
       )}
     </div>
+    
+      <div className="flex items-center justify-end gap-3">
+        <Button
+          color="secondary"
+          size="md"
+          iconLeading={<Printer data-icon />}
+          onClick={handlePrint}
+        >
+          Imprimer
+        </Button>
+          <Button
+              size="md"
+              iconLeading={<Plus data-icon />}
+              onClick={() => {
+              setSelectedExpense(null)
+              setIsExpenseModalOpen(true)
+              }}
+          >
+              Ajouter dépense
+          </Button>
+
+      </div>
 
       <ExpensesTabs tabs={[{ id: "all", label: "All" }, ...expenseCategories.map(c => ({ id: c.id, label: c.name }))]} selectedTabIndex={selectedTabIndex} setSelectedTabIndex={setSelectedTabIndex}/>
 

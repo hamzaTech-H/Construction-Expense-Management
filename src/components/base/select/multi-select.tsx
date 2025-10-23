@@ -24,7 +24,7 @@ interface ComboBoxValueProps extends AriaGroupProps {
     placeholder?: string;
     shortcutClassName?: string;
     placeholderIcon?: IconComponentType | null;
-    ref?: RefObject<HTMLDivElement | null>;
+    ref?: RefObject<HTMLDivElement>;
     onFocus?: FocusEventHandler;
     onPointerEnter?: PointerEventHandler;
 }
@@ -124,7 +124,7 @@ export const MultiSelectBase = ({
         accessibleList.setFilterText(value);
     };
 
-    const placeholderRef = useRef<HTMLDivElement>(null);
+    const placeholderRef = useRef<HTMLDivElement>(null!);
     const [popoverWidth, setPopoverWidth] = useState("");
 
     // Resize observer for popover width

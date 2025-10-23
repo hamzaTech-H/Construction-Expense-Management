@@ -4,6 +4,13 @@ import { Payment } from "./types";
 // Updated interface for database methods
 export {};
 
+// Extend CSS properties to include webkit-specific properties
+declare module 'react' {
+  interface CSSProperties {
+    WebkitAppRegion?: 'drag' | 'no-drag';
+  }
+}
+
 declare global {
   interface Window {
     database: {
@@ -37,6 +44,12 @@ declare global {
     pdf: {
       print: (projectId: number) =>void;
       printPayments: (expenseId: number) =>void;
+    };
+
+    electronAPI: {
+      minimizeWindow: () => void;
+      maximizeWindow: () => void;
+      closeWindow: () => void;
     };
   }
 

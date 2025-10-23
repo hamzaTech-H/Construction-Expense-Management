@@ -25,7 +25,7 @@ interface ComboBoxValueProps extends AriaGroupProps {
     shortcutClassName?: string;
     onFocus?: FocusEventHandler;
     onPointerEnter?: PointerEventHandler;
-    ref?: RefObject<HTMLDivElement | null>;
+    ref?: RefObject<HTMLDivElement>;
 }
 
 const ComboBoxValue = ({ size, shortcut, placeholder, shortcutClassName, ...otherProps }: ComboBoxValueProps) => {
@@ -94,7 +94,7 @@ const ComboBoxValue = ({ size, shortcut, placeholder, shortcutClassName, ...othe
 };
 
 export const ComboBox = ({ placeholder = "Search", shortcut = true, size = "sm", children, items, shortcutClassName, ...otherProps }: ComboBoxProps) => {
-    const placeholderRef = useRef<HTMLDivElement>(null);
+    const placeholderRef = useRef<HTMLDivElement>(null!);
     const [popoverWidth, setPopoverWidth] = useState("");
 
     // Resize observer for popover width

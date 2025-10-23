@@ -52,6 +52,7 @@ export default function EditableCell({ expense, setExpenses, setStats }: Props) 
 
     const updatedExpense = await window.database.updateExpense(
       expense.id,
+      expense.category_id,
       expense.description,
       expense.date,
       value

@@ -39,7 +39,7 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
         categoryId: expense?.category_id,
         description: expense?.description ?? "",
         date: expense?.date ?? new Date().toISOString().split("T")[0],
-        total: expense?.amount_total ?? 0,
+        total: expense?.amount_total.toString() ?? "",
         isNotPaid: expense?.status === ExpenseStatus.PAID
     });
 
@@ -48,14 +48,22 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        const totalAmount = parseFloat(form.total);
+        if (isNaN(totalAmount)) {
+            toast.error('Please enter a valid number');
+            return;
+        }
+
+        console.log(totalAmount);
+
         if (expense) {
 
-            if (form.total < expense.amount_paid) {
+            if (totalAmount < expense.amount_paid) {
                 toast.error("Le total ne peut pas être réduit. Supprimez d’abord un paiement");
                 return; 
             } 
 
-            const updatedExpense = await window.database.updateExpense(expense.id, Number(form.categoryId), form.description, form.date, form.total);
+            const updatedExpense = await window.database.updateExpense(expense.id, Number(form.categoryId), form.description, form.date, totalAmount);
             
             setExpenses(prev =>
                 prev.map(exp => exp.id === updatedExpense.id ? updatedExpense : exp)
@@ -68,7 +76,7 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
                 };
             });
         } else {
-            const newExpense = await window.database.addExpense(projectId, Number(form.categoryId), form.description, form.date, form.total, form.isNotPaid);
+            const newExpense = await window.database.addExpense(projectId, Number(form.categoryId), form.description, form.date, totalAmount, form.isNotPaid);
             
             setExpenses(prev => [newExpense, ...prev]);
             setStats(prev => {
@@ -116,7 +124,7 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
                         <Input isRequired name="date" label="Date" type="date" value={form.date} onChange={(value: string) => handleChange("date", value)}/> 
                     </div>
                     
-                    <Input isRequired name="total" label="Total" type="number" value={form.total.toString()} onChange={(value: String) => handleChange("total", Number(value))}/>                          
+                    <Input isRequired name="total" label="Total" type="text" value={form.total} onChange={(value: string) => handleChange("total", value)}/>                          
                     {!expense && (
                         <Checkbox
                             label="marquer comme non payé"

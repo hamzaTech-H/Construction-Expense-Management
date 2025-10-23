@@ -66,7 +66,7 @@ const ProjectCardComponent = ({project, setIsModalOpen, setSelectedProject, fetc
         {/* Budget section */}
         {project.budget ? (
           <div className="bg-indigo-50 text-indigo-700 font-medium text-sm rounded-xl py-3 px-4 text-center mb-3">
-            {new Intl.NumberFormat("en-US").format(1000)} DA / {new Intl.NumberFormat("en-US").format(project.budget)} DA
+            {new Intl.NumberFormat("en-US").format(1000)} DA / {new Intl.NumberFormat("en-US", {minimumFractionDigits: 2,maximumFractionDigits: 2}).format(project.budget)} DA
           </div>
         ) : (
           <div className="bg-gray-50 text-gray-500 italic text-sm rounded-xl py-3 px-4 text-center mb-3">
