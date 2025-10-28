@@ -8,9 +8,11 @@ import { ExpensesTable } from "./ExpensesTable";
 import { Expense, ProjectStats } from "./types";
 import { ExpensesTabs } from "./ExpensesTabs"
 import { Plus, Printer } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 
 export default function ProjectPage() {
+  const { t } = useTranslation();
   const {projectId} = useParams<{ projectId: string }>();
   const id = Number(projectId); 
   const [searchParams] = useSearchParams();
@@ -59,7 +61,7 @@ export default function ProjectPage() {
     return (
       <div className="h-screen flex items-center justify-center">
         <div className="text-gray-500 animate-pulse text-lg">
-          Chargement du projet...
+          {t("Loading project...")}
         </div>
       </div>
     );
@@ -70,30 +72,30 @@ export default function ProjectPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col py-4 px-2" id='rapport'>
+    <div className="h-screen flex flex-col py-4 px-8" id='rapport'>
       
       {/* Project stats row */}
     <div className="flex flex-wrap gap-6 mb-4">
       {stats ? (
         <>
           <ProjectStatsCard
-            title="Montant total du projet"
+            title={t("Total project amount")}
             value={stats.total}
             colorClasses="bg-blue-100 text-blue-900 border-l-4 border-blue-500"
           />
           <ProjectStatsCard
-            title="Montant total payé"
+            title={t("Total amount paid")}
             value={stats.paid}
             colorClasses="bg-green-100 text-green-900 border-l-4 border-green-500"
           />
           <ProjectStatsCard
-            title="Montant restant à payer"
+            title={t("Remaining amount to pay")}
             value={stats.remaining}
             colorClasses="bg-red-100 text-red-900 border-l-4 border-red-500"
           />
         </>
       ) : (
-        <div className="text-gray-400 animate-pulse">Chargement des stats...</div>
+        <div className="text-gray-400 animate-pulse">{t("Loading stats...")}</div>
       )}
     </div>
     
@@ -104,7 +106,7 @@ export default function ProjectPage() {
           iconLeading={<Printer data-icon />}
           onClick={handlePrint}
         >
-          Imprimer
+          {t("Print")}
         </Button>
           <Button
               size="md"
@@ -114,12 +116,12 @@ export default function ProjectPage() {
               setIsExpenseModalOpen(true)
               }}
           >
-              Ajouter dépense
+              {t("Add expense")}
           </Button>
 
       </div>
 
-      <ExpensesTabs tabs={[{ id: "all", label: "All" }, ...expenseCategories.map(c => ({ id: c.id, label: c.name }))]} selectedTabIndex={selectedTabIndex} setSelectedTabIndex={setSelectedTabIndex}/>
+      <ExpensesTabs tabs={[{ id: "all", label: t("All") }, ...expenseCategories.map(c => ({ id: c.id, label: c.fr_name }))]} selectedTabIndex={selectedTabIndex} setSelectedTabIndex={setSelectedTabIndex}/>
 
       <ExpensesTable projectData={{ id, name:projectName! }} expenses={expenses} setIsExpenseModalOpen={setIsExpenseModalOpen} setSelectedExpense={setSelectedExpense} setExpenses={setExpenses} setStats={setStats} selectedTabIndex={selectedTabIndex} />
 

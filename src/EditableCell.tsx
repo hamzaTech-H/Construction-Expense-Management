@@ -5,6 +5,7 @@ import { Edit01 } from "@untitledui/icons";
 import { Input } from "./components/base/input/input";
 import { Expense, ProjectStats } from "./types";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   expense: Expense;
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export default function EditableCell({ expense, setExpenses, setStats }: Props) {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(expense.amount_total);
 
@@ -23,7 +25,7 @@ export default function EditableCell({ expense, setExpenses, setStats }: Props) 
   const resetValue = () => setValue(expense.amount_total);
 
   const showReductionError = () => {
-    toast.error("Le total ne peut pas être réduit. Supprimez d’abord un paiement");
+    toast.error(t("The total cannot be reduced. Delete a payment first"));
     resetValue();
   };
 
@@ -83,7 +85,7 @@ export default function EditableCell({ expense, setExpenses, setStats }: Props) 
           <span>
             {new Intl.NumberFormat("en-US", {minimumFractionDigits: 2,maximumFractionDigits: 2,}).format(expense.amount_total)}
           </span>
-          <ButtonUtility size="xs" color="tertiary" tooltip="Edit" icon={Edit01} onClick={() => setEditing(true)} />
+          <ButtonUtility size="xs" color="tertiary" tooltip={t("Edit")} icon={Edit01} onClick={() => setEditing(true)} />
         </div>
       )}
     </Table.Cell>

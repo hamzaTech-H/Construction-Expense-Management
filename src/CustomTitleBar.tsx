@@ -32,7 +32,7 @@ export function CustomTitleBar({ title = "Progest" }: CustomTitleBarProps) {
   const canGoBack = location.pathname !== '/';
 
   return (
-    <div className="title-bar flex items-center justify-between bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 h-10 px-4 select-none">
+    <div className="title-bar flex items-center justify-between bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 h-10 px-4 select-none" dir="ltr">
       {/* Left side - Draggable area with title and back button */}
       <div 
         className="flex items-center gap-3 flex-1 -ml-4 pl-4 cursor-move"

@@ -4,6 +4,10 @@ type DatabaseAPI = Window['database'];
 type pdfAPI = Window['pdf'];
 
 const database: DatabaseAPI = {
+  // Settings
+  getSettings: () => ipcRenderer.invoke('get-settings'),
+  updateSettings: (id, language, company_name, owner_first_name, owner_last_name, address, email, phone_number) => 
+    ipcRenderer.invoke('update-settings', { id, language, company_name, owner_first_name, owner_last_name, address, email, phone_number }),
   // Projects
   getAllProjects: () => ipcRenderer.invoke('get-all-projects'),
   getProjectById: (id) => ipcRenderer.invoke('get-project-by-id', id),
@@ -15,8 +19,10 @@ const database: DatabaseAPI = {
   getProjectStats: (id) => ipcRenderer.invoke('get-project-stats', id),
 
   // Expense Categories
+  addEXpenseCategory: (fr_name, ar_name) => ipcRenderer.invoke('add-expense-category', { fr_name, ar_name}),
   getAllExpenseCategories: () => ipcRenderer.invoke('get-all-expense-categories'),
   getExpenseCategoriesByProject: (projectId) => ipcRenderer.invoke('get-expense-categories-by-project', projectId),
+  deleteExpenseCategory: (id) => ipcRenderer.invoke('delete-expense-category', id),
 
   // Expenses
   getExpensesByProject: (projectId) => ipcRenderer.invoke('get-expenses-by-project', projectId),

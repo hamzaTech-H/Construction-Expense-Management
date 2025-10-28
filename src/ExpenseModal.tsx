@@ -27,7 +27,7 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
 
         const formatted: SelectItemType[] = data.map((c) => ({
             id: c.id,
-            label: c.name,          
+            label: c.fr_name,          
         }));
 
         setCategories(formatted);
@@ -50,16 +50,14 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
         e.preventDefault();
         const totalAmount = parseFloat(form.total);
         if (isNaN(totalAmount)) {
-            toast.error('Please enter a valid number');
+            toast.error(t('Please enter a valid number'));
             return;
         }
-
-        console.log(totalAmount);
 
         if (expense) {
 
             if (totalAmount < expense.amount_paid) {
-                toast.error("Le total ne peut pas être réduit. Supprimez d’abord un paiement");
+                toast.error(t("The total cannot be reduced. Delete a payment first"));
                 return; 
             } 
 
@@ -93,8 +91,8 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
             <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-lg relative">
-                <h2 className="mb-4 text-lg font-semibold">Ajouter la dépense</h2>
-                <Button color="tertiary" size="md" iconLeading={<XClose data-icon />} onClick={() => setIsModalOpen(false)} aria-label="Button CTA" className="absolute top-3 right-3"/>
+                <h2 className="mb-4 text-lg font-semibold">{t("Add expense")}</h2>
+                <Button color="tertiary" size="md" iconLeading={<XClose data-icon />} onClick={() => setIsModalOpen(false)} aria-label={t("Close")} className="absolute top-3 right-3"/>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <Select
@@ -114,27 +112,27 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
                         )}
                     </Select>
 
-                    <Input isRequired name="description" label="Description" placeholder="une description sur la dépense" value={form.description} onChange={(value: string) => handleChange("description", value)} maxLength={100}/>
+                    <Input isRequired name="description" label={t("Description")} placeholder={t("Enter expense description")} value={form.description} onChange={(value: string) => handleChange("description", value)} maxLength={100}/>
                     <div
                         onClick={(e) => {
                             const input = e.currentTarget.querySelector('input[type="date"]') as HTMLInputElement | null;
                             input?.showPicker?.();
                         }}
                     >
-                        <Input isRequired name="date" label="Date" type="date" value={form.date} onChange={(value: string) => handleChange("date", value)}/> 
+                        <Input isRequired name="date" label={t("Date")} type="date" value={form.date} onChange={(value: string) => handleChange("date", value)}/> 
                     </div>
                     
-                    <Input isRequired name="total" label="Total" type="text" value={form.total} onChange={(value: string) => handleChange("total", value)}/>                          
+                    <Input isRequired name="total" label={t("Total")} type="text" value={form.total} onChange={(value: string) => handleChange("total", value)}/>                          
                     {!expense && (
                         <Checkbox
-                            label="marquer comme non payé"
+                            label={t("Mark as unpaid")}
                             size="sm"
                             isSelected={form.isNotPaid}
                             onChange={(checked: boolean) => handleChange("isNotPaid", checked)}
                         />
                     )}
                     <div className="flex justify-end gap-2">
-                        <Button type="submit" size="md" className="mt-2">Sauvegarder</Button> 
+                        <Button type="submit" size="md" className="mt-2">{t("Save")}</Button> 
                     </div>
                 </form>
             </div>

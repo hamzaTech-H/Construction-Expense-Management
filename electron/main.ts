@@ -8,7 +8,11 @@ import {
   getPaymentsByExpense, addPayment, deletePayment,
   updatePayment,
   getAllExpenseCategories,
-  getExpenseCategoriesByProject
+  getExpenseCategoriesByProject,
+  addEXpenseCategory,
+  deleteExpenseCategory,
+  getSettings,
+  updateSettings
 } from './database';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -70,6 +74,15 @@ app.on('activate', () => {
 
 app.whenReady().then(createWindow)
 
+// ===== SETTINGS =====
+ipcMain.handle('get-settings', () => {
+  return getSettings();
+});
+
+ipcMain.handle('update-settings', (_event, { id, language, company_name, owner_first_name, owner_last_name, address, email, phone_number }) => {
+  return updateSettings(id, language, company_name, owner_first_name, owner_last_name, address, email, phone_number);
+});
+
 // ===== PROJECTS =====
 ipcMain.handle('get-all-projects', () => {
   return getAllProjects();
@@ -97,12 +110,20 @@ ipcMain.handle('get-project-stats', (_event, id) => {
 
 // ===== Expense Categories ======
 
+ipcMain.handle('add-expense-category', (_event, { fr_name, ar_name }) => {
+  return addEXpenseCategory(fr_name, ar_name);
+});
+
 ipcMain.handle('get-all-expense-categories', () => {
   return getAllExpenseCategories();
 });
 
 ipcMain.handle('get-expense-categories-by-project', (_event, projectId) => {
   return getExpenseCategoriesByProject(projectId);
+});
+
+ipcMain.handle('delete-expense-category', (_event, id) => {
+  return deleteExpenseCategory(id);
 });
 
 

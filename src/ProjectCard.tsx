@@ -1,102 +1,134 @@
-import { Dropdown } from "@/components/base/dropdown/dropdown";
+
+import { Calendar, User, DollarSign, TrendingUp } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { ProgressBar } from "./components/base/progress-indicators/progress-indicators";
+import { Badge } from "./components/base/badges/badges";
+import { Dropdown } from "./components/base/dropdown/dropdown";
 import { Edit05, Trash01 } from "@untitledui/icons";
-import { useState } from "react";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
-import { Link } from "react-aria-components";
 import { Project } from "./types";
-import { memo } from "react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface ProjectCardProps {
   project: Project;
-  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setSelectedProject: React.Dispatch<React.SetStateAction<Project | null>>;
-  fetchProjects: ()=>void;
+  spent?: number;
+  onClick?: () => void;
+    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    setSelectedProject: React.Dispatch<React.SetStateAction<Project | null>>;
+    fetchProjects: ()=>void;
 }
 
-
-const ProjectCardComponent = ({project, setIsModalOpen, setSelectedProject, fetchProjects}: ProjectCardProps) => {
+export function ProjectCard({ project, spent, onClick, setIsModalOpen, setSelectedProject, fetchProjects }: ProjectCardProps) {
+  const { t, i18n } = useTranslation();
+  const currencySymbol = i18n.language === 'ar' ? 'دج' : 'DA';
+  const isOverBudget = project.budget !== null && spent !== undefined && spent > project.budget;
+  const spentPercentage = project.budget && spent ? (spent / project.budget) * 100 : 0;
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-
+  
   return (
     <>
-      <Link
-        href={`/projects/${project.id}?name=${project.name}`}
-        className="group max-w-sm w-full bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 p-6 flex flex-col border border-gray-100"
-      >
-        {/* Header */}
-        <div className="flex items-start justify-between mb-3">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-800">
-              {project.name}
-            </h2>
-            <p className="text-sm text-gray-500">
-              {project.client?.trim() ? project.client : "pas de client"}
-            </p>
-          </div>
+        <Card
+            className="w-full max-w-sm cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]"
+            onClick={onClick}
+            >
+            <CardHeader className="flex items-start justify-between mb-3">
+                <CardTitle className="pr-8 font-semibold">{project.name}</CardTitle>
+                <Dropdown.Root>
+                    <Dropdown.DotsButton onMouseEnter={(e) => e.stopPropagation()} />
+                    <Dropdown.Popover>
+                        <Dropdown.Menu>
+                            <Dropdown.Item
+                            icon={Edit05}
+                            onClick={() => {
+                                setIsModalOpen(true);
+                                setSelectedProject(project);
+                            }}
+                            >
+                                {t("Edit")}
+                            </Dropdown.Item>
+                            <Dropdown.Item
+                            icon={Trash01}
+                            onClick={() => {
+                                setIsConfirmOpen(true);
+                            }}
+                            >
+                                {t("Delete")}
+                            </Dropdown.Item>
+                        </Dropdown.Menu>
+                    </Dropdown.Popover>
+                </Dropdown.Root>
+            </CardHeader>
+            <CardContent className="space-y-3">
+                <div className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">{t("Client")}:</span>
+                    {project.client ? (
+                        <span>{project.client}</span>
+                    ) : (
+                        <Badge type="color" color="gray" size="sm">
+                            {t("Not specified")}
+                        </Badge>
+                    )}
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">{t("Date")}:</span>
+                    <span>{project.date}</span>
+                </div>
+                
+                <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                        <DollarSign className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-muted-foreground">{t("Budget")}:</span>
+                        {project.budget !== null ? (
+                            <span>{new Intl.NumberFormat("en-US", {minimumFractionDigits: 2,maximumFractionDigits: 2}).format(project.budget)} {currencySymbol}</span>
+                            ) : (
+                                <Badge type="color" color="gray" size="sm">
+                                    {t("Budget not available")}
+                                </Badge>
+                        )}
+                    </div>
+                
+                    {project.budget !== null && spent !== undefined && (
+                        <>
+                            <div className="flex items-center gap-2">
+                                <TrendingUp className="w-4 h-4 text-muted-foreground" />
+                                <span className="text-muted-foreground">{t("Spent")}:</span>
+                                <span className={isOverBudget ? "text-red-600" : "text-green-600"}>
+                                {new Intl.NumberFormat("en-US", {minimumFractionDigits: 2,maximumFractionDigits: 2}).format(spent)} {currencySymbol}
+                                </span>
+                                {isOverBudget && (
+                                <Badge type="color" color="error" size="sm">
+                                    {t("Over Budget")}
+                                </Badge>
+                                )}
+                            </div>
+                            
+                            <ProgressBar min={0} max={100} value={Math.min(spentPercentage, 100) }  className={isOverBudget ? "[&>div]:bg-red-600" : "[&>div]:bg-green-600"}/>
+               
+                            <div className="text-sm text-muted-foreground">
+                                {spentPercentage.toFixed(1)}% {t("of budget used")}
+                            </div>
+                        </>
+                    )}
+                </div>
+            </CardContent>
+        </Card>
 
-          <Dropdown.Root>
-            <Dropdown.DotsButton />
-            <Dropdown.Popover>
-              <Dropdown.Menu>
-                <Dropdown.Item
-                  icon={Edit05}
-                  onClick={() => {
-                    setIsModalOpen(true);
-                    setSelectedProject(project);
-                  }}
-                >
-                  Modifier
-                </Dropdown.Item>
-                <Dropdown.Item
-                  icon={Trash01}
-                  onClick={() => {
-                    setIsConfirmOpen(true);
-                  }}
-                >
-                  Supprimer
-                </Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown.Popover>
-          </Dropdown.Root>
-        </div>
-
-        {/* Divider */}
-        <div className="border-t border-gray-100 my-3" />
-
-        {/* Budget section */}
-        {project.budget ? (
-          <div className="bg-indigo-50 text-indigo-700 font-medium text-sm rounded-xl py-3 px-4 text-center mb-3">
-            {new Intl.NumberFormat("en-US").format(1000)} DA / {new Intl.NumberFormat("en-US", {minimumFractionDigits: 2,maximumFractionDigits: 2}).format(project.budget)} DA
-          </div>
-        ) : (
-          <div className="bg-gray-50 text-gray-500 italic text-sm rounded-xl py-3 px-4 text-center mb-3">
-            No budget assigned
-          </div>
+        {isConfirmOpen && (
+            <ConfirmDeleteModal
+                setIsConfirmOpen={setIsConfirmOpen}
+                name={project.name}
+                id={project.id}
+                entityLabel={t("Project")}
+                onDelete={async (id) => {
+                await window.database.deleteProject(id);
+                fetchProjects();
+                }}
+            />
         )}
-
-        {/* Footer */}
-        <div className="flex justify-end mt-auto">
-          <p className="text-xs text-gray-400">{project.date}</p>
-        </div>
-      </Link>
-
-      {isConfirmOpen && (
-        <ConfirmDeleteModal
-          setIsConfirmOpen={setIsConfirmOpen}
-          name={project.name}
-          id={project.id}
-          entityLabel="Projet"
-          onDelete={async (id) => {
-            await window.database.deleteProject(id);
-            fetchProjects();
-          }}
-        />
-      )}
     </>
-  )
+  );
 }
-
-
-const ProjectCard = memo(ProjectCardComponent);
-
-export default ProjectCard;

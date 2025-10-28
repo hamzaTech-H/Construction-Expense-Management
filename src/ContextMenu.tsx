@@ -2,6 +2,7 @@ import { useRef, useEffect } from "react";
 import { Button } from "@/components/base/buttons/button";
 import { Edit05, Trash01, CreditCard01 } from "@untitledui/icons";
 import { Expense } from "./types";
+import { useTranslation } from "react-i18next";
 
 type ContextMenuProps = {
   x: number;
@@ -24,6 +25,7 @@ export const ContextMenu = ({
   onDelete,
   onClose,
 }: ContextMenuProps) => {
+  const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
 
   // optional: close on click outside
@@ -54,7 +56,7 @@ export const ContextMenu = ({
         iconLeading={<CreditCard01 data-icon />}
         onClick={() => onAddPayment(expense)}
       >
-        Afficher les paiements
+        {t("Show payments")}
       </Button>
       
       <Button
@@ -64,7 +66,7 @@ export const ContextMenu = ({
         iconLeading={<Edit05 data-icon />}
         onClick={() => onModify(expense)}
       >
-        Modifier
+        {t("Edit")}
       </Button>
       
       <Button
@@ -74,7 +76,7 @@ export const ContextMenu = ({
         iconLeading={<Trash01 data-icon />}
         onClick={() => onDelete(expense)}
       >
-        Supprimer
+        {t("Delete")}
       </Button>
     </div>
   );

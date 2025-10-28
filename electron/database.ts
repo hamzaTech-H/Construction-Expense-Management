@@ -29,7 +29,8 @@ db.prepare(`
 db.prepare(`
   CREATE TABLE IF NOT EXISTS expense_categories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL UNIQUE,
+    fr_name TEXT NOT NULL UNIQUE,
+    ar_name TEXT NOT NULL UNIQUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )
 `).run();
@@ -48,6 +49,41 @@ db.prepare(`
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE,
     FOREIGN KEY (category_id) REFERENCES expense_categories (id)
+  )
+`).run();
+
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS settings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    language TEXT NOT NULL,
+    company_name TEXT,
+    owner_first_name TEXT,
+    owner_last_name TEXT,
+    address TEXT,
+    email TEXT,
+    phone_number TEXT
+  )
+`).run();
+
+db.prepare(`
+  INSERT OR IGNORE INTO settings (
+    id,
+    language,
+    company_name,
+    owner_first_name,
+    owner_last_name,
+    address,
+    email,
+    phone_number
+  ) VALUES (
+    1,
+    'fr',
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL
   )
 `).run();
 
@@ -114,6 +150,17 @@ db.prepare(`
 `).run();
 
 
+// ===== SETTINGS =====
+
+export function getSettings() {
+  const stmt = db.prepare('SELECT * FROM settings');
+  return stmt.all();
+}
+
+export function updateSettings(id: number, language: string, company_name: string, owner_first_name:string, owner_last_name:string, address: string, email: string, phone_number: string) {
+  const stmt = db.prepare('UPDATE settings SET language = ?, company_name = ? , owner_first_name = ?, owner_last_name = ?, address = ?, email = ?, phone_number = ? WHERE id = ?');
+  return stmt.run(language, company_name, owner_first_name, owner_last_name, address, email, phone_number, id);
+}
 
 // ===== PROJECTS =====
 export function getAllProjects() {
@@ -157,23 +204,31 @@ export function getProjectStats(projectId: number) {
 
 // ===== EXPENSE CATEGORIES =====
 
+export function addEXpenseCategory(fr_name: string, ar_name: string) {
+  const stmt = db.prepare('INSERT INTO expense_categories (fr_name, ar_name) VALUES (?, ?)');
+  const result = stmt.run(fr_name, ar_name);
+  return result.lastInsertRowid;
+}
+
 export function getAllExpenseCategories() {
   const stmt = db.prepare('SELECT * FROM expense_categories');
   return stmt.all();
 }
 
-
 export function getExpenseCategoriesByProject(projectId: number) {
   const stmt = db.prepare(`
-    SELECT expense_categories.id, expense_categories.name
+    SELECT expense_categories.id, expense_categories.fr_name, expense_categories.ar_name
     FROM expenses
     JOIN expense_categories ON expenses.category_id = expense_categories.id
     WHERE expenses.project_id = ?
-    GROUP BY expense_categories.id, expense_categories.name`);
+    GROUP BY expense_categories.id, expense_categories.fr_name, expense_categories.ar_name`);
   return stmt.all(projectId);
 }
 
-
+export function deleteExpenseCategory(id: number) {
+  const stmt = db.prepare('DELETE FROM expense_categories WHERE id = ?');
+  return stmt.run(id);
+}
 
 // ===== EXPENSES =====
 export function getExpensesByProject(projectId: number) {

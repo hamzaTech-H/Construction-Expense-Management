@@ -4,9 +4,8 @@ import ProjectsList from './ProjectsList';
 import { Toaster } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { useEffect } from 'react';
-import { SettingsPage } from './SettingsPage';
 import { CustomTitleBar } from './CustomTitleBar';
-
+import SettingsPage from './SettingsPage';
 function App() {
   const { i18n } = useTranslation();
 
@@ -24,7 +23,7 @@ function App() {
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       <CustomTitleBar />
-          <main className="flex flex-col flex-1 overflow-auto custom-scrollbar px-8">
+          <main className="flex flex-col flex-1 overflow-auto custom-scrollbar">
               <Routes>
                 <Route path="/" element={<ProjectsList />} />
                 <Route path="/projects/:projectId" element={<ProjectPage />} />

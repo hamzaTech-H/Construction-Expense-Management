@@ -13,6 +13,7 @@ import { Input } from "./components/base/input/input";
 import { Button } from "./components/base/buttons/button";
 import { Dropdown } from "./components/base/dropdown/dropdown";
 import { Checkbox } from "./components/base/checkbox/checkbox";
+import { useTranslation } from "react-i18next";
 
 type ExpensesTableProps = {
   expenses: Expense[];
@@ -28,6 +29,7 @@ type ExpensesTableProps = {
 };
 
 export const ExpensesTable = ({ expenses, projectData, setIsExpenseModalOpen, setSelectedExpense, setExpenses, setStats, selectedTabIndex}: ExpensesTableProps) => {
+    const { t } = useTranslation();
     const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
         column: "",
         direction: "ascending",
@@ -116,11 +118,11 @@ export const ExpensesTable = ({ expenses, projectData, setIsExpenseModalOpen, se
     return (
         <>
         <div className="flex justify-start items-center gap-4 py-5">
-                    <Input icon={SearchLg} aria-label="Search" placeholder="Recherche par description" className="w-70" onChange={(value: string) => setSearch(value)} />
+                    <Input icon={SearchLg} aria-label={t("Search")} placeholder={t("Search by description")} className="w-70" onChange={(value: string) => setSearch(value)} />
 
                     <Dropdown.Root>
                         <Button size="md" color={isFiltered ? "primary" : "secondary"} iconLeading={FilterLines}>
-                            Status
+                            {t("Status")}
                         </Button>
 
                         <Dropdown.Popover placement="bottom left">
@@ -145,18 +147,18 @@ export const ExpensesTable = ({ expenses, projectData, setIsExpenseModalOpen, se
                 </div>
             <TableCard.Root size="sm" className="flex flex-col">
                 <TableCard.Header  className="flex items-center justify-between"
-                    title={`Projet: ${projectData.name}`}
-                    badge={`${expenses.length} dépenses`}
+                    title={`${t("Project")}: ${projectData.name}`}
+                    badge={`${expenses.length} ${t("expenses")}`}
                 />
 
-                <Table aria-label="Team members" selectionMode="none" sortDescriptor={sortDescriptor} onSortChange={setSortDescriptor}>
+                <Table aria-label={t("Expenses")} selectionMode="none" sortDescriptor={sortDescriptor} onSortChange={setSortDescriptor}>
                     <Table.Header className="sticky top-0 z-40">
-                        <Table.Head id="description" label="Description" isRowHeader />
-                        <Table.Head id="date" label="Date" allowsSorting />
-                        <Table.Head id="status" label="Status" allowsSorting />
-                        <Table.Head id="amount_total" label="Montant Total (DA)"/>
-                        <Table.Head id="amount_paid" label="Montant Payé (DA)"/>
-                        <Table.Head id="amount_remaining" label="Reste à Payer (DA)"/>
+                        <Table.Head id="description" label={t("Description")} isRowHeader />
+                        <Table.Head id="date" label={t("Date")} allowsSorting />
+                        <Table.Head id="status" label={t("Status")} allowsSorting />
+                        <Table.Head id="amount_total" label={t("Total Amount (DA)")}/>
+                        <Table.Head id="amount_paid" label={t("Amount Paid (DA)")}/>
+                        <Table.Head id="amount_remaining" label={t("Remaining to Pay (DA)")}/>
                     </Table.Header>
                     <Table.Body items={sortedItems} className="flex-1">
                         {(item) => (
@@ -216,11 +218,11 @@ export const ExpensesTable = ({ expenses, projectData, setIsExpenseModalOpen, se
             )}
 
             {isConfirmOpen && contextMenu.expense && (
-                <ConfirmDeleteModal
+                                <ConfirmDeleteModal
                     setIsConfirmOpen={setIsConfirmOpen}
                     name={contextMenu.expense.description}
                     id={contextMenu.expense.id}
-                    entityLabel="Dépense"
+                    entityLabel={t("Expense")}
                     onDelete={async (id) => {
                         const exp = contextMenu.expense!;
                         await window.database.deleteExpense(id);

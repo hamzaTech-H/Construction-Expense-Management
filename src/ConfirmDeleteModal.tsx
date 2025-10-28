@@ -1,5 +1,6 @@
 import { Button } from "@/components/base/buttons/button";
 import { X } from "@untitledui/icons";
+import { useTranslation } from "react-i18next";
 
 type ConfirmDeleteModalProps = {
   setIsConfirmOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -16,6 +17,7 @@ export default function ConfirmDeleteModal({
   entityLabel,
   onDelete,
 }: ConfirmDeleteModalProps) {
+  const { t } = useTranslation();
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
       <div className="w-full max-w-sm rounded-xl bg-white p-5 shadow-lg relative">
@@ -25,19 +27,18 @@ export default function ConfirmDeleteModal({
           size="sm"
           iconLeading={<X data-icon />}
           onClick={() => setIsConfirmOpen(false)}
-          aria-label="Close modal"
+          aria-label={t("Close modal")}
           className="absolute top-3 right-3"
         />
 
         {/* Title */}
         <h2 className="text-lg font-bold text-gray-800 mb-2">
-          Supprimer {entityLabel}
+          {t("Delete")} {entityLabel}
         </h2>
 
         {/* Text */}
         <p className="text-sm text-gray-600 mb-4">
-          Voulez-vous vraiment supprimer « {name} » ? Cette action est
-          définitive et ne peut pas être annulée.
+          {t("Do you really want to delete")} « {name} » ? {t("This action is permanent and cannot be undone.")}
         </p>
 
         {/* Buttons */}
@@ -47,7 +48,7 @@ export default function ConfirmDeleteModal({
             size="md"
             onClick={() => setIsConfirmOpen(false)}
           >
-            Annuler
+            {t("Cancel")}
           </Button>
           <Button
             color="primary-destructive"
@@ -57,7 +58,7 @@ export default function ConfirmDeleteModal({
               setIsConfirmOpen(false);
             }}
           >
-            Supprimer
+            {t("Delete")}
           </Button>
         </div>
       </div>

@@ -1,9 +1,20 @@
+export interface Settings {
+  id: number;
+  language: string;
+  company_name: string | null;
+  owner_first_name: string | null;
+  owner_last_name: string | null;
+  address: string | null;
+  email: string | null;
+  phone_number: string | null;
+}
+
 export interface Project {
   id: number;
   name: string;
   date: string;
   client: string | undefined;
-  budget: number | undefined;
+  budget: number | null;
   description?: string;
 }
 

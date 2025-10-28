@@ -1,5 +1,7 @@
 import { electron } from "node:process";
-import { Payment } from "./types";
+import { Payment, Settings } from "./types";
+import { deleteExpenseCategory, getSettings } from "electron/database";
+
 
 // Updated interface for database methods
 export {};
@@ -14,17 +16,22 @@ declare module 'react' {
 declare global {
   interface Window {
     database: {
+      // Settings
+      getSettings: () => Promise<Settings[]>;
+      updateSettings: (id: number, language: string, company_name: string|null, owner_first_name:string|null, owner_last_name:string|null, address: string|null, email: string|null, phone_number: string|null) => Promise<any>;
       // Projects
       getAllProjects: () => Promise<any[]>;
       getProjectById: (id: number) => Promise<any>;
-      addProject: (name: string, date:string, client:string|undefined, budget:number|undefined, description: string) => Promise<number>;
-      updateProject: (id: number, name: string, date:string, client:string|undefined, budget:number|undefined, description: string) => Promise<any>;
+      addProject: (name: string, date:string, client:string|undefined, budget:number|null, description: string) => Promise<number>;
+      updateProject: (id: number, name: string, date:string, client:string|undefined, budget:number|null, description: string) => Promise<any>;
       deleteProject: (id: number) => Promise<any>;
       getProjectStats: (id: number) => Promise<any>;
 
       // Expense Categories
+      addEXpenseCategory: (fr_name: string, ar_name: string) => Promise<number>;
       getAllExpenseCategories: () => Promise<any[]>;
       getExpenseCategoriesByProject: (projectId: number) => Promise<any[]>;
+      deleteExpenseCategory: (id: number) => Promise<any>;
 
       // Expenses
       getExpensesByProject: (projectId: number) => Promise<any[]>;

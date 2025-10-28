@@ -18,11 +18,11 @@ export default function ProjectModal({ setIsModalOpen, project, setProjects }: P
         name: project?.name ?? "",
         date: project?.date ?? new Date().toISOString().split("T")[0],
         client: project?.client,
-        budget: project?.budget,
+        budget: project?.budget ?? null,
         description: project?.description ?? "",
     });
 
-    const handleChange = (field: keyof typeof form, value: string|number|undefined) =>
+    const handleChange = (field: keyof typeof form, value: string|number|null) =>
         setForm(prev => ({ ...prev, [field]: value }));
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -35,7 +35,7 @@ export default function ProjectModal({ setIsModalOpen, project, setProjects }: P
                 name: form.name,
                 date: form.date,
                 client: form.client,
-                budget: form.budget,
+                budget: form.budget ?? null,
                 description: form.description,
             };
             setProjects((prev) =>
@@ -50,7 +50,7 @@ export default function ProjectModal({ setIsModalOpen, project, setProjects }: P
                 name: form.name,
                 date: form.date,
                 client: form.client,
-                budget: form.budget,
+                budget: form.budget ?? null,
                 description: form.description,
             };
 
@@ -82,7 +82,7 @@ export default function ProjectModal({ setIsModalOpen, project, setProjects }: P
                     </div>
 
                     <Input name="client" label={t("Client")}  value={form.client} onChange={(value: string) => handleChange("client", value)}/>
-                    <Input name="budget" label={t("Budget")} type="number" value={form.budget?.toString() ?? ""} onChange={(value: string) => handleChange("budget", value === "" ? undefined : Number(value)) }/>
+                    <Input name="budget" label={t("Budget")} type="number" value={form.budget?.toString() ?? ""} onChange={(value: string) => handleChange("budget", value === "" ? null : Number(value)) }/>
                                                
                     <TextArea name='description' placeholder={t("Add a description")} label={t("Description")} rows={4} value={form.description} onChange={(value: string) => handleChange("description", value)}/>
                     

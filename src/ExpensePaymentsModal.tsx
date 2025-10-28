@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { ButtonUtility } from "./components/base/buttons/button-utility";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
+import { useTranslation } from "react-i18next";
 
 interface ExpensePaymentsModalProps {
   setIsPaymentsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -14,7 +15,8 @@ interface ExpensePaymentsModalProps {
   setStats: React.Dispatch<React.SetStateAction<ProjectStats>>;
 }
 
-export default function ExpensePaymentsModal({ setIsPaymentsModalOpen, expense, setExpenses, setStats}: ExpensePaymentsModalProps) {  
+export default function ExpensePaymentsModal({ setIsPaymentsModalOpen, expense, setExpenses, setStats}: ExpensePaymentsModalProps) {
+    const { t } = useTranslation();
     const [payments, setPayments] = useState<Payment[]>([]);
     const [form, setForm] = useState({
         amount: "",
@@ -84,7 +86,7 @@ export default function ExpensePaymentsModal({ setIsPaymentsModalOpen, expense, 
                 setStats(prev => ({ total: prev.total, paid: prev.paid + parseFloat(form.amount), remaining: prev.remaining - parseFloat(form.amount) }));
                 setForm({ amount: "", date: new Date().toISOString().split("T")[0], note: "" });
 
-                toast.success("Paiement ajouté avec succès !");
+                toast.success(t("Payment added successfully!"));
             } catch (error:any) {
                 const messageParts = error.message.split(': ');
                 const backendMessage = messageParts[messageParts.length - 1];
@@ -96,7 +98,7 @@ export default function ExpensePaymentsModal({ setIsPaymentsModalOpen, expense, 
    return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
         <div className="w-full max-w-3xl rounded-xl bg-white p-6 shadow-lg relative flex flex-col max-h-[70vh]">
-            <h2 className="mb-4 text-lg font-semibold">Paiements</h2>
+            <h2 className="mb-4 text-lg font-semibold">{t("Payments")}</h2>
 
             {/* Close button */}
             <Button
@@ -104,7 +106,7 @@ export default function ExpensePaymentsModal({ setIsPaymentsModalOpen, expense, 
                 size="md"
                 iconLeading={<XClose data-icon />}
                 onClick={() => setIsPaymentsModalOpen(false)}
-                aria-label="Fermer"
+                aria-label={t("Close")}
                 className="absolute top-3 right-3"
             />
 
@@ -116,7 +118,7 @@ export default function ExpensePaymentsModal({ setIsPaymentsModalOpen, expense, 
                     iconLeading={<Printer data-icon />}
                     onClick={handlePrint}
                 >
-                    Imprimer
+                    {t("Print")}
                 </Button>
             </div>
             <div className="flex-1 overflow-y-auto space-y-2">
@@ -139,13 +141,13 @@ export default function ExpensePaymentsModal({ setIsPaymentsModalOpen, expense, 
                         <span className="italic text-gray-700">{payment.note}</span>
 
                         <div className="flex gap-2">
-                            <ButtonUtility size="xs" color="tertiary" tooltip="modifier" icon={Edit01}  onClick={() => handleEditPayment(payment)}/>
-                            <ButtonUtility size="xs" color="tertiary" tooltip="supprimer" icon={Trash01} onClick={() => setPaymentToDelete(payment)}/>
+                            <ButtonUtility size="xs" color="tertiary" tooltip={t("Edit")} icon={Edit01}  onClick={() => handleEditPayment(payment)}/>
+                            <ButtonUtility size="xs" color="tertiary" tooltip={t("Delete")} icon={Trash01} onClick={() => setPaymentToDelete(payment)}/>
                         </div>
                     </div>
                     ))
                 ) : (
-                    <p className="text-gray-400 text-sm italic">Aucun paiement trouvé</p>
+                    <p className="text-gray-400 text-sm italic">{t("No payments found")}</p>
                 )}
             </div>
 
@@ -153,18 +155,18 @@ export default function ExpensePaymentsModal({ setIsPaymentsModalOpen, expense, 
                 onSubmit={handleSubmit}
                 className="border-t pt-3 flex flex-col gap-4 mt-1"
             >
-                <h3 className="text-md font-semibold">{paymentToEdit ? "Modifier Paiement" : "Ajouter Paiement"}</h3>
+                <h3 className="text-md font-semibold">{paymentToEdit ? t("Edit Payment") : t("Add Payment")}</h3>
                 <div className="flex gap-3">
-                    <Input isRequired name="amount" label="Montant" type="number"  value={form.amount} onChange={(value: string) => setForm(prev => ({ ...prev, amount: value }))}/>
+                    <Input isRequired name="amount" label={t("Amount")} type="number"  value={form.amount} onChange={(value: string) => setForm(prev => ({ ...prev, amount: value }))}/>
                     <div
                         onClick={(e) => {
                             const input = e.currentTarget.querySelector('input[type="date"]') as HTMLInputElement | null;
                             input?.showPicker?.();
                         }}
                     >
-                        <Input isRequired name="date" label="Date" type="date" value={form.date} onChange={(value: string) => setForm((prev) => ({ ...prev, date: value }))}/>
+                        <Input isRequired name="date" label={t("Date")} type="date" value={form.date} onChange={(value: string) => setForm((prev) => ({ ...prev, date: value }))}/>
                     </div>
-                    <Input name="note" label="Notes" placeholder="note" value={form.note} onChange={(value: string) => setForm(prev => ({ ...prev, note: value }))} />
+                    <Input name="note" label={t("Notes")} placeholder={t("note")} value={form.note} onChange={(value: string) => setForm(prev => ({ ...prev, note: value }))} />
                 </div>
                 <div className="flex justify-end gap-2">
                     {paymentToEdit && (
@@ -176,12 +178,12 @@ export default function ExpensePaymentsModal({ setIsPaymentsModalOpen, expense, 
                                 setForm({ amount: "", date: new Date().toISOString().split("T")[0], note: "" });
                             }}
                         >
-                            Annuler modification
+                            {t("Cancel edit")}
                         </Button>
                     )}
 
                     <Button type="submit" size="md">
-                        {paymentToEdit ? "Enregistrer" : "Ajouter Paiement"}
+                        {paymentToEdit ? t("Save") : t("Add Payment")}
                     </Button> 
                 </div>
             </form>
@@ -191,7 +193,7 @@ export default function ExpensePaymentsModal({ setIsPaymentsModalOpen, expense, 
                     setIsConfirmOpen={() => setPaymentToDelete(null)}
                     name={paymentToDelete.amount.toString()}
                     id={paymentToDelete.id}
-                    entityLabel="Paiement"
+                    entityLabel={t("Payment")}
                     onDelete={async (id) => {
                         const updatedExpense = await window.database.deletePayment(id);
                         setPayments((prev) => prev.filter((p) => p.id !== id));
