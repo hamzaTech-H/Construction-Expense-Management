@@ -3,22 +3,31 @@ import ProjectPage from "./ProjectPage";
 import ProjectsList from './ProjectsList';
 import { Toaster } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { CustomTitleBar } from './CustomTitleBar';
 import SettingsPage from './SettingsPage';
 function App() {
   const { i18n } = useTranslation();
 
   useEffect(() => {
+    
     const dir = i18n.language === "ar" ? "rtl" : "ltr";
     document.documentElement.dir = dir;
     document.documentElement.lang = i18n.language;
   }, [i18n.language]);
 
-  {/* <header className="flex justify-end gap-2 py-4">
-          <button onClick={() => i18n.changeLanguage("fr")}>🇫🇷 FR</button>
-          <button onClick={() => i18n.changeLanguage("ar")}>🇸🇦 AR</button>
-        </header> */}
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    const load = async () => {
+      const settingsData = await window.database.getSettings();
+      await i18n.changeLanguage(settingsData[0].language);
+      setIsReady(true);
+    };
+    load();
+  }, []);
+
+  if (!isReady) return null; // or a loading spinner
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">

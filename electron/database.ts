@@ -35,6 +35,24 @@ db.prepare(`
   )
 `).run();
 
+const predefinedCategories = [
+  { fr_name: 'Employés', ar_name: 'العمال' },    
+  { fr_name: 'Marchandises', ar_name: 'السلع' },  
+  { fr_name: 'Autres', ar_name: 'أخرى' },
+];
+
+// insert only if not exists
+const insert = db.prepare(`
+  INSERT OR IGNORE INTO expense_categories (fr_name, ar_name)
+  VALUES (@fr_name, @ar_name)
+`);
+
+const insertMany = db.transaction((categories) => {
+  for (const category of categories) insert.run(category);
+});
+
+insertMany(predefinedCategories);
+
 db.prepare(`
   CREATE TABLE IF NOT EXISTS expenses (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

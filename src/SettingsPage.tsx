@@ -263,9 +263,9 @@ export default function SettingsPage() {
                   <TableRow>
                     {i18n.language === 'ar' ? (
                       <>
-                        <TableHead>{t("Actions")}</TableHead>
                         <TableHead className="text-right">{t("Arabic Name")}</TableHead>
                         <TableHead className="text-right">{t("French Name")}</TableHead>
+                        <TableHead className="text-left">{t("Actions")}</TableHead>
                       </>
                     ) : (
                       <>
@@ -288,14 +288,14 @@ export default function SettingsPage() {
                       <TableRow key={category.id}>
                         {i18n.language === 'ar' ? (
                           <>
-                            <TableCell>
-                              <div className="flex gap-2">
-                                <ButtonUtility size="sm" color="tertiary" tooltip={t("Delete")} icon={Trash01}  onClick={() => handleDeleteClick(category.id)}/>
-                                <ButtonUtility size="sm" color="tertiary" tooltip={t("Edit")} icon={Edit01} onClick={() => handleEditCategory(category)}/>
-                              </div>
-                            </TableCell>
                             <TableCell className="font-arabic text-right">{category.ar_name}</TableCell>
                             <TableCell className="text-right">{category.fr_name}</TableCell>
+                            <TableCell>
+                              <div className="flex justify-end gap-2">
+                                <ButtonUtility size="sm" color="tertiary" tooltip={t("Edit")} icon={Edit01} onClick={() => handleEditCategory(category)}/>
+                                <ButtonUtility size="sm" color="tertiary" tooltip={t("Delete")} icon={Trash01}  onClick={() => handleDeleteClick(category.id)}/>
+                              </div>
+                            </TableCell>
                           </>
                         ) : (
                           <>
@@ -303,8 +303,8 @@ export default function SettingsPage() {
                             <TableCell className="font-arabic">{category.ar_name}</TableCell>
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
-                                <ButtonUtility size="sm" color="tertiary" tooltip={t("Delete")} icon={Trash01}  onClick={() => handleDeleteClick(category.id)}/>
                                 <ButtonUtility size="sm" color="tertiary" tooltip={t("Edit")} icon={Edit01} onClick={() => handleEditCategory(category)}/>
+                                <ButtonUtility size="sm" color="tertiary" tooltip={t("Delete")} icon={Trash01}  onClick={() => handleDeleteClick(category.id)}/>
                               </div>
                             </TableCell>
                           </>
@@ -336,16 +336,17 @@ export default function SettingsPage() {
                 isRequired
                 label={t("French Name")}
                 name="categoryFrench"
-                placeholder={t("e.g., Office Supplies")}
+                placeholder="e.g., Employés"
                 value={categoryFrench}
                 onChange={(value) => setCategoryFrench(value)}
+                dir="ltr"
               />
 
               <Input
                 isRequired
                 label={t("Arabic Name")}
                 name="categoryArabic"
-                placeholder={t("e.g., مستلزمات المكتب")}
+                placeholder="مثلاً: العمال"
                 value={categoryArabic}
                 onChange={(value) => setCategoryArabic(value)}
                 dir="rtl"
