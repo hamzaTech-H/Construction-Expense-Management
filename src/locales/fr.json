@@ -79,7 +79,7 @@
   "Not specified": "Non spécifié",
   "Budget not available": "Budget non disponible",
   "Spent": "Dépensé",
-  "Over Budget": "Au-delà du budget",
+  "Over Budget": "dépassement de budget",
   "of budget used": "du budget utilisé",
   "Project": "Projet",
   "Search": "Rechercher",
@@ -104,6 +104,8 @@
   "Cancel edit": "Annuler modification",
   "Payment": "Paiement",
   "Show payments": "Afficher les paiements",
-  "Payment added successfully!": "Paiement ajouté avec succès !"
-
+  "Payment added successfully!": "Paiement ajouté avec succès !",
+  "Unpaid": "Impayé",      
+  "Paid": "Payé",
+  "Partially paid": "Partiel"
 }

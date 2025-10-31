@@ -65,12 +65,20 @@ function AlertDialogContent({
 
 function AlertDialogHeader({
   className,
+  dir,
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"div"> & { dir?: string }) {
+  const isRtl = dir === "rtl";
+
   return (
     <div
       data-slot="alert-dialog-header"
-      className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
+      dir={dir}
+      className={cn(
+        "flex flex-col gap-2 text-center",
+        isRtl ? "sm:text-right" : "sm:text-left", // ✅ auto alignment
+        className,
+      )}
       {...props}
     />
   );

@@ -5,6 +5,7 @@ interface ExpensesTabsProps {
   tabs: { id: string | number; label: string }[];
   selectedTabIndex: string | number;
   setSelectedTabIndex: React.Dispatch<React.SetStateAction<string | number>>;
+
 }
 
  

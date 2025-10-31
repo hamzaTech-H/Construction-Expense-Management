@@ -32,7 +32,7 @@ function App() {
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       <CustomTitleBar />
-          <main className="flex flex-col flex-1 overflow-auto custom-scrollbar">
+          <main className="flex flex-col flex-1 overflow-auto custom-scrollbar mb-4">
               <Routes>
                 <Route path="/" element={<ProjectsList />} />
                 <Route path="/projects/:projectId" element={<ProjectPage />} />

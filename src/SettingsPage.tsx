@@ -367,8 +367,8 @@ export default function SettingsPage() {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
+        <AlertDialogContent >
+          <AlertDialogHeader  dir={i18n.dir()}>
             <AlertDialogTitle>{t("Are you sure?")}</AlertDialogTitle>
             <AlertDialogDescription>
               {t("This action cannot be undone. This will permanently delete the expense category.")}

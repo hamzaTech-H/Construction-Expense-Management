@@ -182,7 +182,16 @@ export function updateSettings(id: number, language: string, company_name: strin
 
 // ===== PROJECTS =====
 export function getAllProjects() {
-  const stmt = db.prepare('SELECT * FROM projects ORDER BY created_at DESC');
+  const stmt = db.prepare(`
+    SELECT 
+      p.*, 
+      IFNULL(SUM(e.amount_total), 0) AS total_spent
+    FROM projects p
+    LEFT JOIN expenses e ON e.project_id = p.id
+    GROUP BY p.id
+    ORDER BY p.created_at DESC
+  `);
+
   return stmt.all();
 }
 
@@ -210,14 +219,15 @@ export function deleteProject(id: number) {
 export function getProjectStats(projectId: number) {
   const stmt = db.prepare(`
     SELECT 
-      ROUND(SUM(amount_total), 2) AS total,
-      ROUND(SUM(amount_paid), 2) AS paid,
-      ROUND(SUM(amount_remaining), 2) AS remaining
+      ROUND(IFNULL(SUM(amount_total), 0), 2) AS total,
+      ROUND(IFNULL(SUM(amount_paid), 0), 2) AS paid,
+      ROUND(IFNULL(SUM(amount_remaining), 0), 2) AS remaining
     FROM expenses
     WHERE project_id = ?
   `);
-    const result = stmt.get(projectId)
-    return result;
+
+  const result = stmt.get(projectId);
+  return result;
 }
 
 // ===== EXPENSE CATEGORIES =====
@@ -299,10 +309,6 @@ export function updateExpense(id: number, categoryId:number ,description: string
   let status = ExpenseStatus.NOT_PAID
 
   const expense:any = getExpenseById(id);
-
-  if (amountTotal < expense.amount_paid) {
-    throw new Error("Le total ne peut pas être réduit. Supprimez d’abord un paiement");
-  }
 
   if (expense.status === ExpenseStatus.NOT_PAID) {
     amountPaid = 0;

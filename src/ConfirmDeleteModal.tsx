@@ -21,20 +21,22 @@ export default function ConfirmDeleteModal({
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
       <div className="w-full max-w-sm rounded-xl bg-white p-5 shadow-lg relative">
+        
         {/* Close button */}
         <Button
           color="tertiary"
           size="sm"
           iconLeading={<X data-icon />}
           onClick={() => setIsConfirmOpen(false)}
-          aria-label={t("Close modal")}
-          className="absolute top-3 right-3"
+          aria-label="Button CTA"
+          className="absolute top-2 end-2"
         />
 
         {/* Title */}
         <h2 className="text-lg font-bold text-gray-800 mb-2">
           {t("Delete")} {entityLabel}
         </h2>
+
 
         {/* Text */}
         <p className="text-sm text-gray-600 mb-4">

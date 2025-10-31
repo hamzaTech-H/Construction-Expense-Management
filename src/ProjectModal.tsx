@@ -37,6 +37,7 @@ export default function ProjectModal({ setIsModalOpen, project, setProjects }: P
                 client: form.client,
                 budget: form.budget ?? null,
                 description: form.description,
+                total_spent: project.total_spent,
             };
             setProjects((prev) =>
                 prev.map((p) => (p.id === project.id ? updatedProject : p))
@@ -52,6 +53,7 @@ export default function ProjectModal({ setIsModalOpen, project, setProjects }: P
                 client: form.client,
                 budget: form.budget ?? null,
                 description: form.description,
+                total_spent: 0,
             };
 
             setProjects(prev => [newProject, ...prev]);
@@ -66,8 +68,8 @@ export default function ProjectModal({ setIsModalOpen, project, setProjects }: P
 
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="mb-4 text-lg font-semibold">{project ? t("Edit project") : t("Add project")}</h2>
-                <Button color="tertiary" size="md" iconLeading={<XClose data-icon />} onClick={() => setIsModalOpen(false)} aria-label="Button CTA" className="absolute top-2 end-2"/>
-            </div>
+                    <Button color="tertiary" size="md" iconLeading={<XClose data-icon />} onClick={() => setIsModalOpen(false)} aria-label="Button CTA" className="absolute top-2 end-2"/>
+                </div>
                 
 
                 <form onSubmit={handleSubmit} className="space-y-4">

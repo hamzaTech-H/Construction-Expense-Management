@@ -16,6 +16,7 @@ export interface Project {
   client: string | undefined;
   budget: number | null;
   description?: string;
+  total_spent: number;
 }
 
 export type Expense = {

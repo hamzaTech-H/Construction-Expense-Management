@@ -3,7 +3,7 @@ import { Check, EqualNot, FilterLines, SearchLg, X, } from "@untitledui/icons";
 import { type SortDescriptor } from "react-aria-components";
 import { Table, TableCard } from "@/components/application/table/table";
 import { BadgeWithIcon } from "@/components/base/badges/badges";
-import { ExpenseStatus } from "../shared/expense";
+import { ExpenseStatus, getExpenseStatusLabel } from "../shared/expense";
 import { Expense, ProjectStats } from "./types";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
 import { ContextMenu } from "./ContextMenu";
@@ -29,7 +29,8 @@ type ExpensesTableProps = {
 };
 
 export const ExpensesTable = ({ expenses, projectData, setIsExpenseModalOpen, setSelectedExpense, setExpenses, setStats, selectedTabIndex}: ExpensesTableProps) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+
     const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
         column: "",
         direction: "ascending",
@@ -117,34 +118,34 @@ export const ExpensesTable = ({ expenses, projectData, setIsExpenseModalOpen, se
 
     return (
         <>
-        <div className="flex justify-start items-center gap-4 py-5">
-                    <Input icon={SearchLg} aria-label={t("Search")} placeholder={t("Search by description")} className="w-70" onChange={(value: string) => setSearch(value)} />
+            <div className="flex justify-start items-center gap-4 py-5">
+                <Input icon={SearchLg} aria-label={t("Search")} placeholder={t("Search by description")} className="w-70" onChange={(value: string) => setSearch(value)} />
 
-                    <Dropdown.Root>
-                        <Button size="md" color={isFiltered ? "primary" : "secondary"} iconLeading={FilterLines}>
-                            {t("Status")}
-                        </Button>
+                <Dropdown.Root>
+                    <Button size="md" color={isFiltered ? "primary" : "secondary"} iconLeading={FilterLines}>
+                        {t("Status")}
+                    </Button>
 
-                        <Dropdown.Popover placement="bottom left">
-                            <Dropdown.Menu selectionMode="multiple">
-                                <Dropdown.Section>
-                                    <Dropdown.Item>
-                                        <Checkbox label={`${ExpenseStatus.PAID}`} size="sm" isSelected={selectedStatuses.includes(ExpenseStatus.PAID)}
-                                            onChange={(checked) => handleCheckboxChange(ExpenseStatus.PAID, checked)}/>
-                                    </Dropdown.Item>
-                                    <Dropdown.Item>
-                                        <Checkbox label={`${ExpenseStatus.PARTIALLY_PAID}`} size="sm"  isSelected={selectedStatuses.includes(ExpenseStatus.PARTIALLY_PAID)}
-                                            onChange={(checked) => handleCheckboxChange(ExpenseStatus.PARTIALLY_PAID, checked)}/>
-                                    </Dropdown.Item>
-                                    <Dropdown.Item>
-                                        <Checkbox label={`${ExpenseStatus.NOT_PAID}`} size="sm" isSelected={selectedStatuses.includes(ExpenseStatus.NOT_PAID)}
-                                            onChange={(checked) => handleCheckboxChange(ExpenseStatus.NOT_PAID, checked)}/>
-                                    </Dropdown.Item>
-                                </Dropdown.Section>
-                            </Dropdown.Menu>
-                        </Dropdown.Popover>
-                    </Dropdown.Root>
-                </div>
+                    <Dropdown.Popover placement={i18n.dir() === "rtl" ? "bottom right" : "bottom left"}>
+                        <Dropdown.Menu selectionMode="multiple">
+                            <Dropdown.Section dir={i18n.dir()}>
+                                <Dropdown.Item>
+                                    <Checkbox label={getExpenseStatusLabel(t, ExpenseStatus.PAID)} size="sm" isSelected={selectedStatuses.includes(ExpenseStatus.PAID)}
+                                        onChange={(checked) => handleCheckboxChange(ExpenseStatus.PAID, checked)}/>
+                                </Dropdown.Item>
+                                <Dropdown.Item>
+                                    <Checkbox label={getExpenseStatusLabel(t, ExpenseStatus.PARTIALLY_PAID)} size="sm"  isSelected={selectedStatuses.includes(ExpenseStatus.PARTIALLY_PAID)}
+                                        onChange={(checked) => handleCheckboxChange(ExpenseStatus.PARTIALLY_PAID, checked)}/>
+                                </Dropdown.Item>
+                                <Dropdown.Item>
+                                    <Checkbox label={getExpenseStatusLabel(t, ExpenseStatus.NOT_PAID)} size="sm" isSelected={selectedStatuses.includes(ExpenseStatus.NOT_PAID)}
+                                        onChange={(checked) => handleCheckboxChange(ExpenseStatus.NOT_PAID, checked)}/>
+                                </Dropdown.Item>
+                            </Dropdown.Section>
+                        </Dropdown.Menu>
+                    </Dropdown.Popover>
+                </Dropdown.Root>
+            </div>
             <TableCard.Root size="sm" className="flex flex-col">
                 <TableCard.Header  className="flex items-center justify-between"
                     title={`${t("Project")}: ${projectData.name}`}
@@ -172,15 +173,15 @@ export const ExpensesTable = ({ expenses, projectData, setIsExpenseModalOpen, se
                                 <Table.Cell>
                                     {item.status === ExpenseStatus.PAID ? (
                                         <BadgeWithIcon size="sm" color="success" iconLeading={Check} className="capitalize">
-                                            {item.status}
+                                            {getExpenseStatusLabel(t, item.status)}
                                         </BadgeWithIcon>
                                     ) : item.status === ExpenseStatus.PARTIALLY_PAID  ? (
                                         <BadgeWithIcon size="sm" color="gray" iconLeading={EqualNot} className="capitalize">
-                                            {item.status}
+                                            {getExpenseStatusLabel(t, item.status)}
                                         </BadgeWithIcon>
                                     ) : (
                                         <BadgeWithIcon size="sm" color="error" iconLeading={X} className="capitalize">
-                                            {item.status}
+                                            {getExpenseStatusLabel(t, item.status as ExpenseStatus)}
                                         </BadgeWithIcon>
                                     )}
                                 </Table.Cell>

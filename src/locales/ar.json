@@ -103,5 +103,8 @@
   "Cancel edit": "إلغاء التعديل",
   "Payment": "الدفعة",
   "Show payments": "عرض المدفوعات",
-  "Payment added successfully!": "تم إضافة الدفعة بنجاح!"
+  "Payment added successfully!": "تم إضافة الدفعة بنجاح!",
+  "Unpaid": "غير مدفوع",      
+  "Paid": "مدفوع",
+  "Partially paid": "مدفوع جزئياً"
 }

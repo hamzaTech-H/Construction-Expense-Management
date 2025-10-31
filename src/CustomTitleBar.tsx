@@ -22,8 +22,10 @@ export function CustomTitleBar({ title = "Progest" }: CustomTitleBarProps) {
   };
 
   const handleSettings = () => {
+  if (location.pathname !== '/settings') {
     navigate('/settings');
-  };
+  }
+};
 
   const handleBack = () => {
     navigate(-1);

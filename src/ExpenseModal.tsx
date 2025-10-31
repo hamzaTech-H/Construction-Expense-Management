@@ -11,14 +11,15 @@ import { Select, SelectItemType } from "./components/base/select/select";
 import { useTranslation } from "react-i18next";
 
 interface ExpenseModalProps {
-  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  expense?: Expense | null;
-  setExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
-  setStats: React.Dispatch<React.SetStateAction<ProjectStats>>;
+    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    expense?: Expense | null;
+    setExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
+    setStats: React.Dispatch<React.SetStateAction<ProjectStats>>;
+    setExpenseCategories: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
-export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, setStats}: ExpenseModalProps) {    
-    const { t } = useTranslation();
+export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, setStats, setExpenseCategories}: ExpenseModalProps) {    
+    const { t, i18n  } = useTranslation();
     const [categories, setCategories] = useState<SelectItemType[]>([]);
 
     useEffect(() => {
@@ -27,7 +28,7 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
 
         const formatted: SelectItemType[] = data.map((c) => ({
             id: c.id,
-            label: c.fr_name,          
+            label: i18n.language === "ar" ? c.ar_name : c.fr_name,       
         }));
 
         setCategories(formatted);
@@ -92,7 +93,7 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
             <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-lg relative">
                 <h2 className="mb-4 text-lg font-semibold">{t("Add expense")}</h2>
-                <Button color="tertiary" size="md" iconLeading={<XClose data-icon />} onClick={() => setIsModalOpen(false)} aria-label={t("Close")} className="absolute top-3 right-3"/>
+                <Button color="tertiary" size="md" iconLeading={<XClose data-icon />} onClick={() => setIsModalOpen(false)} aria-label={t("Close")} className="absolute top-2 end-2"/>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <Select
@@ -106,7 +107,7 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
                         items={categories}
                     >
                         {(item) => (
-                            <Select.Item id={item.id}  >
+                            <Select.Item dir={i18n.language === "ar" ? "rtl" : "ltr"} id={item.id}  >
                                 {item.label}
                             </Select.Item>
                         )}

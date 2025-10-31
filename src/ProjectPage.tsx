@@ -12,7 +12,7 @@ import { useTranslation } from "react-i18next";
 
 
 export default function ProjectPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const {projectId} = useParams<{ projectId: string }>();
   const id = Number(projectId); 
   const [searchParams] = useSearchParams();
@@ -48,6 +48,7 @@ export default function ProjectPage() {
       window.database.getProjectStats(id),
       window.database.getExpensesByProject(id),
     ]);
+
     setStats(statsResult);
     setExpenses(expensesResult);
     setIsLoading(false);
@@ -121,13 +122,13 @@ export default function ProjectPage() {
 
       </div>
 
-      <ExpensesTabs tabs={[{ id: "all", label: t("All") }, ...expenseCategories.map(c => ({ id: c.id, label: c.fr_name }))]} selectedTabIndex={selectedTabIndex} setSelectedTabIndex={setSelectedTabIndex}/>
+      <ExpensesTabs tabs={[{ id: "all", label: t("All") }, ...expenseCategories.map(c => ({ id: c.id, label: i18n.language === "ar" ? c.ar_name : c.fr_name }))]} selectedTabIndex={selectedTabIndex} setSelectedTabIndex={setSelectedTabIndex} />
 
       <ExpensesTable projectData={{ id, name:projectName! }} expenses={expenses} setIsExpenseModalOpen={setIsExpenseModalOpen} setSelectedExpense={setSelectedExpense} setExpenses={setExpenses} setStats={setStats} selectedTabIndex={selectedTabIndex} />
 
       {/* Modal */}
       {isExpenseModalOpen && (
-        <ExpenseModal setIsModalOpen={setIsExpenseModalOpen} expense={selectedExpense} setExpenses={setExpenses} setStats={setStats}/>
+        <ExpenseModal setIsModalOpen={setIsExpenseModalOpen} expense={selectedExpense} setExpenses={setExpenses} setStats={setStats} setExpenseCategories={setExpenseCategories}/>
       )}
     </div>
   );

@@ -39,19 +39,6 @@ export default function ProjectsList() {
 
   return (
     <>
-      {/* <div className="sticky top-0 z-50 bg-white py-4 px-2 shadow-md flex items-center gap-4">
-        <Input name="name" type="search" icon={SearchMd} placeholder={t("Search by name or description...")} onChange={(value: string) => setSearch(value)}/>
-        <Button 
-          size="md"
-          onClick={() => {
-            setIsModalOpen(true) 
-            setSelectedProject(null)
-          }} 
-          iconLeading={<Plus data-icon />}
-          >{t("Add new project")}
-        </Button>
-      </div> */}
-
       <div className="sticky top-0 z-10 border-b bg-background px-8 py-6 bg-muted">
         <div className="mx-auto flex max-w-6xl gap-4">
           <Input
@@ -76,17 +63,9 @@ export default function ProjectsList() {
 
       <div className="flex flex-wrap justify-center px-8 gap-4 mt-8">
         {filteredProjects.map((project) => (
-          // <ProjectCard
-          //   project={project}
-          //   key={project.id}
-          //   setIsModalOpen={setIsModalOpen} 
-          //   setSelectedProject={setSelectedProject}
-          //   fetchProjects= {fetchProjects}
-          // />
           <ProjectCard
               key={project.id}
               project={project}
-              spent={1200}
               onClick={() => handleProjectClick(project)}
               setIsModalOpen={setIsModalOpen} 
               setSelectedProject={setSelectedProject}
