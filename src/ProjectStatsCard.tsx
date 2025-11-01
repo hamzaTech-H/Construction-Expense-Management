@@ -16,7 +16,7 @@ export const ProjectStatsCard: React.FC<ProjectStatsCardProps> = ({ title, value
   return (
     <div className={`p-4 rounded-lg shadow-md flex-1 min-w-[200px] ${colorClasses}`}>
       <p className="text-sm font-medium opacity-80 mb-1">{title}</p>
-      <p className="text-3xl font-bold">{value} {currencySymbol}</p>
+      <p className="text-3xl font-bold">{new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(value))} {currencySymbol}</p>
     </div>
   );
 };

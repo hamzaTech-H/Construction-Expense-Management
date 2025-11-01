@@ -145,9 +145,9 @@ export async function printProjectReport(projectId: number) {
         </header>
   
         <section class="expense-summary">
-          <div><strong>Montant total :</strong> ${Number(stats.total).toLocaleString('fr-DZ', { style: 'currency', currency: 'DZD' })}</div>
-          <div><strong>Montant payé :</strong> ${Number(stats.paid).toLocaleString('fr-DZ', { style: 'currency', currency: 'DZD' })}</div>
-          <div><strong>Montant restant :</strong> ${Number(stats.remaining).toLocaleString('fr-DZ', { style: 'currency', currency: 'DZD' })}</div>
+          <div><strong>Montant total :</strong> ${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(stats.total)} DA </div>
+          <div><strong>Montant payé :</strong> ${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(stats.paid)} DA </div>
+          <div><strong>Montant restant :</strong> ${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(stats.remaining)} DA</div>
         </section>
   
         <!-- Main expenses table -->
@@ -169,9 +169,9 @@ export async function printProjectReport(projectId: number) {
                   (expense: Expense) => `
                     <tr>
                       <td>${expense.description}</td>
-                      <td style="text-align:center">${expense.amount_total.toLocaleString('fr-DZ')}</td>
-                      <td style="text-align:center">${expense.amount_paid.toLocaleString('fr-DZ')}</td>
-                      <td style="text-align:center">${expense.amount_remaining.toLocaleString('fr-DZ')}</td>
+                      <td style="text-align:center">${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(expense.amount_total)}</td>
+                      <td style="text-align:center">${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(expense.amount_paid)}</td>
+                      <td style="text-align:center">${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(expense.amount_remaining)}</td>
                     </tr>
                   `
                 )
@@ -213,7 +213,7 @@ export async function printExpensePayments(expenseId: number) {
        (payment, i) => `
       <tr>
         <td>${i + 1}</td>
-        <td>${Number(payment.amount).toLocaleString('fr-DZ', { style: 'currency', currency: 'DZD' })}</td>
+        <td>${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(payment.amount)}</td>
         <td>${new Date(payment.date).toLocaleDateString('fr-DZ')}</td>
         <td>${payment.note || '-'}</td>
       </tr>`
@@ -317,9 +317,9 @@ export async function printExpensePayments(expenseId: number) {
       </div>
 
       <section class="expense-summary">
-        <div><strong>Montant total :</strong> ${Number(expense.amount_total).toLocaleString('fr-DZ', { style: 'currency', currency: 'DZD' })}</div>
-        <div><strong>Montant payé :</strong> ${Number(expense.amount_paid).toLocaleString('fr-DZ', { style: 'currency', currency: 'DZD' })}</div>
-        <div><strong>Montant restant :</strong> ${Number(expense.amount_remaining).toLocaleString('fr-DZ', { style: 'currency', currency: 'DZD' })}</div>
+        <div><strong>Montant total :</strong> ${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(expense.amount_total)} DA</div>
+        <div><strong>Montant payé :</strong> ${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(expense.amount_paid)} DA</div>
+        <div><strong>Montant restant :</strong> ${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(expense.amount_remaining)} DA</div>
       </section>
 
       <h2 style="margin-top: 30px;">Détails des paiements</h2>
