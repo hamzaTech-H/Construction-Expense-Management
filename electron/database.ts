@@ -290,17 +290,7 @@ export function addExpense(projectId: number, categoryId: number, description: s
   
   const stmt = db.prepare('INSERT INTO expenses (project_id, category_id, description, date, amount_total, amount_paid, amount_remaining, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
   const result = stmt.run(projectId, categoryId, description, date, amountTotal, amountPaid ,amountRemaining, status);
-   const expenseId = result.lastInsertRowid as number;
-  // const createdExpense = {
-  //   id: result.lastInsertRowid as number,
-  //   category_id: categoryId,
-  //   description,
-  //   date,
-  //   amount_total: amountTotal,
-  //   amount_paid: amountPaid,
-  //   amount_remaining: amountRemainig,
-  //   status
-  // };
+  const expenseId = result.lastInsertRowid as number;
 
   if (!isNotPaid) {
     const today = new Date().toISOString().split('T')[0];

@@ -1,27 +1,98 @@
 import { BrowserWindow, app } from 'electron';
 import path from 'path';
 import fs from 'fs';
-import { getProjectById, getExpensesByProject, getProjectStats } from './database'; // adjust path
+import { getProjectById, getExpensesByProject, getProjectStats, getSettings } from './database'; // adjust path
 import { getExpenseById, getPaymentsByExpense } from './database'; // adjust path
 import { Expense } from '@/types';
+
+// Translation object
+const translations: Record<string, Record<string, string>> = {
+  fr: {
+    companyName: 'Nom de l\'entreprise',
+    owner: 'Propriétaire',
+    address: 'Adresse',
+    email: 'Email',
+    phone: 'Téléphone',
+    projectName: 'Nom du projet',
+    financialReport: 'Rapport Financier du Projet',
+    reportDate: 'Date du rapport',
+    totalAmount: 'Montant total',
+    amountPaid: 'Montant payé',
+    remainingAmount: 'Montant restant',
+    description: 'Description',
+    totalAmountDA: 'Montant Total (DA)',
+    amountPaidDA: 'Montant Payé (DA)',
+    remainingToPayDA: 'Reste à Payer (DA)',
+    noExpensesFound: 'Aucun enregistrement de dépense trouvé pour ce projet.',
+    paymentsReport: 'Rapport de paiements',
+    for: 'Pour',
+    paymentDetails: 'Détails des paiements',
+    amount: 'Montant',
+    date: 'Date',
+    note: 'Note',
+    noPaymentsFound: 'Aucun paiement enregistré pour cette dépense.',
+  },
+  ar: {
+    companyName: 'اسم الشركة',
+    owner: 'المالك',
+    address: 'العنوان',
+    email: 'البريد الإلكتروني',
+    phone: 'رقم الهاتف',
+    projectName: 'اسم المشروع',
+    financialReport: 'التقرير المالي للمشروع',
+    reportDate: 'تاريخ التقرير',
+    totalAmount: 'المبلغ الإجمالي',
+    amountPaid: 'المبلغ المدفوع',
+    remainingAmount: 'المبلغ المتبقي',
+    description: 'الوصف',
+    totalAmountDA: 'المبلغ الإجمالي (دج)',
+    amountPaidDA: 'المبلغ المدفوع (دج)',
+    remainingToPayDA: 'المتبقي للدفع (دج)',
+    noExpensesFound: 'لم يتم العثور على سجلات مصروفات لهذا المشروع.',
+    paymentsReport: 'تقرير المدفوعات',
+    for: 'ل',
+    paymentDetails: 'تفاصيل المدفوعات',
+    amount: 'المبلغ',
+    date: 'التاريخ',
+    note: 'ملاحظة',
+    noPaymentsFound: 'لم يتم تسجيل أي مدفوعات لهذا المصروف.',
+  },
+};
 
 export async function printProjectReport(projectId: number) {
   const project: any = await getProjectById(projectId);
   const expenses: any = await getExpensesByProject(projectId);
   const stats: any = await getProjectStats(projectId);
+  const settingsArray: any = getSettings();
+  const settings = settingsArray && settingsArray.length > 0 ? settingsArray[0] : null;
+
+  // Get language from settings or default to 'fr'
+  const language = settings?.language === 'ar' ? 'ar' : 'fr';
+  const t = translations[language];
 
   const hasExpenses = expenses && expenses.length > 0;
+  
+  // Prepare owner name
+  const ownerFirstName = settings?.owner_first_name || '';
+  const ownerLastName = settings?.owner_last_name || '';
+  const ownerName = [ownerFirstName, ownerLastName].filter(Boolean).join(' ') || '-';
+
+  // RTL support for Arabic
+  const htmlDir = language === 'ar' ? 'rtl' : 'ltr';
+  const textAlign = language === 'ar' ? 'right' : 'left';
+  const currencySymbol = language === 'ar' ? 'دج' : 'DA';
 
   const htmlContent = `
-    <html>
+    <html dir="${htmlDir}">
       <head>
         <meta charset="UTF-8" />
         <style>
   
           body {
-            font-family: 'Times New Roman', serif;
+            font-family: ${language === 'ar' ? "'Arial', 'Tahoma', sans-serif" : "'Times New Roman', serif"};
             padding: 20px;
             color: #333;
+            direction: ${htmlDir};
           }
   
           header {
@@ -72,19 +143,42 @@ export async function printProjectReport(projectId: number) {
             margin: 5px 0;
           }
   
+          .company-info {
+            margin-bottom: 20px;
+            font-size: 13px;
+            line-height: 1.8;
+            color: #333;
+            text-align: ${textAlign};
+          }
+
+          .company-info p {
+            margin: 3px 0;
+          }
+
+          .company-info strong {
+            color: #444;
+            font-weight: 600;
+          }
+
+          .separator {
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+          }
+
           .project-info {
             margin-top: 20px;
             margin-bottom: 25px;
             font-size: 14px;
             line-height: 1.6;
             color: #333;
-            text-align: left;
+            text-align: ${textAlign};
           }
-  
+
           .project-info p {
             margin: 4px 0;
           }
-  
+
           .project-info strong {
             color: #444;
           }
@@ -112,7 +206,7 @@ export async function printProjectReport(projectId: number) {
   
           td {
             font-size: 13px;
-            text-align: left;
+            text-align: ${textAlign};
           }
   
           .stats-section {
@@ -133,21 +227,24 @@ export async function printProjectReport(projectId: number) {
         </style>
       </head>
       <body>
-       <div class="project-info">
-          <p><strong>Nom du projet :</strong> ${project.name}</p>
-          <p><strong>Date de création :</strong> ${project.date}</p>
-          <p><strong>Description :</strong> ${project.description || '-'}</p>
+        <div class="company-info separator">
+          <p><strong>${t.companyName} :</strong> ${settings?.company_name || '-'}</p>
+          <p><strong>${t.owner} :</strong> ${ownerName}</p>
+          <p><strong>${t.address} :</strong> ${settings?.address || '-'}</p>
+          <p><strong>${t.email} :</strong> ${settings?.email || '-'}</p>
+          <p><strong>${t.phone} :</strong> ${settings?.phone_number || '-'}</p>
+          <p><strong>${t.projectName} :</strong> ${project.name}</p>
         </div>
-  
+
         <header>
-          <h1>Rapport Financier du Projet</h1>
-          <p class="report-date">Date du rapport : ${new Date().toLocaleDateString('fr-DZ')}</p>
+          <h1>${t.financialReport}</h1>
+          <p class="report-date">${t.reportDate} : ${new Date().toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-DZ')}</p>
         </header>
-  
+
         <section class="expense-summary">
-          <div><strong>Montant total :</strong> ${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(stats.total)} DA </div>
-          <div><strong>Montant payé :</strong> ${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(stats.paid)} DA </div>
-          <div><strong>Montant restant :</strong> ${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(stats.remaining)} DA</div>
+          <div><strong>${t.totalAmount} :</strong> ${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(stats.total)} ${currencySymbol} </div>
+          <div><strong>${t.amountPaid} :</strong> ${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(stats.paid)} ${currencySymbol} </div>
+          <div><strong>${t.remainingAmount} :</strong> ${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(stats.remaining)} ${currencySymbol}</div>
         </section>
   
         <!-- Main expenses table -->
@@ -157,10 +254,10 @@ export async function printProjectReport(projectId: number) {
           <table>
             <thead>
               <tr>
-                <th>Description</th>
-                <th>Montant Total (DA)</th>
-                <th>Montant Payé (DA)</th>
-                <th>Reste à Payer (DA)</th>
+                <th>${t.description}</th>
+                <th>${t.totalAmountDA}</th>
+                <th>${t.amountPaidDA}</th>
+                <th>${t.remainingToPayDA}</th>
               </tr>
             </thead>
             <tbody>
@@ -180,7 +277,7 @@ export async function printProjectReport(projectId: number) {
           </table>  `
             : `
             <div style="text-align:center; margin-top:50px; color:#777; font-size:15px;">
-              Aucun enregistrement de dépense trouvé pour ce projet.
+              ${t.noExpensesFound}
             </div>
           `
         }
@@ -207,31 +304,43 @@ export async function printProjectReport(projectId: number) {
 export async function printExpensePayments(expenseId: number) {
   const expense: any = await getExpenseById(expenseId);
   const payments = await getPaymentsByExpense(expenseId);
+  const settingsArray: any = getSettings();
+  const settings = settingsArray && settingsArray.length > 0 ? settingsArray[0] : null;
+
+  // Get language from settings or default to 'fr'
+  const language = settings?.language === 'ar' ? 'ar' : 'fr';
+  const t = translations[language];
+
+  // RTL support for Arabic
+  const htmlDir = language === 'ar' ? 'rtl' : 'ltr';
+  const textAlign = language === 'ar' ? 'right' : 'left';
+  const currencySymbol = language === 'ar' ? 'دج' : 'DA';
 
   const formattedPayments = payments
     .map(
        (payment, i) => `
       <tr>
         <td>${i + 1}</td>
-        <td>${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(payment.amount)}</td>
-        <td>${new Date(payment.date).toLocaleDateString('fr-DZ')}</td>
+        <td style="text-align:center">${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(payment.amount)} ${currencySymbol}</td>
+        <td style="text-align:center">${new Date(payment.date).toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-DZ')}</td>
         <td>${payment.note || '-'}</td>
       </tr>`
     )
     .join('');
 
   const htmlContent = `
-  <html>
+  <html dir="${htmlDir}">
     <head>
       <meta charset="UTF-8" />
-      <title>Rapport des paiements</title>
+      <title>${t.paymentsReport}</title>
       <style>
         body {
-          font-family: 'Times New Roman', serif;
+          font-family: ${language === 'ar' ? "'Arial', 'Tahoma', sans-serif" : "'Times New Roman', serif"};
           padding: 40px 50px;
           color: #333;
           line-height: 1.6;
           background: #fff;
+          direction: ${htmlDir};
         }
 
         header {
@@ -291,7 +400,7 @@ export async function printExpensePayments(expenseId: number) {
 
         td {
           font-size: 13px;
-          text-align: left;
+          text-align: ${textAlign};
         }
 
         @media print {
@@ -303,40 +412,40 @@ export async function printExpensePayments(expenseId: number) {
 
     <body>
    
-      <header style="text-align:center; margin-bottom:30px; font-family: 'Georgia', serif;">
+      <header style="text-align:center; margin-bottom:30px; font-family: ${language === 'ar' ? "'Arial', 'Tahoma', sans-serif" : "'Georgia', serif"};">
         <h1>
-          Rapport de paiements
+          ${t.paymentsReport}
         </h1>
         <div style="margin-top:10px; font-size:12px; color:#777;">
-          Date du rapport : ${new Date().toLocaleDateString('fr-DZ')}
+          ${t.reportDate} : ${new Date().toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-DZ')}
         </div>
       </header>
 
-       <div class="project-info">
-        <p><strong>Pour : </strong> ${expense.description || '-'}</p>
+       <div class="project-info" style="text-align:${textAlign};">
+        <p><strong>${t.for} : </strong> ${expense.description || '-'}</p>
       </div>
 
       <section class="expense-summary">
-        <div><strong>Montant total :</strong> ${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(expense.amount_total)} DA</div>
-        <div><strong>Montant payé :</strong> ${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(expense.amount_paid)} DA</div>
-        <div><strong>Montant restant :</strong> ${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(expense.amount_remaining)} DA</div>
+        <div><strong>${t.totalAmount} :</strong> ${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(expense.amount_total)} ${currencySymbol}</div>
+        <div><strong>${t.amountPaid} :</strong> ${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(expense.amount_paid)} ${currencySymbol}</div>
+        <div><strong>${t.remainingAmount} :</strong> ${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(expense.amount_remaining)} ${currencySymbol}</div>
       </section>
 
-      <h2 style="margin-top: 30px;">Détails des paiements</h2>
+      <h2 style="margin-top: 30px; text-align:${textAlign};">${t.paymentDetails}</h2>
       ${
         payments.length
           ? `<table>
               <thead>
                 <tr>
                   <th>#</th>
-                  <th>Montant</th>
-                  <th>Date</th>
-                  <th>Note</th>
+                  <th>${t.amount}</th>
+                  <th>${t.date}</th>
+                  <th>${t.note}</th>
                 </tr>
               </thead>
               <tbody>${formattedPayments}</tbody>
             </table>`
-          : `<p>Aucun paiement enregistré pour cette dépense.</p>`
+          : `<p style="text-align:${textAlign};">${t.noPaymentsFound}</p>`
       }
 
     </body>
@@ -347,9 +456,9 @@ export async function printExpensePayments(expenseId: number) {
   await pdfWindow.loadURL(`data:text/html;charset=UTF-8,${encodeURIComponent(htmlContent)}`);
 
   const pdfBuffer = await pdfWindow.webContents.printToPDF({ printBackground: true, pageSize: 'A4' });
-  const pdfPath = path.join(app.getPath('desktop'), `Paiements_${expenseId}.pdf`);
+  const pdfPath = path.join(app.getPath('desktop'), `${language === 'ar' ? 'مدفوعات' : 'Paiements'}_${expenseId}.pdf`);
   fs.writeFileSync(pdfPath, pdfBuffer);
 
-  const previewWin = new BrowserWindow({ width: 900, height: 800, title: 'Aperçu du rapport des paiements' });
+  const previewWin = new BrowserWindow({ width: 900, height: 800, title: t.paymentsReport });
   previewWin.loadURL(`file://${pdfPath}`);
 }
