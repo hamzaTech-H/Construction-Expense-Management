@@ -71,7 +71,7 @@
   "Total project amount": "Montant total du projet",
   "Total amount paid": "Montant total payé",
   "Remaining amount to pay": "Montant restant à payer",
-  "Please enter a valid number": "Veuillez entrer un nombre valide",
+  "Please enter a valid number (max two decimals)": "Veuillez entrer un nombre valide (maximum deux décimales)",
   "The total cannot be reduced. Delete a payment first": "Le total ne peut pas être réduit. Supprimez d'abord un paiement",
   "Enter expense description": "une description sur la dépense",
   "Total": "Total",
@@ -86,6 +86,8 @@
   "Search by description": "Recherche par description",
   "Status": "Statut",
   "Expenses": "Dépenses",
+  "expenses": "dépenses",
+  "of": "sur",
   "Total Amount (DA)": "Montant Total (DA)",
   "Amount Paid (DA)": "Montant Payé (DA)",
   "Remaining to Pay (DA)": "Reste à Payer (DA)",
@@ -107,5 +109,9 @@
   "Payment added successfully!": "Paiement ajouté avec succès !",
   "Unpaid": "Impayé",      
   "Paid": "Payé",
-  "Partially paid": "Partiel"
+  "Partially paid": "Partiel",
+  "Cannot delete this category because it is used by one or more expenses": "Impossible de supprimer cette catégorie car elle est utilisée par une ou plusieurs dépenses",
+  "The paid amount exceeds the total expense!": "Le montant payé dépasse le total de la dépense!",
+  "The amount cannot be zero": "Le montant ne peut pas être 0",
+  "The total paid amount cannot be less than zero": "Le montant total payé ne peut pas être inférieur à zéro"
 }

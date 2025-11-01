@@ -49,11 +49,20 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const totalAmount = parseFloat(form.total);
-        if (isNaN(totalAmount)) {
-            toast.error(t('Please enter a valid number'));
+
+        // ✅ Allow only numbers (optionally with one decimal point)
+        const value = form.total.trim();
+
+        // ✅ Allow only numbers, optional one dot or comma, max 2 digits after it
+        const validNumberPattern = /^\d+([.,]\d{1,2})?$/;
+
+        if (!validNumberPattern.test(value)) {
+            toast.error(t('Please enter a valid number (max two decimals)'));
             return;
         }
+
+        // Normalize comma to dot and parse
+        const totalAmount = parseFloat(value.replace(',', '.'));
 
         if (expense) {
 
@@ -64,9 +73,59 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
 
             const updatedExpense = await window.database.updateExpense(expense.id, Number(form.categoryId), form.description, form.date, totalAmount);
             
-            setExpenses(prev =>
-                prev.map(exp => exp.id === updatedExpense.id ? updatedExpense : exp)
-            );
+            // setExpenses(prev =>
+            //     prev.map(exp => exp.id === updatedExpense.id ? updatedExpense : exp)
+            // );
+
+            // setExpenseCategories((prevCategories) => {
+            //     const exists = prevCategories.some((c) => c.id === updatedExpense.category_id);
+            //     if (exists) return prevCategories;
+
+            //     const newCategory = {
+            //         id: updatedExpense.category_id,
+            //         fr_name: updatedExpense.category_fr_name,
+            //         ar_name: updatedExpense.category_ar_name,
+            //     };
+
+            //     return [...prevCategories, newCategory];
+            // });
+
+            setExpenses((prev) => {
+                const updatedExpenses = prev.map((exp) =>
+                    exp.id === updatedExpense.id ? updatedExpense : exp
+                );
+
+                // ✅ Update categories based on updated expenses
+                setExpenseCategories((prevCategories) => {
+                    // 1. Collect all category IDs still in use
+                    const usedCategoryIds = new Set(updatedExpenses.map((e) => e.category_id));
+
+                    // 2. Start with existing categories that are still in use
+                    let updatedCategories = prevCategories.filter((c) =>
+                        usedCategoryIds.has(c.id)
+                    );
+
+                    // 3. Add new category if it’s missing
+                    const exists = updatedCategories.some(
+                        (c) => c.id === updatedExpense.category_id
+                    );
+
+                    if (!exists && updatedExpense.category_fr_name && updatedExpense.category_ar_name) {
+                        const newCategory = {
+                            id: updatedExpense.category_id,
+                            fr_name: updatedExpense.category_fr_name,
+                            ar_name: updatedExpense.category_ar_name,
+                        };
+                        updatedCategories = [...updatedCategories, newCategory];
+                    }
+
+                    return updatedCategories;
+                });
+
+                return updatedExpenses;
+            });
+
+
             setStats(prev => {
                 return {
                     total: prev.total - expense.amount_total + updatedExpense.amount_total,
@@ -74,6 +133,9 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
                     remaining: prev.remaining - expense.amount_remaining + updatedExpense.amount_remaining
                 };
             });
+
+             
+
         } else {
             const newExpense = await window.database.addExpense(projectId, Number(form.categoryId), form.description, form.date, totalAmount, form.isNotPaid);
             
@@ -84,6 +146,20 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
                     paid: prev.paid + newExpense.amount_paid,
                     remaining: prev.remaining + newExpense.amount_remaining
                 };
+            });
+
+            setExpenseCategories((prevCategories) => {
+                const exists = prevCategories.some((c) => c.id === newExpense.category_id);
+                if (exists) return prevCategories; // ✅ Skip if category already exists
+
+                // ✅ Add new category with localized names
+                const newCategory = {
+                    id: newExpense.category_id,
+                    fr_name: newExpense.category_fr_name,
+                    ar_name: newExpense.category_ar_name,
+                };
+
+                return [...prevCategories, newCategory];
             });
         }
         setIsModalOpen(false);

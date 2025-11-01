@@ -122,8 +122,14 @@ ipcMain.handle('get-expense-categories-by-project', (_event, projectId) => {
   return getExpenseCategoriesByProject(projectId);
 });
 
-ipcMain.handle('delete-expense-category', (_event, id) => {
-  return deleteExpenseCategory(id);
+ipcMain.handle("delete-expense-category", async (_, id: number) => {
+  try {
+    deleteExpenseCategory(id);
+    return { success: true };
+  } catch (error: any) {
+    console.error("Delete category failed:", error);
+    return { success: false, message: error.message };
+  }
 });
 
 

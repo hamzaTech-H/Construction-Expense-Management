@@ -17,18 +17,16 @@ import { useTranslation } from "react-i18next";
 
 type ExpensesTableProps = {
   expenses: Expense[];
-  projectData: {
-    id: number;
-    name: string;
-  };
+
   setIsExpenseModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectedExpense: React.Dispatch<React.SetStateAction<Expense | null>>
   setExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
   setStats: React.Dispatch<React.SetStateAction<ProjectStats>>;
   selectedTabIndex: string | number;
+  setExpenseCategories: React.Dispatch<React.SetStateAction<any[]>>;
 };
 
-export const ExpensesTable = ({ expenses, projectData, setIsExpenseModalOpen, setSelectedExpense, setExpenses, setStats, selectedTabIndex}: ExpensesTableProps) => {
+export const ExpensesTable = ({ expenses, setIsExpenseModalOpen, setSelectedExpense, setExpenses, setStats, selectedTabIndex, setExpenseCategories}: ExpensesTableProps) => {
     const { t, i18n } = useTranslation();
 
     const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
@@ -148,8 +146,8 @@ export const ExpensesTable = ({ expenses, projectData, setIsExpenseModalOpen, se
             </div>
             <TableCard.Root size="sm" className="flex flex-col">
                 <TableCard.Header  className="flex items-center justify-between"
-                    title={`${t("Project")}: ${projectData.name}`}
-                    badge={`${expenses.length} ${t("expenses")}`}
+                    title={t("Expenses")}
+                    badge={`${sortedItems.length} ${t("of")} ${expenses.length} ${t("expenses")}`}
                 />
 
                 <Table aria-label={t("Expenses")} selectionMode="none" sortDescriptor={sortDescriptor} onSortChange={setSortDescriptor}>
@@ -220,22 +218,22 @@ export const ExpensesTable = ({ expenses, projectData, setIsExpenseModalOpen, se
 
             {isConfirmOpen && contextMenu.expense && (
                                 <ConfirmDeleteModal
-                    setIsConfirmOpen={setIsConfirmOpen}
-                    name={contextMenu.expense.description}
-                    id={contextMenu.expense.id}
-                    entityLabel={t("Expense")}
-                    onDelete={async (id) => {
-                        const exp = contextMenu.expense!;
-                        await window.database.deleteExpense(id);
+                                    setIsConfirmOpen={setIsConfirmOpen}
+                                    name={contextMenu.expense.description}
+                                    id={contextMenu.expense.id}
+                                    entityLabel={t("Expense")}
+                                    onDelete={async (id) => {
+                                        const exp = contextMenu.expense!;
+                                        await window.database.deleteExpense(id);
 
-                        setExpenses(prev => prev.filter(e => e.id !== exp.id));
-                        setStats(prev => prev && {
-                            total: prev.total - exp.amount_total,
-                            paid: prev.paid - exp.amount_paid,
-                            remaining: prev.remaining - exp.amount_remaining
-                        });
-                    }}
-                />
+                                        setExpenses(prev => prev.filter(e => e.id !== exp.id));
+                                        setStats(prev => prev && {
+                                            total: prev.total - exp.amount_total,
+                                            paid: prev.paid - exp.amount_paid,
+                                            remaining: prev.remaining - exp.amount_remaining
+                                        });
+                                    }}
+                                />
             )}
 
             {isExpensePaymentsModalOpen && (

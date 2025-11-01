@@ -16,13 +16,13 @@ interface Props {
 export default function EditableCell({ expense, setExpenses, setStats }: Props) {
   const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState(expense.amount_total);
+  const [value, setValue] = useState(expense.amount_total.toString());
 
   useEffect(() => {
-    setValue(expense.amount_total);
-  }, [expense.amount_total]);
+  setValue(expense.amount_total.toString());
+}, [expense.amount_total]);
 
-  const resetValue = () => setValue(expense.amount_total);
+  const resetValue = () => setValue(expense.amount_total.toString());
 
   const showReductionError = () => {
     toast.error(t("The total cannot be reduced. Delete a payment first"));
@@ -41,53 +41,86 @@ export default function EditableCell({ expense, setExpenses, setStats }: Props) 
     }));
   };
 
-  const handleSave = async () => {
-    setEditing(false);
-    if (value === expense.amount_total) {
-        return
-    }
+const handleSave = async () => {
+  const strValue = value.toString().trim();
 
-    if (value < expense.amount_paid) {
-      showReductionError();
-      return;
-    }
+  // ✅ Allow only numbers, one optional dot or comma, up to 2 decimals
+  const validNumberPattern = /^\d+([.,]\d{0,2})?$/;
 
-    const updatedExpense = await window.database.updateExpense(
-      expense.id,
-      expense.category_id,
-      expense.description,
-      expense.date,
-      value
-    );
+  if (!validNumberPattern.test(strValue)) {
+    toast.error(t("Please enter a valid number (max two decimals)"));
+    return;
+  }
 
-    updateLocalState(updatedExpense);
-  };
+  // ✅ Convert comma to dot and parse to float
+  const totalAmount = parseFloat(strValue.replace(",", "."));
 
-  const handleKeyDown = async (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      await handleSave();
-    } else if (e.key === "Escape") {
-      resetValue();
-      setEditing(false);
-    }
-  };
+  setEditing(false);
 
-  return (
-    <Table.Cell className="font-medium text-primary font-mono">
-      {editing ? (
-        <Input autoFocus isRequired name="total" aria-label="Total" type="number" value={value.toString()}
-          onKeyDown={handleKeyDown}
-          onBlur={handleSave}
-          onChange={(val: string) => setValue(Number(val))}
-        />
-      ) : (
-        <div className="flex items-center gap-x-1">
-          <span>
-            {new Intl.NumberFormat("en-US", {minimumFractionDigits: 2,maximumFractionDigits: 2,}).format(expense.amount_total)}
-          </span>
-          <ButtonUtility size="xs" color="tertiary" tooltip={t("Edit")} icon={Edit01} onClick={() => setEditing(true)} />
-        </div>
-      )}
-    </Table.Cell>
+  // ✅ If unchanged, skip update
+  if (totalAmount === expense.amount_total) {
+    return;
+  }
+
+  // ✅ Prevent reducing below paid amount
+  if (totalAmount < expense.amount_paid) {
+    showReductionError();
+    return;
+  }
+
+  // ✅ Save update
+  const updatedExpense = await window.database.updateExpense(
+    expense.id,
+    expense.category_id,
+    expense.description,
+    expense.date,
+    totalAmount
   );
+
+  updateLocalState(updatedExpense);
+};
+
+const handleKeyDown = async (e: React.KeyboardEvent) => {
+  if (e.key === "Enter") {
+    await handleSave();
+  } else if (e.key === "Escape") {
+    resetValue();
+    setEditing(false);
+  }
+};
+
+return (
+  <Table.Cell className="font-medium text-primary font-mono">
+    {editing ? (
+      <Input
+        autoFocus
+        isRequired
+        name="total"
+        aria-label="Total"
+        type="text" // ✅ switched to text to allow '.' and ','
+        value={value.toString()}
+        onKeyDown={handleKeyDown}
+        onBlur={handleSave}
+        onChange={(val: string) => setValue(val)} // ✅ keep as string for now
+      />
+    ) : (
+      <div className="flex items-center gap-x-1">
+        <span>
+          {new Intl.NumberFormat("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }).format(expense.amount_total)}
+        </span>
+        <ButtonUtility
+          size="xs"
+          color="tertiary"
+          tooltip={t("Edit")}
+          icon={Edit01}
+          onClick={() => setEditing(true)}
+        />
+      </div>
+    )}
+  </Table.Cell>
+);
+
 }

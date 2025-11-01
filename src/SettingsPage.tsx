@@ -103,12 +103,18 @@ export default function SettingsPage() {
     setDeleteDialogOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    if (categoryToDelete) {
-      setCategories(categories.filter(cat => cat.id !== categoryToDelete));
-      window.database.deleteExpenseCategory(Number(categoryToDelete));
+  const handleConfirmDelete = async () => {
+    if (!categoryToDelete) return;
+
+    const result = await window.database.deleteExpenseCategory(Number(categoryToDelete));
+
+    if (result.success) {
+      setCategories(prev => prev.filter(cat => cat.id !== categoryToDelete));
       toast.success(t('Category deleted successfully'));
+    } else {
+      toast.error(t(result.message || 'Failed to delete category'));
     }
+
     setDeleteDialogOpen(false);
     setCategoryToDelete(null);
   };

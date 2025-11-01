@@ -42,3 +42,9 @@ export type Payment = {
   date: string;
   note: string;
 }
+
+export type ExpenseCategory = {
+  id: number;
+  fr_name: string;
+  ar_name: string;
+}

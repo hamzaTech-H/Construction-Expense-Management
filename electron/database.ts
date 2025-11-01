@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import { ExpenseStatus } from "../shared/expense";
-import { Payment } from '@/types';
+import { ExpenseCategory, Payment } from '@/types';
 import Decimal from 'decimal.js';
 
 // Ensure database file is stored properly
@@ -155,7 +155,7 @@ db.prepare(`
        amount_remaining = amount_total - (
         SELECT COALESCE(SUM(amount), 0)
         FROM payments
-        WHERE expense_id = OLD.expense_id
+        WHERE expense_id = NEW.expense_id
       ),
       status = CASE
         WHEN (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE expense_id = NEW.expense_id) = 0 THEN '${ExpenseStatus.NOT_PAID}'
@@ -254,6 +254,13 @@ export function getExpenseCategoriesByProject(projectId: number) {
 }
 
 export function deleteExpenseCategory(id: number) {
+  const checkStmt = db.prepare('SELECT COUNT(*) AS count FROM expenses WHERE category_id = ?');
+  const { count } = checkStmt.get(id) as { count: number };
+
+  if (count > 0) {
+    throw new Error('Cannot delete this category because it is used by one or more expenses');
+  }
+
   const stmt = db.prepare('DELETE FROM expense_categories WHERE id = ?');
   return stmt.run(id);
 }
@@ -271,48 +278,69 @@ export function getExpenseById(id: number) {
 
 export function addExpense(projectId: number, categoryId: number, description: string, date: string, amountTotal: number, isNotPaid: boolean) {
   let amountPaid = 0;
-  let amountRemainig = 0;
+  let amountRemaining = 0;
   let status = ExpenseStatus.NOT_PAID
 
   if (!isNotPaid) {
     amountPaid = amountTotal;
     status = ExpenseStatus.PAID;
   } else {
-    amountRemainig = amountTotal;
+    amountRemaining = amountTotal;
   }
   
   const stmt = db.prepare('INSERT INTO expenses (project_id, category_id, description, date, amount_total, amount_paid, amount_remaining, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
-  const result = stmt.run(projectId, categoryId, description, date, amountTotal, amountPaid ,amountRemainig, status);
-  const createdExpense = {
-    id: result.lastInsertRowid as number,
-    category_id: categoryId,
-    description,
-    date,
-    amount_total: amountTotal,
-    amount_paid: amountPaid,
-    amount_remaining: amountRemainig,
-    status
-  };
+  const result = stmt.run(projectId, categoryId, description, date, amountTotal, amountPaid ,amountRemaining, status);
+   const expenseId = result.lastInsertRowid as number;
+  // const createdExpense = {
+  //   id: result.lastInsertRowid as number,
+  //   category_id: categoryId,
+  //   description,
+  //   date,
+  //   amount_total: amountTotal,
+  //   amount_paid: amountPaid,
+  //   amount_remaining: amountRemainig,
+  //   status
+  // };
 
   if (!isNotPaid) {
     const today = new Date().toISOString().split('T')[0];
     const stmt = db.prepare('INSERT INTO payments (expense_id, amount, date, note) VALUES (?, ?, ?, ?)');
-    stmt.run(createdExpense.id, amountTotal, today, '');
+    stmt.run(expenseId, amountTotal, today, '');
   }
 
-  return createdExpense;
+    const categoryStmt = db.prepare(`
+    SELECT id, fr_name, ar_name
+    FROM expense_categories
+    WHERE id = ?
+  `);
+  const category = categoryStmt.get(categoryId) as ExpenseCategory | undefined ;
+
+  // ✅ Return complete expense with category names
+  return {
+    id: expenseId,
+    project_id: projectId,
+    category_id: categoryId,
+    category_fr_name: category?.fr_name ?? "",
+    category_ar_name: category?.ar_name ?? "",
+    description,
+    date,
+    amount_total: amountTotal,
+    amount_paid: amountPaid,
+    amount_remaining: amountRemaining,
+    status,
+  };
 }
 
 export function updateExpense(id: number, categoryId:number ,description: string, date: string, amountTotal: number) {
   let amountPaid = 0;
-  let amountRemainig = 0;
+  let amountRemaining = 0;
   let status = ExpenseStatus.NOT_PAID
 
   const expense:any = getExpenseById(id);
 
   if (expense.status === ExpenseStatus.NOT_PAID) {
     amountPaid = 0;
-    amountRemainig = new Decimal(amountTotal).toNumber();
+    amountRemaining = new Decimal(amountTotal).toNumber();
     status = ExpenseStatus.NOT_PAID;
 } else {
     const amountRemainingDecimal = new Decimal(expense.amount_remaining)
@@ -320,26 +348,36 @@ export function updateExpense(id: number, categoryId:number ,description: string
         .minus(new Decimal(expense.amount_total));
 
     amountPaid = expense.amount_paid;
-    amountRemainig = amountRemainingDecimal.toNumber();
+    amountRemaining = amountRemainingDecimal.toNumber();
 
     status = new Decimal(amountTotal).equals(expense.amount_paid)
         ? ExpenseStatus.PAID
         : ExpenseStatus.PARTIALLY_PAID;
 }
   const stmt = db.prepare('UPDATE expenses SET category_id = ?, description = ?, date = ?, amount_total = ?, amount_paid = ?, amount_remaining = ?, status = ? WHERE id = ?');
-  stmt.run(categoryId, description, date, amountTotal, amountPaid, amountRemainig, status, id);
-  const updatedExpense = {
+  stmt.run(categoryId, description, date, amountTotal, amountPaid, amountRemaining, status, id);
+
+  const categoryStmt = db.prepare(`
+    SELECT id, fr_name, ar_name
+    FROM expense_categories
+    WHERE id = ?
+  `);
+  
+  const category = categoryStmt.get(categoryId) as ExpenseCategory | undefined ;
+
+  return {
     id: id,
     category_id: categoryId,
+    category_fr_name: category?.fr_name ?? "",
+    category_ar_name: category?.ar_name ?? "",
     description,
     date,
     amount_total: amountTotal,
     amount_paid: amountPaid,
-    amount_remaining: amountRemainig,
-    status
+    amount_remaining: amountRemaining,
+    status,
   };
 
-  return updatedExpense;
 }
 
 export function deleteExpense(id: number) {
@@ -360,18 +398,31 @@ export function getPaymentsByExpense(expenseId: number) {
 
 export function addPayment(expenseId: number, amount: number, date: string, note: string) {
   const expense:any = getExpenseById(expenseId);
+  let status;
+  let newAmountPaid;
 
-  if (amount <= 0) throw new Error("Le montant doit être supérieur à 0");
-  
-  const newAmountPaid = expense.amount_paid + amount;
-  if (newAmountPaid > expense.amount_total)
-    throw new Error("Le montant payé dépasse le total de la dépense !");
-  
-  const status =
-    newAmountPaid === expense.amount_total
-      ? ExpenseStatus.PAID
-      : ExpenseStatus.PARTIALLY_PAID;
 
+  if (amount === 0) throw new Error("The amount cannot be zero");
+  
+  if (amount < 0) {
+    newAmountPaid = expense.amount_paid + amount;
+    if (newAmountPaid < 0)
+      throw new Error("The total paid amount cannot be less than zero");
+    status =
+      newAmountPaid === 0
+        ? ExpenseStatus.NOT_PAID
+        : ExpenseStatus.PARTIALLY_PAID;
+  } else {
+    newAmountPaid = expense.amount_paid + amount;
+    if (newAmountPaid > expense.amount_total)
+      throw new Error("The paid amount exceeds the total expense!");
+  
+    status =
+      newAmountPaid === expense.amount_total
+        ? ExpenseStatus.PAID
+        : ExpenseStatus.PARTIALLY_PAID;
+  }
+ 
   const stmt = db.prepare('INSERT INTO payments (expense_id, amount, date, note) VALUES (?, ?, ?, ?)');
   const result = stmt.run(expenseId, amount, date, note);
   const paymentId = result.lastInsertRowid;
@@ -379,8 +430,8 @@ export function addPayment(expenseId: number, amount: number, date: string, note
   return { paymentId, newAmountPaid, remaining: expense.amount_total - newAmountPaid, status };
 }
 
-export function updatePayment(id: number, amount: number, date: string, note: string) {
-  if (amount <= 0) throw new Error("Le montant doit être supérieur à 0");
+export function updatePayment(id: number, amount: number, date: string, note: string) { // i am using triggers to update expense
+  if (amount === 0) throw new Error("The amount cannot be zero");
 
   const payment: any = db.prepare('SELECT * FROM payments WHERE id = ?').get(id);
 
@@ -388,8 +439,12 @@ export function updatePayment(id: number, amount: number, date: string, note: st
 
   const difference = amount - payment.amount;
 
+  if (amount < 0 && expense.amount_paid + difference < 0) {
+    throw new Error("The total paid amount cannot be less than zero");
+  }
+
   if (difference > 0 && expense.amount_paid + difference > expense.amount_total) {
-    throw new Error("Le montant payé dépasse le total de la dépense !");
+    throw new Error("The paid amount exceeds the total expense!");
   }
 
   const stmt = db.prepare(`UPDATE payments SET amount = ?, date = ?, note = ? WHERE id = ?`);

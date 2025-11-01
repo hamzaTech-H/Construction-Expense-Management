@@ -69,7 +69,7 @@ export default function ExpensePaymentsModal({ setIsPaymentsModalOpen, expense, 
             } catch (error:any) {
                 const messageParts = error.message.split(': ');
                 const backendMessage = messageParts[messageParts.length - 1];
-                toast.error(backendMessage);
+                toast.error(t(backendMessage));
             }
             
         } else {
@@ -90,7 +90,7 @@ export default function ExpensePaymentsModal({ setIsPaymentsModalOpen, expense, 
             } catch (error:any) {
                 const messageParts = error.message.split(': ');
                 const backendMessage = messageParts[messageParts.length - 1];
-                toast.error(backendMessage);
+                toast.error(t(backendMessage));
             }
         }
     };
@@ -107,7 +107,7 @@ export default function ExpensePaymentsModal({ setIsPaymentsModalOpen, expense, 
                 iconLeading={<XClose data-icon />}
                 onClick={() => setIsPaymentsModalOpen(false)}
                 aria-label={t("Close")}
-                className="absolute top-3 right-3"
+                className="absolute top-2 end-2"
             />
 
             {/* Payments list */}

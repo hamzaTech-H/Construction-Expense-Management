@@ -18,8 +18,11 @@ export default function ProjectPage() {
   const [searchParams] = useSearchParams();
   
   const projectName = searchParams.get('name'); 
+
+  const [tabs, setTabs] = useState<{ id: string | number; label: string }[]>([]);
   
   const [expenseCategories, setExpenseCategories] = useState<any[]>([]);
+  
   useEffect(() => {
     async function fetchCategories() {
       const categories = await window.database.getExpenseCategoriesByProject(Number(projectId));
@@ -29,6 +32,18 @@ export default function ProjectPage() {
 
     fetchCategories();
   }, [projectId]);
+
+  useEffect(() => {
+    const generatedTabs = [
+      { id: "all", label: t("All") },
+      ...expenseCategories.map(c => ({
+        id: c.id,
+        label: i18n.language === "ar" ? c.ar_name : c.fr_name,
+      })),
+    ];
+
+    setTabs(generatedTabs);
+  }, [expenseCategories]);
 
   const [selectedTabIndex, setSelectedTabIndex] = useState<Key>("all");
 
@@ -76,55 +91,64 @@ export default function ProjectPage() {
     <div className="h-screen flex flex-col py-4 px-8" id='rapport'>
       
       {/* Project stats row */}
-    <div className="flex flex-wrap gap-6 mb-4">
-      {stats ? (
-        <>
-          <ProjectStatsCard
-            title={t("Total project amount")}
-            value={stats.total}
-            colorClasses="bg-blue-100 text-blue-900 border-l-4 border-blue-500"
-          />
-          <ProjectStatsCard
-            title={t("Total amount paid")}
-            value={stats.paid}
-            colorClasses="bg-green-100 text-green-900 border-l-4 border-green-500"
-          />
-          <ProjectStatsCard
-            title={t("Remaining amount to pay")}
-            value={stats.remaining}
-            colorClasses="bg-red-100 text-red-900 border-l-4 border-red-500"
-          />
-        </>
-      ) : (
-        <div className="text-gray-400 animate-pulse">{t("Loading stats...")}</div>
-      )}
-    </div>
+      <div className="flex flex-wrap gap-6 mb-4">
+        {stats ? (
+          <>
+            <ProjectStatsCard
+              title={t("Total project amount")}
+              value={stats.total.toFixed(2)}
+              colorClasses="bg-blue-100 text-blue-900 border-l-4 border-blue-500"
+            />
+            <ProjectStatsCard
+              title={t("Total amount paid")}
+              value={stats.paid.toFixed(2)}
+              colorClasses="bg-green-100 text-green-900 border-l-4 border-green-500"
+            />
+            <ProjectStatsCard
+              title={t("Remaining amount to pay")}
+              value={stats.remaining.toFixed(2)}
+              colorClasses="bg-red-100 text-red-900 border-l-4 border-red-500"
+            />
+          </>
+        ) : (
+          <div className="text-gray-400 animate-pulse">{t("Loading stats...")}</div>
+        )}
+      </div>
     
-      <div className="flex items-center justify-end gap-3">
-        <Button
-          color="secondary"
-          size="md"
-          iconLeading={<Printer data-icon />}
-          onClick={handlePrint}
-        >
-          {t("Print")}
-        </Button>
+      <div className="flex items-center justify-between mb-5">
+        {/* Left side: title + description */}
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800">{projectName}</h2>
+          <p className="text-base text-gray-600 mt-1">{t("Manage and track all project expenses")}</p>
+        </div>
+
+        {/* Right side: buttons */}
+        <div className="flex items-center gap-3">
           <Button
-              size="md"
-              iconLeading={<Plus data-icon />}
-              onClick={() => {
-              setSelectedExpense(null)
-              setIsExpenseModalOpen(true)
-              }}
+            color="secondary"
+            size="md"
+            iconLeading={<Printer data-icon />}
+            onClick={handlePrint}
           >
-              {t("Add expense")}
+            {t("Print")}
           </Button>
 
+          <Button
+            size="md"
+            iconLeading={<Plus data-icon />}
+            onClick={() => {
+              setSelectedExpense(null);
+              setIsExpenseModalOpen(true);
+            }}
+          >
+            {t("Add expense")}
+          </Button>
+        </div>
       </div>
 
-      <ExpensesTabs tabs={[{ id: "all", label: t("All") }, ...expenseCategories.map(c => ({ id: c.id, label: i18n.language === "ar" ? c.ar_name : c.fr_name }))]} selectedTabIndex={selectedTabIndex} setSelectedTabIndex={setSelectedTabIndex} />
+      <ExpensesTabs tabs={tabs} selectedTabIndex={selectedTabIndex} setSelectedTabIndex={setSelectedTabIndex} />
 
-      <ExpensesTable projectData={{ id, name:projectName! }} expenses={expenses} setIsExpenseModalOpen={setIsExpenseModalOpen} setSelectedExpense={setSelectedExpense} setExpenses={setExpenses} setStats={setStats} selectedTabIndex={selectedTabIndex} />
+      <ExpensesTable expenses={expenses} setIsExpenseModalOpen={setIsExpenseModalOpen} setSelectedExpense={setSelectedExpense} setExpenses={setExpenses} setStats={setStats} selectedTabIndex={selectedTabIndex} setExpenseCategories={setExpenseCategories}/>
 
       {/* Modal */}
       {isExpenseModalOpen && (

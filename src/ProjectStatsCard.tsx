@@ -4,7 +4,7 @@ interface ProjectStatsCardProps {
   /** The primary label for the card (e.g., "Total Budget") */
   title: string;
   /** The main numeric value (e.g., "$15,000") */
-  value: number;
+  value: string;
   /** Tailwind CSS classes for background and border color */
   colorClasses: string;
 }
