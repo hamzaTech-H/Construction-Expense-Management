@@ -233,12 +233,12 @@ export async function printProjectReport(projectId: number) {
           <p><strong>${t.address} :</strong> ${settings?.address || '-'}</p>
           <p><strong>${t.email} :</strong> ${settings?.email || '-'}</p>
           <p><strong>${t.phone} :</strong> ${settings?.phone_number || '-'}</p>
-          <p><strong>${t.projectName} :</strong> ${project.name}</p>
         </div>
 
         <header>
           <h1>${t.financialReport}</h1>
           <p class="report-date">${t.reportDate} : ${new Date().toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-DZ')}</p>
+          <p style="margin-top: 10px; font-size: 14px; color: #555; text-align: ${textAlign};"><strong>${t.projectName} :</strong> ${project.name}</p>
         </header>
 
         <section class="expense-summary">

@@ -23,10 +23,9 @@ type ExpensesTableProps = {
   setExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
   setStats: React.Dispatch<React.SetStateAction<ProjectStats>>;
   selectedTabIndex: string | number;
-  setExpenseCategories: React.Dispatch<React.SetStateAction<any[]>>;
 };
 
-export const ExpensesTable = ({ expenses, setIsExpenseModalOpen, setSelectedExpense, setExpenses, setStats, selectedTabIndex, setExpenseCategories}: ExpensesTableProps) => {
+export const ExpensesTable = ({ expenses, setIsExpenseModalOpen, setSelectedExpense, setExpenses, setStats, selectedTabIndex}: ExpensesTableProps) => {
     const { t, i18n } = useTranslation();
 
     const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({

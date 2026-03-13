@@ -18,6 +18,7 @@ export default function ProjectPage() {
   const [searchParams] = useSearchParams();
   
   const projectName = searchParams.get('name'); 
+  const projectDescription =  searchParams.get('description'); 
 
   const [tabs, setTabs] = useState<{ id: string | number; label: string }[]>([]);
   
@@ -119,7 +120,7 @@ export default function ProjectPage() {
         {/* Left side: title + description */}
         <div>
           <h2 className="text-2xl font-bold text-gray-800">{projectName}</h2>
-          <p className="text-base text-gray-600 mt-1">{t("Manage and track all project expenses")}</p>
+          <p className="text-base text-gray-600 mt-1">{projectDescription}</p>
         </div>
 
         {/* Right side: buttons */}
@@ -148,7 +149,7 @@ export default function ProjectPage() {
 
       <ExpensesTabs tabs={tabs} selectedTabIndex={selectedTabIndex} setSelectedTabIndex={setSelectedTabIndex} />
 
-      <ExpensesTable expenses={expenses} setIsExpenseModalOpen={setIsExpenseModalOpen} setSelectedExpense={setSelectedExpense} setExpenses={setExpenses} setStats={setStats} selectedTabIndex={selectedTabIndex} setExpenseCategories={setExpenseCategories}/>
+      <ExpensesTable expenses={expenses} setIsExpenseModalOpen={setIsExpenseModalOpen} setSelectedExpense={setSelectedExpense} setExpenses={setExpenses} setStats={setStats} selectedTabIndex={selectedTabIndex}/>
 
       {/* Modal */}
       {isExpenseModalOpen && (

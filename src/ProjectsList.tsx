@@ -34,7 +34,7 @@ export default function ProjectsList() {
   }, [projects, search]);
 
  const handleProjectClick = (project: Project) => {
-  navigate(`/projects/${project.id}?name=${project.name}`);
+  navigate(`/projects/${project.id}?name=${project.name}&description=${project.description}`);
 };
 
   return (
