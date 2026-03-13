@@ -336,7 +336,7 @@ export default function SettingsPage() {
               {t("Enter the category name in both French and Arabic")}
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSaveCategory}>
+          <form onSubmit={(e) => { e.preventDefault(); handleSaveCategory(); }}>
             <div className="space-y-4 py-4">
               <Input 
                 isRequired
