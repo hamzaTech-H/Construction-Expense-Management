@@ -112,5 +112,21 @@
   "Cannot delete this category because it is used by one or more expenses": "لا يمكن حذف هذه الفئة لأنها مستخدمة في مصروف واحد أو أكثر",
   "The paid amount exceeds the total expense!": "المبلغ المدفوع يتجاوز إجمالي المصروف!",
   "The amount cannot be zero": "لا يمكن أن يكون المبلغ صفراً",
-  "The total paid amount cannot be less than zero": "لا يمكن أن يكون إجمالي المبلغ المدفوع أقل من الصفر"
+  "The total paid amount cannot be less than zero": "لا يمكن أن يكون إجمالي المبلغ المدفوع أقل من الصفر",
+  "Backup Now": "نسخ احتياطي الآن",
+  "Restore Backup": "استعادة نسخة احتياطية",
+  "Backup uploaded to Google Drive.": "تم رفع النسخة الاحتياطية إلى Google Drive.",
+  "Backup failed.": "فشل النسخ الاحتياطي.",
+  "No backups found in Google Drive.": "لم يتم العثور على نسخ احتياطية في Google Drive.",
+  "Failed to list backups.": "فشل في عرض النسخ الاحتياطية.",
+  "Restoring backup. The app will restart.": "جاري الاستعادة. سيتم إعادة تشغيل التطبيق.",
+  "Restore failed.": "فشلت الاستعادة.",
+  "Backup deleted from Google Drive.": "تم حذف النسخة الاحتياطية من Google Drive.",
+  "Failed to delete backup.": "فشل في حذف النسخة الاحتياطية.",
+  "Select a backup from Google Drive to restore. The app will restart with the selected database.": "اختر نسخة احتياطية من Google Drive للاستعادة. سيتم إعادة تشغيل التطبيق بقاعدة البيانات المختارة.",
+  "Loading backups...": "جاري تحميل النسخ الاحتياطية...",
+  "Delete backup from Google Drive": "حذف النسخة الاحتياطية من Google Drive",
+  "Deleting...": "جاري الحذف...",
+  "Restore": "استعادة",
+  "Restoring...": "جاري الاستعادة..."
 }

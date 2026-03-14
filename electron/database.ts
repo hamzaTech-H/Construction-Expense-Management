@@ -7,6 +7,16 @@ import Decimal from 'decimal.js';
 // Ensure database file is stored properly
 const dbPath = path.join(process.cwd(), 'database.db');
 
+/** Returns the path to the SQLite database file (for backup/restore). */
+export function getDbPath(): string {
+  return dbPath;
+}
+
+/** Closes the database connection. Call before replacing the DB file (e.g. restore). */
+export function closeDatabase(): void {
+  db.close();
+}
+
 // Create connection
 const db = new Database(dbPath);
 

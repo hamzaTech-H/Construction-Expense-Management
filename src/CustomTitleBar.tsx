@@ -1,5 +1,9 @@
-import { X, Minus, Maximize2, Settings, ArrowLeft } from 'lucide-react';
+import { X, Minus, Maximize2, Settings, ArrowLeft, CloudUpload, CloudDownload } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
+import { RestoreBackupModal } from './RestoreBackupModal';
 
 interface CustomTitleBarProps {
   title?: string;
@@ -8,6 +12,32 @@ interface CustomTitleBarProps {
 export function CustomTitleBar({ title = "Progest" }: CustomTitleBarProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
+  const [backupLoading, setBackupLoading] = useState(false);
+  const [restoreModalOpen, setRestoreModalOpen] = useState(false);
+
+  const handleBack = () => {
+    navigate(-1);
+  };
+
+  const handleBackupNow = async () => {
+    if (!window.googleDrive || backupLoading) return;
+    setBackupLoading(true);
+    try {
+      const res = await window.googleDrive.backupNow();
+      if (res.success) {
+        toast.success(t('Backup uploaded to Google Drive.'));
+      } else {
+        toast.error(res.error || t('Backup failed.'));
+      }
+    } finally {
+      setBackupLoading(false);
+    }
+  };
+
+  const handleRestoreClick = () => {
+    setRestoreModalOpen(true);
+  };
 
   const handleMinimize = () => {
     window.electronAPI?.minimizeWindow();
@@ -22,13 +52,9 @@ export function CustomTitleBar({ title = "Progest" }: CustomTitleBarProps) {
   };
 
   const handleSettings = () => {
-  if (location.pathname !== '/settings') {
-    navigate('/settings');
-  }
-};
-
-  const handleBack = () => {
-    navigate(-1);
+    if (location.pathname !== '/settings') {
+      navigate('/settings');
+    }
   };
 
   const canGoBack = location.pathname !== '/';
@@ -76,6 +102,27 @@ export function CustomTitleBar({ title = "Progest" }: CustomTitleBarProps) {
           <Settings className="w-4 h-4 text-gray-600 dark:text-gray-400" />
         </button>
 
+        {/* Google Drive Backup - only in Electron */}
+        {typeof window !== 'undefined' && window.googleDrive && (
+          <>
+            <button
+              onClick={handleBackupNow}
+              disabled={backupLoading}
+              className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors disabled:opacity-50"
+              title={t('Backup Now')}
+            >
+              <CloudUpload className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+            </button>
+            <button
+              onClick={handleRestoreClick}
+              className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+              title={t('Restore Backup')}
+            >
+              <CloudDownload className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+            </button>
+          </>
+        )}
+
         {/* Window controls */}
         <button
           onClick={handleMinimize}
@@ -101,6 +148,8 @@ export function CustomTitleBar({ title = "Progest" }: CustomTitleBarProps) {
           <X className="w-4 h-4 text-gray-600 dark:text-gray-400" />
         </button>
       </div>
+
+      <RestoreBackupModal isOpen={restoreModalOpen} onClose={() => setRestoreModalOpen(false)} />
     </div>
   );
 }

@@ -113,5 +113,21 @@
   "Cannot delete this category because it is used by one or more expenses": "Impossible de supprimer cette catégorie car elle est utilisée par une ou plusieurs dépenses",
   "The paid amount exceeds the total expense!": "Le montant payé dépasse le total de la dépense!",
   "The amount cannot be zero": "Le montant ne peut pas être 0",
-  "The total paid amount cannot be less than zero": "Le montant total payé ne peut pas être inférieur à zéro"
+  "The total paid amount cannot be less than zero": "Le montant total payé ne peut pas être inférieur à zéro",
+  "Backup Now": "Sauvegarder maintenant",
+  "Restore Backup": "Restaurer une sauvegarde",
+  "Backup uploaded to Google Drive.": "Sauvegarde envoyée sur Google Drive.",
+  "Backup failed.": "Échec de la sauvegarde.",
+  "No backups found in Google Drive.": "Aucune sauvegarde trouvée sur Google Drive.",
+  "Failed to list backups.": "Impossible de lister les sauvegardes.",
+  "Restoring backup. The app will restart.": "Restauration en cours. L'application va redémarrer.",
+  "Restore failed.": "Échec de la restauration.",
+  "Backup deleted from Google Drive.": "Sauvegarde supprimée de Google Drive.",
+  "Failed to delete backup.": "Impossible de supprimer la sauvegarde.",
+  "Select a backup from Google Drive to restore. The app will restart with the selected database.": "Choisissez une sauvegarde sur Google Drive à restaurer. L'application redémarrera avec la base sélectionnée.",
+  "Loading backups...": "Chargement des sauvegardes...",
+  "Delete backup from Google Drive": "Supprimer la sauvegarde de Google Drive",
+  "Deleting...": "Suppression...",
+  "Restore": "Restaurer",
+  "Restoring...": "Restauration..."
 }

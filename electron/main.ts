@@ -1,8 +1,21 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
-import { fileURLToPath } from 'node:url'
-import { printProjectReport, printExpensePayments } from './printReports';
 import path from 'node:path'
-import { 
+import { fileURLToPath } from 'node:url'
+import { config } from 'dotenv'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+config({ path: path.join(__dirname, '..', '.env') })
+
+import { app, BrowserWindow, ipcMain } from 'electron'
+import { printProjectReport, printExpensePayments } from './printReports';
+import {
+  backupNow as gdBackupNow,
+  listBackups,
+  restoreFromBackup,
+  deleteBackup,
+  ensureAuth,
+  hasStoredTokens,
+} from './googleDrive';
+import {
   getAllProjects, getProjectById, addProject, updateProject, deleteProject, getProjectStats,
   getExpensesByProject, getExpenseById, addExpense, updateExpense, deleteExpense, updateExpenseAmounts,
   getPaymentsByExpense, addPayment, deletePayment,
@@ -14,8 +27,6 @@ import {
   getSettings,
   updateSettings
 } from './database';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 process.env.APP_ROOT = path.join(__dirname, '..')
 
@@ -204,4 +215,31 @@ ipcMain.on('window-close', () => {
   if (win) {
     win.close();
   }
+});
+
+// ===== GOOGLE DRIVE BACKUP =====
+ipcMain.handle('google-drive-has-auth', () => hasStoredTokens());
+
+ipcMain.handle('google-drive-backup-now', async () => {
+  const auth = await ensureAuth();
+  if (!auth.success) return auth;
+  return gdBackupNow();
+});
+
+ipcMain.handle('google-drive-list-backups', async () => {
+  const auth = await ensureAuth();
+  if (!auth.success) return auth;
+  return listBackups();
+});
+
+ipcMain.handle('google-drive-restore', async (_e, fileId: string) => {
+  const auth = await ensureAuth();
+  if (!auth.success) return auth;
+  return restoreFromBackup(fileId);
+});
+
+ipcMain.handle('google-drive-delete-backup', async (_e, fileId: string) => {
+  const auth = await ensureAuth();
+  if (!auth.success) return auth;
+  return deleteBackup(fileId);
 });

@@ -246,7 +246,6 @@ export default function SettingsPage() {
           </Card>
 
         </form>
-       
 
         {/* Expense Categories Section */}
         

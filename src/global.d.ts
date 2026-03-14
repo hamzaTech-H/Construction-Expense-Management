@@ -58,6 +58,14 @@ declare global {
       maximizeWindow: () => void;
       closeWindow: () => void;
     };
+
+    googleDrive: {
+      hasAuth: () => Promise<boolean>;
+      backupNow: () => Promise<{ success: boolean; error?: string }>;
+      listBackups: () => Promise<{ success: boolean; files?: { id: string; name: string; createdTime?: string }[]; error?: string }>;
+      restore: (fileId: string) => Promise<{ success: boolean; error?: string }>;
+      deleteBackup: (fileId: string) => Promise<{ success: boolean; error?: string }>;
+    };
   }
 
 }

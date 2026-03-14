@@ -26,6 +26,11 @@
     transition-timing-function: inherit;
 }
 
+/* Arabic script: RTL-friendly font stack for correct shaping and display */
+.font-arabic {
+    font-family: "Segoe UI", Tahoma, "Arabic Typesetting", "Traditional Arabic", "Arial", sans-serif;
+}
+
 html,
 body {
     font-family: var(--font-body);
