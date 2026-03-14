@@ -7,6 +7,7 @@ import { useParams } from "react-router-dom";
 import { Expense, ProjectStats} from "./types";
 import { ExpenseStatus } from "../shared/expense";
 import toast from "react-hot-toast";
+import { FocusScope } from "react-aria";
 import { Select, SelectItemType } from "./components/base/select/select";
 import { useTranslation } from "react-i18next";
 
@@ -213,6 +214,7 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+            <FocusScope contain restoreFocus autoFocus={false}>
             <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-lg relative">
                 <h2 className="mb-4 text-lg font-semibold">{t("Add expense")}</h2>
                 <Button color="tertiary" size="md" iconLeading={<XClose data-icon />} onClick={() => setIsModalOpen(false)} aria-label={t("Close")} className="absolute top-2 end-2"/>
@@ -259,6 +261,7 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
                     </div>
                 </form>
             </div>
+            </FocusScope>
         </div>
     )
 }
