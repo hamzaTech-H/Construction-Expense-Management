@@ -1,7 +1,7 @@
 import { Button } from "@/components/base/buttons/button";
 import { Input } from "@/components/base/input/input";
 import { XClose } from '@untitledui/icons';
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Checkbox } from "@/components/base/checkbox/checkbox";
 import { useParams } from "react-router-dom";
 import { Expense, ProjectStats} from "./types";
@@ -67,6 +67,18 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
             categoryId: exists ? tabId : undefined
         }));
     }, [expense, categories, activeTabCategoryId]);
+
+    const formRef = useRef<HTMLFormElement>(null);
+
+    useEffect(() => {
+        const frame = requestAnimationFrame(() => {
+            const first = formRef.current?.querySelector<HTMLElement>(
+                'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [role="combobox"], [tabindex="0"]'
+            );
+            first?.focus();
+        });
+        return () => cancelAnimationFrame(frame);
+    }, []);
 
     const handleChange = (field: keyof typeof form, value: string | number | boolean) =>
         setForm(prev => ({ ...prev, [field]: value }));
@@ -195,7 +207,7 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
                 <h2 className="mb-4 text-lg font-semibold">{t("Add expense")}</h2>
                 <Button color="tertiary" size="md" iconLeading={<XClose data-icon />} onClick={() => setIsModalOpen(false)} aria-label={t("Close")} className="absolute top-2 end-2"/>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
                     <Select
                         selectedKey={form.categoryId != null ? String(form.categoryId) : undefined}
                         onSelectionChange={(key) =>
