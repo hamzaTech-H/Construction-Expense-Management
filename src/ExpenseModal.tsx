@@ -80,6 +80,16 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
         return () => cancelAnimationFrame(frame);
     }, []);
 
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                setIsModalOpen(false);
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [setIsModalOpen]);
+
     const handleChange = (field: keyof typeof form, value: string | number | boolean) =>
         setForm(prev => ({ ...prev, [field]: value }));
 
