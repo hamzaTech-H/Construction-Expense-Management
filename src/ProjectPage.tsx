@@ -74,6 +74,21 @@ export default function ProjectPage() {
     loadData();
   }, [id]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "n") {
+        const target = e.target as HTMLElement;
+        const isInput = /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName) || target.isContentEditable;
+        if (isInput) return;
+        e.preventDefault();
+        setSelectedExpense(null);
+        setIsExpenseModalOpen(true);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   if (isLoading) {
     return (
       <div className="h-screen flex items-center justify-center">
