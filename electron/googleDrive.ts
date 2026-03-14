@@ -228,39 +228,49 @@ export async function restoreFromBackup(fileId: string): Promise<{ success: bool
   }
 }
 
-/** Start a local HTTP server to catch OAuth redirect and return the auth code. */
-export function startLocalAuthServer(): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const server = http.createServer(async (req, res) => {
-      const url = new URL(req.url!, `http://localhost:${REDIRECT_PORT}`);
-      if (url.pathname === '/callback') {
-        const code = url.searchParams.get('code');
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.end(
-          '<!DOCTYPE html><html><body><p>Authorization successful. You can close this window.</p></body></html>'
-        );
-        server.close();
-        if (code) resolve(code);
-        else reject(new Error('No code in callback'));
-      }
-    });
-    server.listen(REDIRECT_PORT, '127.0.0.1', () => {
-      // resolve is called when we get the code
-    });
-    server.on('error', reject);
+/** Start a local HTTP server to catch OAuth redirect and return the auth code. Returns promise + close so caller can cancel (e.g. when auth window is closed). */
+function startLocalAuthServer(): { promise: Promise<string>; close: () => void } {
+  let resolve: (value: string) => void;
+  let reject: (reason: Error) => void;
+  const promise = new Promise<string>((res, rej) => {
+    resolve = res;
+    reject = rej;
   });
+  const server = http.createServer(async (req, res) => {
+    const url = new URL(req.url!, `http://localhost:${REDIRECT_PORT}`);
+    if (url.pathname === '/callback') {
+      const code = url.searchParams.get('code');
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(
+        '<!DOCTYPE html><html><body><p>Authorization successful. You can close this window.</p></body></html>'
+      );
+      server.close();
+      if (code) resolve(code);
+      else reject(new Error('No code in callback'));
+    }
+  });
+  server.listen(REDIRECT_PORT, '127.0.0.1');
+  server.on('error', (err) => reject(err));
+  const close = () => {
+    server.close();
+    reject(new Error('Auth window closed'));
+  };
+  return { promise, close };
 }
 
-/** Open a window for the user to complete Google sign-in; returns when we have the code. */
+/** Open a window for the user to complete Google sign-in; returns when we have the code. Rejects if user closes the window without completing. */
 export async function openAuthWindowAndGetCode(): Promise<string> {
   const redirectUri = `http://localhost:${REDIRECT_PORT}/callback`;
   const authUrl = getAuthUrl(redirectUri);
-  const codePromise = startLocalAuthServer();
+  const { promise: codePromise, close: closeServer } = startLocalAuthServer();
   const authWindow = new BrowserWindow({
     width: 500,
     height: 650,
     show: true,
     webPreferences: { nodeIntegration: false },
+  });
+  authWindow.on('closed', () => {
+    closeServer();
   });
   authWindow.loadURL(authUrl);
   const code = await codePromise;

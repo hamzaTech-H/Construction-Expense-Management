@@ -1,6 +1,6 @@
-import { X, Minus, Maximize2, Settings, ArrowLeft, CloudUpload, CloudDownload } from 'lucide-react';
+import { X, Minus, Maximize2, Settings, ArrowLeft, CloudUpload, CloudDownload, Cloud, CloudOff } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { RestoreBackupModal } from './RestoreBackupModal';
@@ -13,8 +13,26 @@ export function CustomTitleBar({ title = "Progest" }: CustomTitleBarProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
+  const [isConnected, setIsConnected] = useState(false);
+  const [connectionChecking, setConnectionChecking] = useState(true);
+  const [connectLoading, setConnectLoading] = useState(false);
   const [backupLoading, setBackupLoading] = useState(false);
   const [restoreModalOpen, setRestoreModalOpen] = useState(false);
+
+  const refreshConnection = useCallback(async () => {
+    if (typeof window === 'undefined' || !window.googleDrive) return;
+    setConnectionChecking(true);
+    try {
+      const connected = await window.googleDrive.hasAuth();
+      setIsConnected(connected);
+    } finally {
+      setConnectionChecking(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshConnection();
+  }, [refreshConnection]);
 
   const handleBack = () => {
     navigate(-1);
@@ -33,6 +51,29 @@ export function CustomTitleBar({ title = "Progest" }: CustomTitleBarProps) {
     } finally {
       setBackupLoading(false);
     }
+  };
+
+  const handleConnect = async () => {
+    if (!window.googleDrive || connectLoading) return;
+    setConnectLoading(true);
+    try {
+      const res = await window.googleDrive.connect();
+      if (res.success) {
+        setIsConnected(true);
+        toast.success(t('Connected to Google Drive.'));
+      } else {
+        toast.error(res.error ? t(res.error) : t('Failed to connect to Google Drive.'));
+      }
+    } finally {
+      setConnectLoading(false);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    if (!window.googleDrive) return;
+    await window.googleDrive.disconnect();
+    setIsConnected(false);
+    toast.success(t('Disconnected from Google Drive.'));
   };
 
   const handleRestoreClick = () => {
@@ -102,24 +143,44 @@ export function CustomTitleBar({ title = "Progest" }: CustomTitleBarProps) {
           <Settings className="w-4 h-4 text-gray-600 dark:text-gray-400" />
         </button>
 
-        {/* Google Drive Backup - only in Electron */}
-        {typeof window !== 'undefined' && window.googleDrive && (
+        {/* Google Drive - only in Electron: Connect when disconnected; Upload / Restore / Disconnect when connected */}
+        {typeof window !== 'undefined' && window.googleDrive && !connectionChecking && (
           <>
-            <button
-              onClick={handleBackupNow}
-              disabled={backupLoading}
-              className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors disabled:opacity-50"
-              title={t('Backup Now')}
-            >
-              <CloudUpload className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-            </button>
-            <button
-              onClick={handleRestoreClick}
-              className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
-              title={t('Restore Backup')}
-            >
-              <CloudDownload className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-            </button>
+            {!isConnected ? (
+              <button
+                onClick={handleConnect}
+                disabled={connectLoading}
+                className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors disabled:opacity-50"
+                title={t('Connect Google Drive')}
+              >
+                <Cloud className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={handleBackupNow}
+                  disabled={backupLoading}
+                  className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors disabled:opacity-50"
+                  title={t('Upload Backup')}
+                >
+                  <CloudUpload className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                </button>
+                <button
+                  onClick={handleRestoreClick}
+                  className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+                  title={t('Restore Backup')}
+                >
+                  <CloudDownload className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                </button>
+                <button
+                  onClick={handleDisconnect}
+                  className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+                  title={t('Disconnect Google Drive')}
+                >
+                  <CloudOff className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                </button>
+              </>
+            )}
           </>
         )}
 

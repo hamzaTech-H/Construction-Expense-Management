@@ -61,6 +61,8 @@ declare global {
 
     googleDrive: {
       hasAuth: () => Promise<boolean>;
+      connect: () => Promise<{ success: boolean; error?: string }>;
+      disconnect: () => Promise<void>;
       backupNow: () => Promise<{ success: boolean; error?: string }>;
       listBackups: () => Promise<{ success: boolean; files?: { id: string; name: string; createdTime?: string }[]; error?: string }>;
       restore: (fileId: string) => Promise<{ success: boolean; error?: string }>;

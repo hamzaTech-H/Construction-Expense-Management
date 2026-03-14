@@ -67,6 +67,8 @@ contextBridge.exposeInMainWorld("electronAPI", electronAPI);
 // Google Drive backup API
 const googleDrive = {
   hasAuth: () => ipcRenderer.invoke('google-drive-has-auth'),
+  connect: () => ipcRenderer.invoke('google-drive-connect'),
+  disconnect: () => ipcRenderer.invoke('google-drive-disconnect'),
   backupNow: () => ipcRenderer.invoke('google-drive-backup-now'),
   listBackups: () => ipcRenderer.invoke('google-drive-list-backups'),
   restore: (fileId: string) => ipcRenderer.invoke('google-drive-restore', fileId),

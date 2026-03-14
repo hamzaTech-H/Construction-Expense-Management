@@ -14,6 +14,7 @@ import {
   deleteBackup,
   ensureAuth,
   hasStoredTokens,
+  clearTokens,
 } from './googleDrive';
 import {
   getAllProjects, getProjectById, addProject, updateProject, deleteProject, getProjectStats,
@@ -219,6 +220,12 @@ ipcMain.on('window-close', () => {
 
 // ===== GOOGLE DRIVE BACKUP =====
 ipcMain.handle('google-drive-has-auth', () => hasStoredTokens());
+
+ipcMain.handle('google-drive-connect', async () => ensureAuth());
+
+ipcMain.handle('google-drive-disconnect', () => {
+  clearTokens();
+});
 
 ipcMain.handle('google-drive-backup-now', async () => {
   const auth = await ensureAuth();
