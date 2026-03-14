@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
 import  toast from "react-hot-toast";
 import { Input } from './components/base/input/input';
@@ -8,7 +8,7 @@ import { Button } from './components/base/buttons/button';
 import { Toaster } from 'react-hot-toast';
 import { Select } from './components/base/select/select';
 import { Separator } from 'react-aria-components';
-import { Edit01, Plus, Settings01, Trash01 } from '@untitledui/icons';
+import { Edit01, Plus, Settings01, Trash01, X } from '@untitledui/icons';
 import { ButtonUtility } from './components/base/buttons/button-utility';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { DzFlagIcon, FrFlagIcon } from './FlagsSVG';
@@ -326,15 +326,20 @@ export default function SettingsPage() {
 
       {/* Add/Edit Category Dialog */}
       <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {editingCategory ? t('Edit Category') : t('Add New Category')}
-            </DialogTitle>
-            <DialogDescription>
-              {t("Enter the category name in both French and Arabic")}
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent dir={i18n.dir()} className={i18n.language === 'ar' ? 'font-arabic' : ''} hideClose>
+          <div className="flex items-center justify-between mb-4">
+            <DialogHeader className={i18n.language === 'ar' ? 'text-start' : 'text-left flex-1 min-w-0'}>
+              <DialogTitle className="text-lg font-semibold">
+                {editingCategory ? t('Edit Category') : t('Add New Category')}
+              </DialogTitle>
+            </DialogHeader>
+            <DialogClose className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors shrink-0" aria-label={t('Close')}>
+              <X className="w-5 h-5" />
+            </DialogClose>
+          </div>
+          <DialogDescription className={i18n.language === 'ar' ? 'text-start' : 'text-left mb-4'}>
+            {t("Enter the category name in both French and Arabic")}
+          </DialogDescription>
           <form onSubmit={(e) => { e.preventDefault(); handleSaveCategory(); }}>
             <div className="space-y-4 py-4">
               <Input 
@@ -358,7 +363,7 @@ export default function SettingsPage() {
               />
             </div>
 
-            <DialogFooter>
+            <DialogFooter className={i18n.language === 'ar' ? 'sm:flex-row-reverse sm:justify-start' : ''}>
               <Button type="button" color="secondary" onClick={() => setCategoryDialogOpen(false)}>
                 {t("Cancel")}
               </Button>
