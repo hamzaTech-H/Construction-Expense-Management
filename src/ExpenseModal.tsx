@@ -16,9 +16,11 @@ interface ExpenseModalProps {
     setExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
     setStats: React.Dispatch<React.SetStateAction<ProjectStats>>;
     setExpenseCategories: React.Dispatch<React.SetStateAction<any[]>>;
+    /** When creating a new expense, pre-select this category. Undefined/"all" = empty. */
+    activeTabCategoryId?: string | number | null;
 }
 
-export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, setStats, setExpenseCategories}: ExpenseModalProps) {    
+export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, setStats, setExpenseCategories, activeTabCategoryId }: ExpenseModalProps) {    
     const { t, i18n  } = useTranslation();
     const [categories, setCategories] = useState<SelectItemType[]>([]);
 
@@ -27,7 +29,7 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
         const data = await window.database.getAllExpenseCategories(); 
 
         const formatted: SelectItemType[] = data.map((c) => ({
-            id: c.id,
+            id: String(c.id),
             label: i18n.language === "ar" ? c.ar_name : c.fr_name,       
         }));
 
@@ -37,12 +39,34 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
     
     const projectId = Number(useParams<{ projectId: string }>().projectId);
     const [form, setForm] = useState({
-        categoryId: expense?.category_id,
+        categoryId: expense?.category_id as number | undefined,
         description: expense?.description ?? "",
         date: expense?.date ?? new Date().toISOString().split("T")[0],
         total: expense?.amount_total.toString() ?? "",
         isNotPaid: expense?.status === ExpenseStatus.PAID
     });
+
+    useEffect(() => {
+        if (expense) {
+            setForm({
+                categoryId: expense.category_id,
+                description: expense.description ?? "",
+                date: expense.date ?? new Date().toISOString().split("T")[0],
+                total: expense.amount_total.toString() ?? "",
+                isNotPaid: expense.status === ExpenseStatus.PAID
+            });
+            return;
+        }
+        if (categories.length === 0) return;
+        const tabId = activeTabCategoryId == null || activeTabCategoryId === "all"
+            ? undefined
+            : Number(activeTabCategoryId);
+        const exists = tabId != null && categories.some((c) => String(c.id) === String(tabId));
+        setForm((prev) => ({
+            ...prev,
+            categoryId: exists ? tabId : undefined
+        }));
+    }, [expense, categories, activeTabCategoryId]);
 
     const handleChange = (field: keyof typeof form, value: string | number | boolean) =>
         setForm(prev => ({ ...prev, [field]: value }));
@@ -173,7 +197,7 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <Select
-                        selectedKey={form.categoryId}
+                        selectedKey={form.categoryId != null ? String(form.categoryId) : undefined}
                         onSelectionChange={(key) =>
                             setForm((prev) => ({ ...prev, categoryId: Number(key)}))
                         }

@@ -153,7 +153,14 @@ export default function ProjectPage() {
 
       {/* Modal */}
       {isExpenseModalOpen && (
-        <ExpenseModal setIsModalOpen={setIsExpenseModalOpen} expense={selectedExpense} setExpenses={setExpenses} setStats={setStats} setExpenseCategories={setExpenseCategories}/>
+        <ExpenseModal
+          setIsModalOpen={setIsExpenseModalOpen}
+          expense={selectedExpense}
+          setExpenses={setExpenses}
+          setStats={setStats}
+          setExpenseCategories={setExpenseCategories}
+          activeTabCategoryId={selectedTabIndex === "all" ? undefined : selectedTabIndex}
+        />
       )}
     </div>
   );
