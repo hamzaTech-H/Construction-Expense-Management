@@ -27,22 +27,45 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
         const data = await window.database.getAllExpenseCategories(); 
 
         const formatted: SelectItemType[] = data.map((c) => ({
-            id: c.id,
+            id: String(c.id),
             label: i18n.language === "ar" ? c.ar_name : c.fr_name,       
         }));
 
         setCategories(formatted);
     })();
     }, []);
-    
+
     const projectId = Number(useParams<{ projectId: string }>().projectId);
     const [form, setForm] = useState({
-        categoryId: expense?.category_id,
+        categoryId: expense?.category_id as number | undefined,
         description: expense?.description ?? "",
         date: expense?.date ?? new Date().toISOString().split("T")[0],
         total: expense?.amount_total.toString() ?? "",
         isNotPaid: expense?.status === ExpenseStatus.PAID
     });
+
+    useEffect(() => {
+        if (expense) {
+            setForm({
+                categoryId: expense.category_id,
+                description: expense.description ?? "",
+                date: expense.date ?? new Date().toISOString().split("T")[0],
+                total: expense.amount_total.toString() ?? "",
+                isNotPaid: expense.status === ExpenseStatus.PAID
+            });
+            return;
+        }
+        if (categories.length === 0) return;
+        const savedDefault = localStorage.getItem('defaultExpenseCategoryId');
+        if (savedDefault === 'none') return;
+        const defaultId = savedDefault
+            ? categories.find((c) => String(c.id) === savedDefault)?.id
+            : undefined;
+        const idToSelect = defaultId ?? categories[0]?.id;
+        if (idToSelect != null) {
+            setForm((prev) => ({ ...prev, categoryId: Number(idToSelect) }));
+        }
+    }, [categories, expense]);
 
     const handleChange = (field: keyof typeof form, value: string | number | boolean) =>
         setForm(prev => ({ ...prev, [field]: value }));
@@ -173,7 +196,7 @@ export default function ExpenseModal({ setIsModalOpen, expense, setExpenses, set
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <Select
-                        selectedKey={form.categoryId}
+                        selectedKey={form.categoryId != null ? String(form.categoryId) : undefined}
                         onSelectionChange={(key) =>
                             setForm((prev) => ({ ...prev, categoryId: Number(key)}))
                         }

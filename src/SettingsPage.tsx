@@ -42,6 +42,7 @@ export default function SettingsPage() {
 
   // Expense Categories State
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
+  const [defaultCategoryId, setDefaultCategoryId] = useState<string | null>(null);
 
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -126,10 +127,18 @@ export default function SettingsPage() {
       const settingsData  = await window.database.getSettings();
       setSettings(settingsData[0]); 
       i18n.changeLanguage(settingsData[0].language);
+      const savedDefault = localStorage.getItem('defaultExpenseCategoryId');
+      setDefaultCategoryId(savedDefault ?? null);
     };
 
     load();
   }, []);
+
+  const handleDefaultCategoryChange = (key: string | number) => {
+    const value = key === '' || key === 'none' || key == null ? 'none' : String(key);
+    setDefaultCategoryId(value);
+    localStorage.setItem('defaultExpenseCategoryId', value);
+  };
 
 
   return (
@@ -262,7 +271,28 @@ export default function SettingsPage() {
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            <div className="max-w-xs">
+              <Select
+                label={t("Default category for new expenses")}
+                placeholder={t("Select default")}
+                selectedKey={defaultCategoryId ?? 'none'}
+                onSelectionChange={(key) => handleDefaultCategoryChange(key == null ? 'none' : String(key))}
+                items={[
+                  { id: 'none', label: t('None') },
+                  ...categories.map((c) => ({
+                    id: String(c.id),
+                    label: i18n.language === 'ar' ? c.ar_name : c.fr_name,
+                  })),
+                ]}
+              >
+                {(item) => (
+                  <Select.Item key={item.id} id={item.id}>
+                    {item.label}
+                  </Select.Item>
+                )}
+              </Select>
+            </div>
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
