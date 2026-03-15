@@ -17,6 +17,7 @@ import {
   clearTokens,
 } from './googleDrive';
 import {
+  initDatabase,
   getAllProjects, getProjectById, addProject, updateProject, deleteProject, getProjectStats,
   getExpensesByProject, getExpenseById, addExpense, updateExpense, deleteExpense, updateExpenseAmounts,
   getPaymentsByExpense, addPayment, deletePayment,
@@ -88,7 +89,10 @@ app.on('activate', () => {
   }
 })
 
-app.whenReady().then(createWindow)
+app.whenReady().then(() => {
+  initDatabase(app.getPath('userData'), app.getPath('exe'))
+  createWindow()
+})
 
 // ===== SETTINGS =====
 ipcMain.handle('get-settings', () => {
