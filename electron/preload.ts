@@ -66,6 +66,7 @@ const electronAPI = {
   minimizeWindow: () => ipcRenderer.send('window-minimize'),
   maximizeWindow: () => ipcRenderer.send('window-maximize'),
   closeWindow: () => ipcRenderer.send('window-close'),
+  openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
 }
 
 contextBridge.exposeInMainWorld("electronAPI", electronAPI);

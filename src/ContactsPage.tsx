@@ -124,7 +124,12 @@ export default function ContactsPage() {
   };
 
   const openWhatsApp = (c: Contact) => {
-    window.open(toWhatsAppUrl(c.phone_number), '_blank');
+    const url = toWhatsAppUrl(c.phone_number);
+    if (window.electronAPI?.openExternal) {
+      window.electronAPI.openExternal(url);
+    } else {
+      window.open(url, '_blank');
+    }
   };
 
   const copyPhone = async (c: Contact) => {

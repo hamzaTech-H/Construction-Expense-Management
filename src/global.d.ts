@@ -63,6 +63,7 @@ declare global {
       minimizeWindow: () => void;
       maximizeWindow: () => void;
       closeWindow: () => void;
+      openExternal: (url: string) => Promise<void>;
     };
 
     googleDrive: {

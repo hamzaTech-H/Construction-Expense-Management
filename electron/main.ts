@@ -5,7 +5,7 @@ import { config } from 'dotenv'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 config({ path: path.join(__dirname, '..', '.env') })
 
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { printProjectReport, printExpensePayments } from './printReports';
 import {
   backupNow as gdBackupNow,
@@ -225,6 +225,12 @@ ipcMain.on('window-maximize', () => {
 ipcMain.on('window-close', () => {
   if (win) {
     win.close();
+  }
+});
+
+ipcMain.handle('open-external', (_event, url: string) => {
+  if (typeof url === 'string' && url.startsWith('http')) {
+    shell.openExternal(url);
   }
 });
 
