@@ -1,4 +1,4 @@
-import { X, Minus, Maximize2, Settings, ArrowLeft, CloudUpload, CloudDownload, Cloud, CloudOff, Users } from 'lucide-react';
+import { X, Minus, Maximize2, Settings, ArrowLeft, CloudUpload, CloudDownload, Cloud, CloudOff, Users, Home } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
@@ -104,6 +104,12 @@ export function CustomTitleBar({ title = "Progest" }: CustomTitleBarProps) {
     }
   };
 
+  const handleHome = () => {
+    if (location.pathname !== '/') {
+      navigate('/');
+    }
+  };
+
   const canGoBack = location.pathname !== '/';
 
   return (
@@ -140,6 +146,14 @@ export function CustomTitleBar({ title = "Progest" }: CustomTitleBarProps) {
         className="flex items-center gap-1"
         style={{ WebkitAppRegion: 'no-drag' }}
       >
+        {/* Home button */}
+        <button
+          onClick={handleHome}
+          className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+          title={t('Home')}
+        >
+          <Home className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+        </button>
         {/* Contacts button */}
         <button
           onClick={handleContacts}
