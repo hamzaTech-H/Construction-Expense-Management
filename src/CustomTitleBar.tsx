@@ -184,7 +184,7 @@ export function CustomTitleBar({ title = "Progest" }: CustomTitleBarProps) {
           <button
             onClick={handleSettings}
             className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
-            title="Settings"
+            title={t('Settings')}
           >
             <Settings className="w-4 h-4 text-gray-600 dark:text-gray-400" />
           </button>
@@ -192,7 +192,7 @@ export function CustomTitleBar({ title = "Progest" }: CustomTitleBarProps) {
             <button
               onClick={handleBack}
               className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
-              title="Go Back"
+              title={t('Go Back')}
             >
               <ArrowLeft className="w-4 h-4 text-gray-600 dark:text-gray-400" />
             </button>
@@ -211,21 +211,21 @@ export function CustomTitleBar({ title = "Progest" }: CustomTitleBarProps) {
         <button
           onClick={handleMinimize}
           className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
-          title="Minimize"
+          title={t('Minimize')}
         >
           <Minus className="w-4 h-4 text-gray-600 dark:text-gray-400" />
         </button>
         <button
           onClick={handleMaximize}
           className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
-          title="Maximize"
+          title={t('Maximize')}
         >
           <Maximize2 className="w-4 h-4 text-gray-600 dark:text-gray-400" />
         </button>
         <button
           onClick={handleClose}
           className="p-1.5 hover:bg-red-500 hover:text-white rounded transition-colors"
-          title="Close"
+          title={t('Close')}
         >
           <X className="w-4 h-4 text-gray-600 dark:text-gray-400" />
         </button>

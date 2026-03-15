@@ -269,6 +269,7 @@ export async function openAuthWindowAndGetCode(): Promise<string> {
     show: true,
     webPreferences: { nodeIntegration: false },
   });
+  authWindow.setMenu(null);
   authWindow.on('closed', () => {
     closeServer();
   });
