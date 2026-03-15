@@ -114,105 +114,100 @@ export function CustomTitleBar({ title = "Progest" }: CustomTitleBarProps) {
 
   return (
     <div className="title-bar flex items-center justify-between bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 h-10 px-4 select-none" dir="ltr">
-      {/* Left side - Draggable area with title and back button */}
-      <div 
-        className="flex items-center gap-3 flex-1 -ml-4 pl-4 cursor-move"
-        style={{ WebkitAppRegion: 'drag' }}
-      >
-        <div className="flex items-center gap-2">
+      {/* Left side - Traffic lights + app name + navigation icons + draggable fill */}
+      <div className="flex items-center gap-1 flex-1 min-w-0">
+        <div className="flex items-center gap-2 shrink-0" style={{ WebkitAppRegion: 'no-drag' }}>
           <div className="w-3 h-3 rounded-full bg-red-500"></div>
           <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
           <div className="w-3 h-3 rounded-full bg-green-500"></div>
         </div>
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-2">
+
+        <span className="text-sm font-medium text-gray-700 dark:text-gray-300 shrink-0 ml-2">
           {title}
         </span>
-        
-        {/* Back button - only show when not on home page */}
-        {canGoBack && (
+
+        {/* Navigation icons */}
+        <div className="flex items-center gap-0.5 ml-2" style={{ WebkitAppRegion: 'no-drag' }}>
           <button
-            onClick={handleBack}
-            className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors ml-2"
-            title="Go Back"
-            style={{ WebkitAppRegion: 'no-drag' }}
+            onClick={handleHome}
+            className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+            title={t('Home')}
           >
-            <ArrowLeft className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+            <Home className="w-4 h-4 text-gray-600 dark:text-gray-400" />
           </button>
-        )}
+          <button
+            onClick={handleContacts}
+            className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+            title={t('Contacts')}
+          >
+            <Users className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+          </button>
+          {typeof window !== 'undefined' && window.googleDrive && !connectionChecking && (
+            <>
+              {!isConnected ? (
+                <button
+                  onClick={handleConnect}
+                  disabled={connectLoading}
+                  className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors disabled:opacity-50"
+                  title={t('Connect Google Drive')}
+                >
+                  <Cloud className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={handleBackupNow}
+                    disabled={backupLoading}
+                    className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors disabled:opacity-50"
+                    title={t('Upload Backup')}
+                  >
+                    <CloudUpload className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  </button>
+                  <button
+                    onClick={handleRestoreClick}
+                    className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+                    title={t('Restore Backup')}
+                  >
+                    <CloudDownload className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  </button>
+                  <button
+                    onClick={handleDisconnect}
+                    className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+                    title={t('Disconnect Google Drive')}
+                  >
+                    <CloudOff className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  </button>
+                </>
+              )}
+            </>
+          )}
+          <button
+            onClick={handleSettings}
+            className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+            title="Settings"
+          >
+            <Settings className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+          </button>
+          {canGoBack && (
+            <button
+              onClick={handleBack}
+              className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+              title="Go Back"
+            >
+              <ArrowLeft className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+            </button>
+          )}
+        </div>
+
+        {/* Draggable fill */}
+        <div
+          className="flex-1 min-w-0 cursor-move"
+          style={{ WebkitAppRegion: 'drag' }}
+        />
       </div>
 
-      {/* Right side - Window controls and settings */}
-      <div 
-        className="flex items-center gap-1"
-        style={{ WebkitAppRegion: 'no-drag' }}
-      >
-        {/* Home button */}
-        <button
-          onClick={handleHome}
-          className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
-          title={t('Home')}
-        >
-          <Home className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-        </button>
-        {/* Contacts button */}
-        <button
-          onClick={handleContacts}
-          className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
-          title={t('Contacts')}
-        >
-          <Users className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-        </button>
-        {/* Settings button */}
-        <button
-          onClick={handleSettings}
-          className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
-          title="Settings"
-        >
-          <Settings className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-        </button>
-
-        {/* Google Drive - only in Electron: Connect when disconnected; Upload / Restore / Disconnect when connected */}
-        {typeof window !== 'undefined' && window.googleDrive && !connectionChecking && (
-          <>
-            {!isConnected ? (
-              <button
-                onClick={handleConnect}
-                disabled={connectLoading}
-                className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors disabled:opacity-50"
-                title={t('Connect Google Drive')}
-              >
-                <Cloud className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-              </button>
-            ) : (
-              <>
-                <button
-                  onClick={handleBackupNow}
-                  disabled={backupLoading}
-                  className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors disabled:opacity-50"
-                  title={t('Upload Backup')}
-                >
-                  <CloudUpload className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                </button>
-                <button
-                  onClick={handleRestoreClick}
-                  className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
-                  title={t('Restore Backup')}
-                >
-                  <CloudDownload className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                </button>
-                <button
-                  onClick={handleDisconnect}
-                  className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
-                  title={t('Disconnect Google Drive')}
-                >
-                  <CloudOff className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                </button>
-              </>
-            )}
-          </>
-        )}
-
-        {/* Window controls */}
+      {/* Right side - Window controls only */}
+      <div className="flex items-center gap-1 shrink-0" style={{ WebkitAppRegion: 'no-drag' }}>
         <button
           onClick={handleMinimize}
           className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
@@ -220,7 +215,6 @@ export function CustomTitleBar({ title = "Progest" }: CustomTitleBarProps) {
         >
           <Minus className="w-4 h-4 text-gray-600 dark:text-gray-400" />
         </button>
-
         <button
           onClick={handleMaximize}
           className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
@@ -228,7 +222,6 @@ export function CustomTitleBar({ title = "Progest" }: CustomTitleBarProps) {
         >
           <Maximize2 className="w-4 h-4 text-gray-600 dark:text-gray-400" />
         </button>
-
         <button
           onClick={handleClose}
           className="p-1.5 hover:bg-red-500 hover:text-white rounded transition-colors"
