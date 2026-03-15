@@ -18,6 +18,12 @@ const database: DatabaseAPI = {
   deleteProject: (id) => ipcRenderer.invoke('delete-project', id),
   getProjectStats: (id) => ipcRenderer.invoke('get-project-stats', id),
 
+  // Contacts
+  getAllContacts: () => ipcRenderer.invoke('get-all-contacts'),
+  addContact: (name, phone_number, role) => ipcRenderer.invoke('add-contact', { name, phone_number, role }),
+  updateContact: (id, name, phone_number, role) => ipcRenderer.invoke('update-contact', { id, name, phone_number, role }),
+  deleteContact: (id) => ipcRenderer.invoke('delete-contact', id),
+
   // Expense Categories
   addEXpenseCategory: (fr_name, ar_name) => ipcRenderer.invoke('add-expense-category', { fr_name, ar_name}),
   getAllExpenseCategories: () => ipcRenderer.invoke('get-all-expense-categories'),

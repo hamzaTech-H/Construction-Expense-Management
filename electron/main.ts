@@ -26,7 +26,11 @@ import {
   addEXpenseCategory,
   deleteExpenseCategory,
   getSettings,
-  updateSettings
+  updateSettings,
+  getAllContacts,
+  addContact,
+  updateContact,
+  deleteContact,
 } from './database';
 
 process.env.APP_ROOT = path.join(__dirname, '..')
@@ -94,6 +98,12 @@ ipcMain.handle('get-settings', () => {
 ipcMain.handle('update-settings', (_event, { id, language, company_name, owner_first_name, owner_last_name, address, email, phone_number }) => {
   return updateSettings(id, language, company_name, owner_first_name, owner_last_name, address, email, phone_number);
 });
+
+// ===== CONTACTS =====
+ipcMain.handle('get-all-contacts', () => getAllContacts());
+ipcMain.handle('add-contact', (_event, { name, phone_number, role }) => addContact(name, phone_number, role ?? null));
+ipcMain.handle('update-contact', (_event, { id, name, phone_number, role }) => updateContact(id, name, phone_number, role ?? null));
+ipcMain.handle('delete-contact', (_event, id: number) => deleteContact(id));
 
 // ===== PROJECTS =====
 ipcMain.handle('get-all-projects', () => {

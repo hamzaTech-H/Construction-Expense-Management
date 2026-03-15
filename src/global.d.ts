@@ -1,5 +1,5 @@
 import { electron } from "node:process";
-import { Payment, Settings } from "./types";
+import { Payment, Settings, Contact } from "./types";
 import { deleteExpenseCategory, getSettings } from "electron/database";
 
 
@@ -46,6 +46,12 @@ declare global {
       addPayment: (expenseId: number, amount: number, date: string, note: string) => Promise<any>;
       updatePayment: (id: number, amount: number, date: string, note: string) => Promise<any>;
       deletePayment: (id: number) => Promise<any>;
+
+      // Contacts
+      getAllContacts: () => Promise<Contact[]>;
+      addContact: (name: string, phone_number: string, role: string | null) => Promise<number>;
+      updateContact: (id: number, name: string, phone_number: string, role: string | null) => Promise<any>;
+      deleteContact: (id: number) => Promise<any>;
     };
 
     pdf: {

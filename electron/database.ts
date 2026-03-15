@@ -116,6 +116,16 @@ db.prepare(`
 `).run();
 
 db.prepare(`
+  CREATE TABLE IF NOT EXISTS contacts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    phone_number TEXT NOT NULL,
+    role TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`).run();
+
+db.prepare(`
   CREATE TABLE IF NOT EXISTS payments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     expense_id INTEGER NOT NULL,
@@ -188,6 +198,29 @@ export function getSettings() {
 export function updateSettings(id: number, language: string, company_name: string, owner_first_name:string, owner_last_name:string, address: string, email: string, phone_number: string) {
   const stmt = db.prepare('UPDATE settings SET language = ?, company_name = ? , owner_first_name = ?, owner_last_name = ?, address = ?, email = ?, phone_number = ? WHERE id = ?');
   return stmt.run(language, company_name, owner_first_name, owner_last_name, address, email, phone_number, id);
+}
+
+// ===== CONTACTS =====
+
+export function getAllContacts() {
+  const stmt = db.prepare('SELECT * FROM contacts ORDER BY name COLLATE NOCASE');
+  return stmt.all();
+}
+
+export function addContact(name: string, phone_number: string, role: string | null) {
+  const stmt = db.prepare('INSERT INTO contacts (name, phone_number, role) VALUES (?, ?, ?)');
+  const result = stmt.run(name, phone_number, role ?? null);
+  return result.lastInsertRowid;
+}
+
+export function updateContact(id: number, name: string, phone_number: string, role: string | null) {
+  const stmt = db.prepare('UPDATE contacts SET name = ?, phone_number = ?, role = ? WHERE id = ?');
+  return stmt.run(name, phone_number, role ?? null, id);
+}
+
+export function deleteContact(id: number) {
+  const stmt = db.prepare('DELETE FROM contacts WHERE id = ?');
+  return stmt.run(id);
 }
 
 // ===== PROJECTS =====

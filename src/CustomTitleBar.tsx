@@ -1,4 +1,4 @@
-import { X, Minus, Maximize2, Settings, ArrowLeft, CloudUpload, CloudDownload, Cloud, CloudOff } from 'lucide-react';
+import { X, Minus, Maximize2, Settings, ArrowLeft, CloudUpload, CloudDownload, Cloud, CloudOff, Users } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
@@ -98,6 +98,12 @@ export function CustomTitleBar({ title = "Progest" }: CustomTitleBarProps) {
     }
   };
 
+  const handleContacts = () => {
+    if (location.pathname !== '/contacts') {
+      navigate('/contacts');
+    }
+  };
+
   const canGoBack = location.pathname !== '/';
 
   return (
@@ -134,6 +140,14 @@ export function CustomTitleBar({ title = "Progest" }: CustomTitleBarProps) {
         className="flex items-center gap-1"
         style={{ WebkitAppRegion: 'no-drag' }}
       >
+        {/* Contacts button */}
+        <button
+          onClick={handleContacts}
+          className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+          title={t('Contacts')}
+        >
+          <Users className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+        </button>
         {/* Settings button */}
         <button
           onClick={handleSettings}

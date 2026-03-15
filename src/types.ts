@@ -48,3 +48,11 @@ export type ExpenseCategory = {
   fr_name: string;
   ar_name: string;
 }
+
+export type Contact = {
+  id: number;
+  name: string;
+  phone_number: string;
+  role: string | null;
+  created_at?: string;
+}

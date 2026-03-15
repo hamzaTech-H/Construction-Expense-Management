@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useEffect, useState } from 'react';
 import { CustomTitleBar } from './CustomTitleBar';
 import SettingsPage from './SettingsPage';
+import ContactsPage from './ContactsPage';
 function App() {
   const { i18n } = useTranslation();
 
@@ -37,6 +38,7 @@ function App() {
                 <Route path="/" element={<ProjectsList />} />
                 <Route path="/projects/:projectId" element={<ProjectPage />} />
                 <Route path='/settings' element={<SettingsPage />} />
+                <Route path='/contacts' element={<ContactsPage />} />
               </Routes>
           </main>
       <Toaster position="top-center" reverseOrder={false} />
