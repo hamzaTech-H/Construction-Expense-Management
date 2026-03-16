@@ -90,6 +90,14 @@ app.on('activate', () => {
 })
 
 app.whenReady().then(() => {
+  // try {
+  //   config({ path: path.join(app.getPath('userData'), '.env') })
+  // } catch (_) {}
+  try {
+    config({
+      path: path.join(process.resourcesPath, ".env")
+    })
+  } catch (_) {}
   initDatabase(app.getPath('userData'), app.getPath('exe'))
   createWindow()
 })

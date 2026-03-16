@@ -18,14 +18,16 @@ The app can backup and restore the local SQLite database to/from a folder **MyAp
 
 ## 2. Configure the app
 
-Create a `.env` file in the project root with:
+Credentials are read only from environment variables (never exposed to the UI). Use a `.env` file:
 
-```
-GOOGLE_DRIVE_CLIENT_ID=your-client-id.apps.googleusercontent.com
-GOOGLE_DRIVE_CLIENT_SECRET=your-client-secret
-```
+- **Development:** Create a `.env` file in the project root with:
+  ```
+  GOOGLE_DRIVE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+  GOOGLE_DRIVE_CLIENT_SECRET=your-client-secret
+  ```
+  The app loads it at startup.
 
-The app loads these when the Electron main process starts. Client Secret is optional for desktop apps.
+- **Production:** Put a `.env` file in the app’s user data folder (e.g. `%APPDATA%\Progest\.env` on Windows, or `~/Library/Application Support/Progest/.env` on macOS) with the same variables. The app loads it when it starts. Client Secret is optional for desktop apps.
 
 ## 3. Use Backup and Restore
 

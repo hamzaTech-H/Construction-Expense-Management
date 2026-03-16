@@ -283,7 +283,7 @@ export async function openAuthWindowAndGetCode(): Promise<string> {
 export async function ensureAuth(): Promise<{ success: boolean; error?: string }> {
   const { clientId } = getClientIds();
   if (!clientId) {
-    return { success: false, error: 'Google Drive credentials not configured. Set GOOGLE_DRIVE_CLIENT_ID (and optionally GOOGLE_DRIVE_CLIENT_SECRET) in environment or in app settings.' };
+    return { success: false, error: 'Google Drive credentials not configured. Set GOOGLE_DRIVE_CLIENT_ID (and optionally GOOGLE_DRIVE_CLIENT_SECRET) in a .env file (project root or app user data folder) or in environment variables.' };
   }
   if (hasStoredTokens()) {
     try {
