@@ -112,6 +112,25 @@ export function CustomTitleBar({ title = "Progest" }: CustomTitleBarProps) {
 
   const canGoBack = location.pathname !== '/';
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && e.key === 'ArrowLeft' && canGoBack) {
+        const target = e.target as HTMLElement | null;
+        const tag = target?.tagName;
+        const isTyping =
+          tag === 'INPUT' ||
+          tag === 'TEXTAREA' ||
+          (target as HTMLElement | null)?.isContentEditable;
+        if (isTyping) return;
+
+        e.preventDefault();
+        handleBack();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [canGoBack]);
+
   return (
     <div className="title-bar flex items-center justify-between bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 h-10 px-4 select-none" dir="ltr">
       {/* Left side - Traffic lights + app name + navigation icons + draggable fill */}

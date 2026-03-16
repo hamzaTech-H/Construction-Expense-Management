@@ -26,6 +26,27 @@ export default function ProjectsList() {
     fetchProjects();
   }, [fetchProjects]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+      if (isCtrlOrCmd && (e.key === "n" || e.key === "N")) {
+        const target = e.target as HTMLElement | null;
+        const tag = target?.tagName;
+        const isTyping =
+          tag === "INPUT" ||
+          tag === "TEXTAREA" ||
+          (target as HTMLElement | null)?.isContentEditable;
+        if (isTyping) return;
+
+        e.preventDefault();
+        setIsModalOpen(true);
+        setSelectedProject(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const filteredProjects = useMemo(() => {
     const normalizedSearch = search.toLowerCase();
     return projects.filter(({ name, description }) =>

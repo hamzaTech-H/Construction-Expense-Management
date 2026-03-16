@@ -2,7 +2,8 @@ import { Button } from "@/components/base/buttons/button";
 import { Input } from "@/components/base/input/input";
 import { TextArea } from "@/components/base/textarea/textarea";
 import { XClose } from '@untitledui/icons';
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { FocusScope } from "react-aria";
 import { Project } from "./types";
 import { useTranslation } from "react-i18next";
 
@@ -22,8 +23,30 @@ export default function ProjectModal({ setIsModalOpen, project, setProjects }: P
         description: project?.description ?? "",
     });
 
+    const formRef = useRef<HTMLFormElement>(null);
+
     const handleChange = (field: keyof typeof form, value: string|number|null) =>
         setForm(prev => ({ ...prev, [field]: value }));
+
+    useEffect(() => {
+        const frame = requestAnimationFrame(() => {
+            const first = formRef.current?.querySelector<HTMLElement>(
+                'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [role="combobox"], [tabindex="0"]'
+            );
+            first?.focus();
+        });
+        return () => cancelAnimationFrame(frame);
+    }, []);
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                setIsModalOpen(false);
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [setIsModalOpen]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -64,6 +87,7 @@ export default function ProjectModal({ setIsModalOpen, project, setProjects }: P
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+            <FocusScope contain restoreFocus autoFocus={false}>
             <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-lg relative">
 
                 <div className="flex justify-between items-center mb-4">
@@ -72,7 +96,7 @@ export default function ProjectModal({ setIsModalOpen, project, setProjects }: P
                 </div>
                 
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
                     <Input isRequired name="name" label={t("Name")} placeholder={t("Project name")} value={form.name} onChange={(value: string) => handleChange("name", value)}/>
                      <div
                         onClick={(e) => {
@@ -93,6 +117,7 @@ export default function ProjectModal({ setIsModalOpen, project, setProjects }: P
                     </div>
                 </form>
             </div>
+            </FocusScope>
         </div>
     )
 }
