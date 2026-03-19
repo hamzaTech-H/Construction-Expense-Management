@@ -123,6 +123,7 @@
   "Backup Now": "نسخ احتياطي الآن",
   "Restore Backup": "استعادة نسخة احتياطية",
   "Connected to Google Drive.": "تم الاتصال بـ Google Drive.",
+  "No internet connection.": "لا يوجد اتصال بالإنترنت.",
   "Auth window closed": "تم إغلاق نافذة المصادقة",
   "Failed to connect to Google Drive.": "فشل الاتصال بـ Google Drive.",
   "Disconnected from Google Drive.": "تم قطع الاتصال بـ Google Drive.",

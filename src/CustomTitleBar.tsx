@@ -55,6 +55,10 @@ export function CustomTitleBar({ title = "Progest" }: CustomTitleBarProps) {
 
   const handleConnect = async () => {
     if (!window.googleDrive || connectLoading) return;
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      toast.error(t('No internet connection.'));
+      return;
+    }
     setConnectLoading(true);
     try {
       const res = await window.googleDrive.connect();

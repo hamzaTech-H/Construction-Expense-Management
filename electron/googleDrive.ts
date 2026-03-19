@@ -229,13 +229,14 @@ export async function restoreFromBackup(fileId: string): Promise<{ success: bool
 }
 
 /** Start a local HTTP server to catch OAuth redirect and return the auth code. Returns promise + close so caller can cancel (e.g. when auth window is closed). */
-function startLocalAuthServer(): { promise: Promise<string>; close: () => void } {
+function startLocalAuthServer(): { promise: Promise<string>; close: (reason?: string) => void } {
   let resolve: (value: string) => void;
   let reject: (reason: Error) => void;
   const promise = new Promise<string>((res, rej) => {
     resolve = res;
     reject = rej;
   });
+  let closed = false;
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url!, `http://localhost:${REDIRECT_PORT}`);
     if (url.pathname === '/callback') {
@@ -251,9 +252,11 @@ function startLocalAuthServer(): { promise: Promise<string>; close: () => void }
   });
   server.listen(REDIRECT_PORT, '127.0.0.1');
   server.on('error', (err) => reject(err));
-  const close = () => {
+  const close = (reason?: string) => {
+    if (closed) return;
+    closed = true;
     server.close();
-    reject(new Error('Auth window closed'));
+    reject(new Error(reason || 'Auth window closed'));
   };
   return { promise, close };
 }
@@ -270,6 +273,18 @@ export async function openAuthWindowAndGetCode(): Promise<string> {
     webPreferences: { nodeIntegration: false },
   });
   authWindow.setMenu(null);
+
+  // If the OAuth page can't load (DNS/offline), close window and reject so renderer can show a toast.
+  authWindow.webContents.on('did-fail-load', (_e, errorCode, _errorDescription, validatedURL, isMainFrame) => {
+    if (!isMainFrame) return;
+    // Common offline/DNS errors in Electron/Chromium:
+    // -105 ERR_NAME_NOT_RESOLVED, -106 ERR_INTERNET_DISCONNECTED, -109 ERR_ADDRESS_UNREACHABLE
+    if (validatedURL.startsWith('https://accounts.google.com') && [-105, -106, -109].includes(errorCode)) {
+      try { authWindow.close(); } catch (_) {}
+      closeServer('No internet connection.');
+    }
+  });
+
   authWindow.on('closed', () => {
     closeServer();
   });
