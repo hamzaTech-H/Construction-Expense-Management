@@ -3,7 +3,7 @@ import { Key } from "react-aria-components";
 import { Button } from "@/components/base/buttons/button";
 import { ProjectStatsCard } from './ProjectStatsCard';
 import ExpenseModal from "./ExpenseModal";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ExpensesTable } from "./ExpensesTable";
 import { Expense, ProjectStats } from "./types";
 import { ExpensesTabs } from "./ExpensesTabs"
@@ -48,7 +48,7 @@ export default function ProjectPage() {
 
   const [selectedTabIndex, setSelectedTabIndex] = useState<Key>("all");
 
-  const [stats, setStats] = useState<ProjectStats>({
+  const [, setStats] = useState<ProjectStats>({
     total: 0,
     paid: 0,
     remaining: 0,
@@ -73,6 +73,25 @@ export default function ProjectPage() {
   useEffect(() => {
     loadData();
   }, [id]);
+
+  // Compute stats for the currently selected tab (category tabs).
+  // Matches `ExpensesTable` filtering: `selectedTabIndex === "all" || category_id === selectedTabIndex`
+  const tabStats = useMemo<ProjectStats>(() => {
+    const tabId = String(selectedTabIndex);
+    const scopedExpenses =
+      selectedTabIndex === "all"
+        ? expenses
+        : expenses.filter((e) => String(e.category_id) === tabId);
+
+    return scopedExpenses.reduce<ProjectStats>(
+      (acc, e) => ({
+        total: acc.total + Number(e.amount_total ?? 0),
+        paid: acc.paid + Number(e.amount_paid ?? 0),
+        remaining: acc.remaining + Number(e.amount_remaining ?? 0),
+      }),
+      { total: 0, paid: 0, remaining: 0 },
+    );
+  }, [expenses, selectedTabIndex]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -100,7 +119,9 @@ export default function ProjectPage() {
   }
 
   function handlePrint() {
-       window.pdf.print(id);
+       const selected = tabs.find((t) => String(t.id) === String(selectedTabIndex));
+       const tabLabel = selectedTabIndex === "all" ? null : (selected?.label ?? null);
+       window.pdf.print(id, selectedTabIndex === "all" ? null : selectedTabIndex, tabLabel);
   }
 
   return (
@@ -108,21 +129,21 @@ export default function ProjectPage() {
       
       {/* Project stats row */}
       <div className="flex flex-wrap gap-6 mb-4">
-        {stats ? (
+        {tabStats ? (
           <>
             <ProjectStatsCard
               title={t("Total project amount")}
-              value={stats.total.toFixed(2)}
+              value={tabStats.total.toFixed(2)}
               colorClasses="bg-blue-100 text-blue-900 border-l-4 border-blue-500"
             />
             <ProjectStatsCard
               title={t("Total amount paid")}
-              value={stats.paid.toFixed(2)}
+              value={tabStats.paid.toFixed(2)}
               colorClasses="bg-green-100 text-green-900 border-l-4 border-green-500"
             />
             <ProjectStatsCard
               title={t("Remaining amount to pay")}
-              value={stats.remaining.toFixed(2)}
+              value={tabStats.remaining.toFixed(2)}
               colorClasses="bg-red-100 text-red-900 border-l-4 border-red-500"
             />
           </>

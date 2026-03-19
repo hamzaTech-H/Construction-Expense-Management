@@ -55,7 +55,7 @@ contextBridge.exposeInMainWorld("database", database);
 
 
 const pdf: pdfAPI = {
-  print: (projectId) => ipcRenderer.send('print-rapport', projectId),
+  print: (projectId, categoryId, tabLabel) => ipcRenderer.send('print-rapport', projectId, categoryId, tabLabel),
   printPayments: (expenseId) => ipcRenderer.send('print-payments', expenseId),
 }
 

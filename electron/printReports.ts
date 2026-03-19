@@ -1,7 +1,7 @@
 import { BrowserWindow, app } from 'electron';
 import path from 'path';
 import fs from 'fs';
-import { getProjectById, getExpensesByProject, getProjectStats, getSettings } from './database'; // adjust path
+import { getProjectById, getExpensesByProject, getSettings } from './database'; // adjust path
 import { getExpenseById, getPaymentsByExpense } from './database'; // adjust path
 import { Expense } from '@/types';
 
@@ -59,10 +59,9 @@ const translations: Record<string, Record<string, string>> = {
   },
 };
 
-export async function printProjectReport(projectId: number) {
+export async function printProjectReport(projectId: number, categoryId?: string | number | null, tabLabel?: string | null) {
   const project: any = await getProjectById(projectId);
   const expenses: any = await getExpensesByProject(projectId);
-  const stats: any = await getProjectStats(projectId);
   const settingsArray: any = getSettings();
   const settings = settingsArray && settingsArray.length > 0 ? settingsArray[0] : null;
 
@@ -70,7 +69,20 @@ export async function printProjectReport(projectId: number) {
   const language = settings?.language === 'ar' ? 'ar' : 'fr';
   const t = translations[language];
 
-  const hasExpenses = expenses && expenses.length > 0;
+  const filteredExpenses = categoryId == null || String(categoryId) === 'all'
+    ? expenses
+    : (expenses || []).filter((e: any) => String(e.category_id) === String(categoryId));
+
+  const stats = (filteredExpenses || []).reduce(
+    (acc: any, e: any) => ({
+      total: acc.total + Number(e.amount_total ?? 0),
+      paid: acc.paid + Number(e.amount_paid ?? 0),
+      remaining: acc.remaining + Number(e.amount_remaining ?? 0),
+    }),
+    { total: 0, paid: 0, remaining: 0 },
+  );
+
+  const hasExpenses = filteredExpenses && filteredExpenses.length > 0;
   
   // Prepare owner name
   const ownerFirstName = settings?.owner_first_name || '';
@@ -236,9 +248,10 @@ export async function printProjectReport(projectId: number) {
         </div>
 
         <header>
-          <h1>${t.financialReport}</h1>
+          <h1>${t.financialReport}${tabLabel ? ` – ${tabLabel}` : ''}</h1>
           <p class="report-date">${t.reportDate} : ${new Date().toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-DZ')}</p>
           <p style="margin-top: 10px; font-size: 14px; color: #555; text-align: ${textAlign};"><strong>${t.projectName} :</strong> ${project.name}</p>
+          <p style="margin-top: 6px; font-size: 14px; color: #555; text-align: ${textAlign};"><strong>${t.description} :</strong> ${project.description || '-'}</p>
         </header>
 
         <section class="expense-summary">
@@ -261,7 +274,7 @@ export async function printProjectReport(projectId: number) {
               </tr>
             </thead>
             <tbody>
-              ${expenses
+              ${filteredExpenses
                 .map(
                   (expense: Expense) => `
                     <tr>

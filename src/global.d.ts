@@ -55,7 +55,7 @@ declare global {
     };
 
     pdf: {
-      print: (projectId: number) =>void;
+      print: (projectId: number, categoryId?: string | number | null, tabLabel?: string | null) =>void;
       printPayments: (expenseId: number) =>void;
     };
 

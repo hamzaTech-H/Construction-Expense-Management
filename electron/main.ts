@@ -209,8 +209,8 @@ ipcMain.handle('delete-payment', (_event, id) => {
   return deletePayment(id);
 });
 
-ipcMain.on('print-rapport', async (_event, projectId) => {
-  await printProjectReport(projectId);
+ipcMain.on('print-rapport', async (_event, projectId, categoryId, tabLabel) => {
+  await printProjectReport(projectId, categoryId, tabLabel);
 });
 
 ipcMain.on('print-payments', async (_event, expenseId) => {
