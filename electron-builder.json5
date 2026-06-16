@@ -3,13 +3,35 @@
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
   "appId": "YourAppID",
   "asar": true,
+  "asarUnpack": [
+    "**/*.node"
+  ],
   "productName": "Progest",
+  "compression": "maximum",
   "directories": {
     "output": "release/${version}"
   },
   "files": [
-    "dist",
-    "dist-electron"
+    "dist/**",
+    "dist-electron/**",
+    "package.json",
+
+    "!**/*.map",
+    "!**/*.ts",
+    "!**/*.tsx",
+    "!**/*.md",
+    "!**/*.log",
+    "!**/tests/**",
+    "!**/__tests__/**",
+    "!**/test/**",
+    "!**/docs/**",
+    "!**/doc/**",
+    "!**/examples/**",
+    "!**/example/**",
+    "!**/.DS_Store",
+
+    "!dist-electron/**/database.db",
+    "!**/node_modules/*/{test,tests,docs,doc,example,examples,coverage,src,ts,tslib,flow-typed,typedoc,*.map}"
   ],
   "extraResources": [
     {

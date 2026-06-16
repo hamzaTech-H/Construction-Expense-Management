@@ -7,6 +7,11 @@ import { resolve } from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  build: {
+    sourcemap: false,
+    minify: 'esbuild',
+    cssMinify: true,
+  },
   plugins: [
     react(),
     tailwindcss(),
@@ -16,8 +21,14 @@ export default defineConfig({
         entry: 'electron/main.ts',
         vite: {
           build: {
+            sourcemap: false,
+            emptyOutDir: true,
+            outDir: 'dist-electron',
             rollupOptions: {
-              external: ['better-sqlite3']
+              external: ['better-sqlite3'],
+              output: {
+                entryFileNames: 'main.js',
+              }
             }
           }
         }
@@ -26,6 +37,18 @@ export default defineConfig({
         // Shortcut of `build.rollupOptions.input`.
         // Preload scripts may contain Web assets, so use the `build.rollupOptions.input` instead `build.lib.entry`.
         input: path.join(__dirname, 'electron/preload.ts'),
+        vite: {
+          build: {
+            sourcemap: false,
+            emptyOutDir: false,
+            outDir: 'dist-electron',
+            rollupOptions: {
+              output: {
+                entryFileNames: 'preload.mjs',
+              }
+            }
+          }
+        }
       },
       // Ployfill the Electron and Node.js API for Renderer process.
       // If you want use Node.js in Renderer process, the `nodeIntegration` needs to be enabled in the Main process.

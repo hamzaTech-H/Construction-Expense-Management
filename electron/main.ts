@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url'
 import { config } from 'dotenv'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+// Dev: load .env from project root (when running un-packaged)
 config({ path: path.join(__dirname, '..', '.env') })
 
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
@@ -90,13 +91,11 @@ app.on('activate', () => {
 })
 
 app.whenReady().then(() => {
-  // try {
-  //   config({ path: path.join(app.getPath('userData'), '.env') })
-  // } catch (_) {}
   try {
-    config({
-      path: path.join(process.resourcesPath, ".env")
-    })
+    // Production: prefer userData/.env (easy to update without reinstall),
+    // fallback to packaged resources/.env (if shipped as extraResources).
+    config({ path: path.join(app.getPath('userData'), '.env'), override: false })
+    config({ path: path.join(process.resourcesPath, '.env'), override: false })
   } catch (_) {}
   initDatabase(app.getPath('userData'), app.getPath('exe'))
   createWindow()
